@@ -1,0 +1,577 @@
+{{define "detail.html"}}
+{{$boost := .Data.Boost}}
+{{$reviews := .Data.Reviews}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes likePop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .dt-page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .dt-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .dt-back:hover { color: var(--accent-light); }
+
+    /* Hero Card */
+    .dt-hero {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        overflow: hidden;
+        position: relative;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .dt-hero:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .dt-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+
+    .dt-hero-inner {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 0;
+        position: relative;
+        z-index: 1;
+    }
+    @media (max-width: 800px) {
+        .dt-hero-inner { grid-template-columns: 1fr; }
+    }
+
+    .dt-hero-left {
+        padding: 3rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    @media (max-width: 500px) {
+        .dt-hero-left { padding: 2rem 1.5rem; }
+    }
+
+    .dt-game-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 1rem;
+        border-radius: 100px;
+        background: rgba(139,92,246,0.08);
+        border: 1px solid rgba(139,92,246,0.15);
+        color: var(--accent-light);
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 1.2rem;
+        width: fit-content;
+    }
+    .dt-title {
+        font-size: 2.6rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 40%, #c4b5fd 70%, #a78bfa 100%);
+        background-size: 300% 300%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 1rem;
+        line-height: 1.05;
+    }
+    @media (max-width: 500px) {
+        .dt-title { font-size: 1.8rem; }
+    }
+    .dt-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin: 0 0 1.5rem;
+        max-width: 500px;
+    }
+
+    .dt-stats-row {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+    .dt-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.1rem;
+        border-radius: 100px;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+    .dt-stat.price-stat {
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+    }
+    .dt-stat.price-stat .dt-stat-val {
+        background: linear-gradient(135deg, #b794ff, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.6rem;
+        font-weight: 900;
+    }
+    .dt-stat.rating-stat {
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.15);
+        color: #fcd34d;
+    }
+    .dt-stat.reviews-stat {
+        background: rgba(16,185,129,0.08);
+        border: 1px solid rgba(16,185,129,0.12);
+        color: #6ee7b7;
+    }
+
+    .dt-seller-block {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-item);
+        background: rgba(255,255,255,0.015);
+        border: 1px solid rgba(255,255,255,0.04);
+        width: fit-content;
+        transition: all var(--transition);
+    }
+    .dt-seller-block:hover {
+        border-color: rgba(139,92,246,0.15);
+        background: rgba(139,92,246,0.03);
+    }
+    .dt-seller-av {
+        width: 46px; height: 46px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #fff;
+        flex-shrink: 0;
+        text-transform: uppercase;
+    }
+    .dt-seller-label {
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+    }
+    .dt-seller-name {
+        color: var(--accent-light);
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .dt-seller-name:hover { color: #fff; }
+
+    /* Right panel */
+    .dt-hero-right {
+        background: rgba(139,92,246,0.03);
+        border-left: 1px solid rgba(255,255,255,0.04);
+        padding: 3rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.2rem;
+        text-align: center;
+    }
+    @media (max-width: 800px) {
+        .dt-hero-right {
+            border-left: none;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding: 2.5rem 2rem;
+        }
+    }
+    .dt-big-price {
+        font-size: 3.2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #b794ff, #c084fc, #e9d5ff);
+        background-size: 200% 200%;
+        animation: gradientFlow 6s ease infinite;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+    }
+    .dt-price-unit {
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    .dt-cart-btn {
+        width: 100%;
+        padding: 0.95rem 2rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+    }
+    .dt-cart-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        color: #fff;
+    }
+    .dt-guarantee {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        font-weight: 500;
+    }
+    .dt-guarantee i { color: #6ee7b7; font-size: 0.85rem; }
+
+    /* Reviews Card */
+    .dt-reviews {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease 0.1s both;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .dt-reviews:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .dt-reviews::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .dt-reviews > * { position: relative; z-index: 1; }
+    @media (max-width: 500px) {
+        .dt-reviews { padding: 2rem 1.5rem; }
+    }
+
+    .dt-reviews-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .dt-reviews-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+    .dt-reviews-count {
+        padding: 0.3rem 1rem;
+        border-radius: 100px;
+        background: rgba(139,92,246,0.08);
+        border: 1px solid rgba(139,92,246,0.15);
+        color: var(--accent-light);
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .dt-review {
+        padding: 1.4rem 1.6rem;
+        border-radius: var(--radius-item);
+        background: rgba(255,255,255,0.015);
+        border: 1px solid rgba(255,255,255,0.04);
+        margin-bottom: 0.8rem;
+        transition: all var(--transition);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .dt-review:last-child { margin-bottom: 0; }
+    .dt-review:hover {
+        background: rgba(139,92,246,0.04);
+        border-color: rgba(139,92,246,0.15);
+        transform: translateX(6px);
+    }
+    .dt-review-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.6rem;
+    }
+    .dt-review-user {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .dt-review-av {
+        width: 38px; height: 38px;
+        border-radius: 12px;
+        background: rgba(139,92,246,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: var(--accent-light);
+        text-transform: uppercase;
+    }
+    .dt-review-author {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+    .dt-review-stars {
+        display: flex;
+        gap: 2px;
+        color: var(--gold);
+        font-size: 0.8rem;
+    }
+    .dt-review-text {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0 0 0.7rem;
+        font-style: italic;
+    }
+    .dt-review-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dt-review-date {
+        color: var(--text-dim);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .dt-like-btn {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 100px;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all var(--transition);
+        font-weight: 600;
+    }
+    .dt-like-btn:hover {
+        color: #f87171;
+        border-color: rgba(239,68,68,0.25);
+        background: rgba(239,68,68,0.06);
+    }
+    .dt-like-btn.liked {
+        color: #f87171;
+        border-color: rgba(239,68,68,0.35);
+        background: rgba(239,68,68,0.12);
+        animation: likePop 0.4s ease;
+    }
+
+    .dt-empty-reviews {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-dim);
+    }
+    .dt-empty-reviews i {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.2;
+    }
+</style>
+
+<section class="dt-page">
+    <a href="/marketplace" class="dt-back"><i class="fa-solid fa-arrow-left"></i> Назад к маркетплейсу</a>
+
+    <!-- Hero -->
+    <div class="dt-hero">
+        <div class="dt-hero-inner">
+            <div class="dt-hero-left">
+                <div class="dt-game-pill"><i class="fa-solid fa-gamepad"></i> {{$boost.Game}}</div>
+                <h1 class="dt-title">{{$boost.Title}}</h1>
+                <p class="dt-desc">{{$boost.Description}}</p>
+
+                <div class="dt-stats-row">
+                    <div class="dt-stat price-stat">
+                        <span class="dt-stat-val">{{printf "%.0f" $boost.Price}} ₽</span>
+                    </div>
+                    <div class="dt-stat rating-stat">
+                        <i class="fa-solid fa-star"></i> {{printf "%.1f" $boost.Rating}}
+                    </div>
+                    <div class="dt-stat reviews-stat">
+                        <i class="fa-solid fa-comment"></i> {{$boost.Reviews}} отзывов
+                    </div>
+                </div>
+
+                <div class="dt-seller-block">
+                    <div class="dt-seller-av">{{slice $boost.OwnerName 0 2}}</div>
+                    <div>
+                        <div class="dt-seller-label">Продавец</div>
+                        <a href="/seller/{{$boost.BoosterID}}" class="dt-seller-name">{{$boost.OwnerName}}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dt-hero-right">
+                <div class="dt-big-price">{{printf "%.0f" $boost.Price}} ₽</div>
+                <div class="dt-price-unit">Единоразово</div>
+                <button class="dt-cart-btn" onclick="addToCart({{$boost.ID}}, '{{$boost.Title}}', {{$boost.Price}}, '{{$boost.Game}}', {{$boost.BoosterID}})">
+                    <i class="fa-solid fa-cart-shopping"></i> В корзину
+                </button>
+                <div class="dt-guarantee">
+                    <i class="fa-solid fa-shield-halved"></i> Безопасная сделка
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="dt-reviews">
+        <div class="dt-reviews-head">
+            <h3 class="dt-reviews-title">
+                <i class="fa-solid fa-star" style="color:#fbbf24;"></i> Отзывы
+            </h3>
+            <span class="dt-reviews-count">{{len $reviews}} отзывов</span>
+        </div>
+
+        {{if $reviews}}
+        {{range $reviews}}
+        <div class="dt-review">
+            <div class="dt-review-top">
+                <div class="dt-review-user">
+                    <div class="dt-review-av">{{slice .Username 0 2}}</div>
+                    <span class="dt-review-author">{{.Username}}</span>
+                </div>
+                <div class="dt-review-stars">
+                    {{if eq .Rating 5}}<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    {{else if eq .Rating 4}}<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+                    {{else if eq .Rating 3}}<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                    {{else if eq .Rating 2}}<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                    {{else}}<i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>{{end}}
+                </div>
+            </div>
+            <p class="dt-review-text">"{{.Text}}"</p>
+            <div class="dt-review-bottom">
+                <span class="dt-review-date">{{.CreatedAt.Format "02.01.2006"}}</span>
+                <button class="dt-like-btn" id="like-{{.ID}}" onclick="toggleLike({{.ID}})">
+                    <i class="fa-regular fa-heart"></i>
+                    <span id="like-count-{{.ID}}">0</span>
+                </button>
+            </div>
+        </div>
+        {{end}}
+        {{else}}
+        <div class="dt-empty-reviews">
+            <i class="fa-regular fa-comment-dots"></i>
+            <p>Пока нет отзывов. Будьте первым!</p>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}

@@ -1,0 +1,929 @@
+{{define "profile.html"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes avatarGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.35), 0 0 0 1px rgba(139,92,246,0.2); }
+        50% { box-shadow: 0 0 0 18px rgba(139,92,246,0), 0 0 0 1px rgba(192,132,252,0.6); }
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(20px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes softPulse {
+        0%, 100% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .pf-page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.4rem;
+    }
+
+    .pf-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        animation: fadeUp 0.5s ease;
+        position: relative;
+        overflow: hidden;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .pf-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08), inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .pf-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite; /* Очень медленное сияние */
+        pointer-events: none;
+    }
+    .pf-card > * { position: relative; z-index: 1; }
+    .pf-card h3 {
+        font-size: 1.1rem;
+        margin: 0 0 1.4rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+
+    /* Алерты */
+    .pf-alert {
+        padding: 1rem 1.6rem;
+        border-radius: 1.5rem;
+        border: 1px solid;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeUp 0.4s ease;
+        backdrop-filter: blur(20px);
+        background: rgba(0,0,0,0.3);
+    }
+    .pf-alert.success {
+        border-color: rgba(16,185,129,0.25);
+        color: #6ee7b7;
+        background: rgba(16,185,129,0.05);
+    }
+    .pf-alert.error {
+        border-color: rgba(239,68,68,0.25);
+        color: #fca5a5;
+        background: rgba(239,68,68,0.05);
+    }
+    .pf-alert-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 1.2rem;
+        opacity: 0.6;
+        padding: 0.2rem;
+        transition: opacity 0.2s;
+    }
+    .pf-alert-close:hover { opacity: 1; }
+
+    /* Hero */
+    .pf-hero {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 600px) {
+        .pf-hero { flex-direction: column; text-align: center; }
+        .pf-actions { margin-left: 0 !important; justify-content: center; }
+    }
+    .pf-av-wrap {
+        position: relative;
+        flex-shrink: 0;
+        border-radius: 32px;
+        padding: 3px;
+        background: linear-gradient(135deg, #8b5cf6, #c084fc, #8b5cf6);
+        background-size: 200% 200%;
+        animation: avatarGlow 6s ease-in-out infinite, gradientFlow 8s ease infinite; /* Медленнее */
+    }
+    .pf-av {
+        width: 96px; height: 96px;
+        border-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: #0a0a1f;
+        color: #c084fc;
+        text-transform: uppercase;
+        transition: transform 0.2s;
+    }
+    .pf-av-wrap:hover .pf-av {
+        transform: scale(1.02);
+    }
+    .pf-name {
+        font-size: 2rem;
+        font-weight: 850;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 10s ease infinite; /* Медленнее */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 0.2rem;
+        letter-spacing: -0.03em;
+    }
+    .pf-meta {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        font-weight: 500;
+    }
+    .pf-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+    .pf-btn-icon {
+        width: 40px; height: 40px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.02);
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+    .pf-btn-icon::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 80%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .pf-btn-icon:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.06);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+    }
+    .pf-btn-icon:hover::before { opacity: 1; }
+
+    /* Плашки */
+    .pf-plaque {
+        padding: 1.6rem 2rem;
+        border-radius: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        animation: fadeUp 0.4s ease;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(30px);
+        transition: border-color var(--transition);
+    }
+    .pf-plaque:hover { border-color: rgba(255,255,255,0.1); }
+    .pf-plaque-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+    .pf-plaque-info { flex: 1; }
+    .pf-plaque-info h4 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+    .pf-plaque-info p { color: var(--text-secondary); font-size: 0.8rem; margin: 0.2rem 0 0; }
+    .pf-plaque-btn {
+        padding: 0.6rem 1.4rem;
+        border-radius: 100px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.82rem;
+        transition: all var(--transition);
+        white-space: nowrap;
+        letter-spacing: -0.01em;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+    }
+    .pf-plaque-btn.green {
+        background: #10b981;
+        color: #fff;
+    }
+    .pf-plaque-btn.green:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 10px 18px rgba(16,185,129,0.25); }
+    .pf-plaque-btn.gold {
+        background: #f59e0b;
+        color: #0a0a1a;
+    }
+    .pf-plaque-btn.gold:hover { background: #d97706; transform: translateY(-2px); box-shadow: 0 10px 18px rgba(245,158,11,0.3); }
+    .pf-plaque-btn.gradient {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #0a0a1a;
+        font-weight: 800;
+    }
+    .pf-plaque-btn.gradient:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 10px 18px rgba(245,158,11,0.35); }
+
+    /* Баланс */
+    .pf-bal-row {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    .pf-bal-amount {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #b794ff, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.03em;
+    }
+    .pf-bal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        flex: 1;
+        max-width: 300px;
+    }
+    .pf-bal-input-wrap {
+        position: relative;
+    }
+    .pf-bal-input-wrap span {
+        position: absolute;
+        left: 1.1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .pf-bal-input {
+        width: 100%;
+        padding: 0.8rem 1.2rem 0.8rem 2.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: 600;
+        outline: none;
+        transition: all var(--transition);
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+    }
+    .pf-bal-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.12);
+        background: rgba(139,92,246,0.04);
+    }
+    .pf-bal-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .pf-bal-btn {
+        flex: 1;
+        padding: 0.7rem 0.8rem;
+        border-radius: 0.9rem;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.84rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        transition: all var(--transition);
+        background: rgba(255,255,255,0.02);
+        letter-spacing: -0.01em;
+    }
+    .pf-bal-btn.green {
+        border-color: rgba(16,185,129,0.2);
+        color: #6ee7b7;
+        background: rgba(16,185,129,0.06);
+    }
+    .pf-bal-btn.green:hover {
+        background: rgba(16,185,129,0.15);
+        border-color: rgba(16,185,129,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(16,185,129,0.15);
+    }
+    .pf-bal-btn.red {
+        border-color: rgba(239,68,68,0.2);
+        color: #fca5a5;
+        background: rgba(239,68,68,0.04);
+    }
+    .pf-bal-btn.red:hover {
+        background: rgba(239,68,68,0.12);
+        border-color: rgba(239,68,68,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(239,68,68,0.15);
+    }
+
+    /* Grid */
+    .pf-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.4rem;
+    }
+    @media (max-width: 768px) {
+        .pf-grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* PRO сетка */
+    .pf-pro-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.9rem;
+    }
+    @media (max-width: 550px) {
+        .pf-pro-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .pf-pro-item {
+        background: rgba(139,92,246,0.03);
+        border: 1px solid rgba(139,92,246,0.08);
+        border-radius: 1.5rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        transition: all var(--transition);
+        text-decoration: none;
+        color: #fff;
+        display: block;
+        backdrop-filter: blur(10px);
+    }
+    .pf-pro-item:hover {
+        background: rgba(139,92,246,0.1);
+        border-color: rgba(139,92,246,0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(139,92,246,0.15);
+    }
+    .pf-pro-item i {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 0.6rem;
+        background: linear-gradient(135deg, #a78bfa, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .pf-pro-item span {
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: -0.01em;
+    }
+
+    /* Статистика */
+    .seller-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.9rem;
+    }
+    @media (max-width: 550px) {
+        .seller-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .seller-stat-card {
+        background: rgba(255,255,255,0.015);
+        border: 1px solid rgba(255,255,255,0.03);
+        border-radius: 1.5rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        transition: all var(--transition);
+        backdrop-filter: blur(10px);
+    }
+    .seller-stat-card:hover {
+        background: rgba(139,92,246,0.05);
+        border-color: rgba(139,92,246,0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    .seller-stat-card .ss-icon {
+        width: 46px; height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.9rem;
+        font-size: 1.1rem;
+    }
+    .seller-stat-card .ss-val {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    .seller-stat-card .ss-lbl {
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-top: 0.2rem;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+    }
+
+    /* Список */
+    .pf-list-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        transition: all var(--transition);
+        border-radius: 0.9rem;
+        margin: 0 -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .pf-list-item:last-child { border-bottom: none; }
+    .pf-list-item:hover {
+        background: rgba(139,92,246,0.04);
+        border-color: transparent;
+        transform: translateX(6px);
+    }
+    .pf-list-icon {
+        width: 44px; height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .pf-list-info { flex: 1; min-width: 0; }
+    .pf-list-title { font-weight: 600; font-size: 0.9rem; color: #fff; letter-spacing: -0.01em; }
+    .pf-list-sub { color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.15rem; display: flex; align-items: center; gap: 0.3rem; }
+    .pf-list-amount { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+    .pf-list-status {
+        padding: 0.2rem 0.8rem;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        white-space: nowrap;
+        letter-spacing: 0.02em;
+    }
+    .pf-list-status.completed { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+    .pf-list-status.refunded { background: rgba(239,68,68,0.12); color: #fca5a5; }
+    .pf-list-status.processing { background: rgba(245,158,11,0.12); color: #fcd34d; }
+    .pf-list-status.ready { background: rgba(59,130,246,0.12); color: #93c5fd; }
+
+    .pf-more {
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-size: 0.82rem;
+        padding: 0.6rem;
+        width: 100%;
+        transition: color 0.2s, background 0.2s;
+        font-weight: 600;
+        border-radius: 0.8rem;
+        margin-top: 0.2rem;
+    }
+    .pf-more:hover { color: #c4b5fd; background: rgba(139,92,246,0.06); }
+
+    /* Модалки */
+    .pf-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(20px);
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .pf-modal {
+        background: rgba(18,18,44,0.98);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        max-width: 480px;
+        width: 90%;
+        animation: fadeSlide 0.3s ease;
+        box-shadow: 0 30px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(139,92,246,0.1);
+    }
+    .pf-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .pf-modal-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .pf-modal-close {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.4);
+        cursor: pointer;
+        font-size: 1.5rem;
+        padding: 0.2rem;
+        transition: color 0.2s;
+    }
+    .pf-modal-close:hover { color: #fff; }
+    .pf-modal-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .pf-modal-option {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        padding: 1.2rem 1.4rem;
+        border-radius: 1.5rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        color: #fff;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-align: left;
+        width: 100%;
+    }
+    .pf-modal-option:hover {
+        background: rgba(139,92,246,0.08);
+        border-color: rgba(139,92,246,0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+    }
+    .pf-modal-option-icon {
+        width: 52px; height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.2rem;
+    }
+    .pf-modal-option-info { flex: 1; }
+    .pf-modal-option-title { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.01em; }
+    .pf-modal-option-desc { color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.15rem; }
+
+    /* Убираем стрелки у числового инпута */
+    input[type='number'] { -moz-appearance: textfield; }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    /* Дополнительные микро-анимации */
+    .pf-pro-item, .seller-stat-card, .pf-list-item { will-change: transform; }
+</style>
+
+<section class="pf-page">
+    {{if .User}}
+    {{if .Success}}<div class="pf-alert success">{{.Success}} <button class="pf-alert-close" onclick="this.parentElement.remove()">✕</button></div>{{end}}
+    {{if .Error}}<div class="pf-alert error">{{.Error}} <button class="pf-alert-close" onclick="this.parentElement.remove()">✕</button></div>{{end}}
+
+    <!-- Верификация -->
+    {{if .IsVerified}}
+    <div class="pf-plaque ver">
+        <div class="pf-plaque-icon"><i class="fa-solid fa-circle-check" style="color:#10b981;"></i></div>
+        <div class="pf-plaque-info"><h4 style="color:#10b981;">Проверенный продавец</h4><p>Ваш аккаунт верифицирован</p></div>
+    </div>
+    {{else if .HasPending}}
+    <div class="pf-plaque" style="border-color:rgba(245,158,11,0.3);">
+        <div class="pf-plaque-icon"><i class="fa-solid fa-clock" style="color:#fbbf24;"></i></div>
+        <div class="pf-plaque-info"><h4 style="color:#fbbf24;">Заявка рассматривается</h4><p>Ожидайте решения</p></div>
+    </div>
+    {{else}}
+    <div class="pf-plaque">
+        <div class="pf-plaque-icon"><i class="fa-solid fa-shield-halved" style="color:#10b981;"></i></div>
+        <div class="pf-plaque-info"><h4 style="color:#10b981;">Верификация</h4><p>Получите значок проверенного продавца</p></div>
+        <a href="/verification" class="pf-plaque-btn green"><i class="fa-solid fa-arrow-right"></i> Получить</a>
+    </div>
+    {{end}}
+
+    <!-- PRO -->
+    {{if .IsPro}}
+    <div class="pf-plaque pro">
+        <div class="pf-plaque-icon"><i class="fa-solid fa-crown" style="color:#fbbf24;"></i></div>
+        <div class="pf-plaque-info"><h4 style="color:#fbbf24;">XSoneBMP PRO</h4><p>Активна до {{.ProExpires.Format "02.01.2006"}}</p></div>
+        <a href="/upgrade-pro" class="pf-plaque-btn gold"><i class="fa-solid fa-arrow-right"></i> Продлить</a>
+    </div>
+    {{else}}
+    <div class="pf-plaque">
+        <div class="pf-plaque-icon"><i class="fa-solid fa-crown" style="color:#fbbf24;"></i></div>
+        <div class="pf-plaque-info"><h4 style="color:#fbbf24;">XSoneBMP PRO</h4><p>Комиссия 2%, аналитика, приоритет</p></div>
+        <a href="/upgrade-pro" class="pf-plaque-btn gradient">Подробнее</a>
+    </div>
+    {{end}}
+
+    <!-- Hero -->
+    <div class="pf-card">
+        <div class="pf-hero">
+            <div class="pf-av-wrap">
+                <div class="pf-av">{{slice .User.Username 0 1}}</div>
+            </div>
+            <div>
+                <div class="pf-name">{{.User.Username}}</div>
+                <div class="pf-meta">{{.User.Email}} • {{.User.Orders}} заказов</div>
+            </div>
+            <div class="pf-actions">
+                <a href="/profile/edit" class="pf-btn-icon" title="Редактировать профиль"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a href="/seller/{{.User.ID}}" class="pf-btn-icon" title="Мой магазин"><i class="fa-solid fa-store"></i></a>
+                <a href="/referral" class="pf-btn-icon"><i class="fa-solid fa-users"></i></a>
+                <a href="/sessions" class="pf-btn-icon"><i class="fa-solid fa-shield-halved"></i></a>
+                <a href="/qr-generate" class="pf-btn-icon" title="QR-вход" style="color:#a78bfa;border-color:rgba(139,92,246,0.4);"><i class="fa-solid fa-qrcode"></i></a>
+            </div>
+        </div>
+    </div>
+
+    {{if .IsPro}}
+    <div class="pf-card">
+        <h3><i class="fa-solid fa-crown" style="color:#fbbf24;"></i> PRO возможности</h3>
+        <div class="pf-pro-grid">
+            <a href="/seller/stats" class="pf-pro-item"><i class="fa-solid fa-chart-pie"></i><span>Статистика</span></a>
+            <a href="/seller/insights" class="pf-pro-item"><i class="fa-solid fa-magnifying-glass-chart"></i><span>Аналитика</span></a>
+            <a href="/seller/templates" class="pf-pro-item"><i class="fa-solid fa-message"></i><span>Шаблоны</span></a>
+        </div>
+    </div>
+    {{end}}
+
+    <div class="pf-grid-2">
+        <!-- Баланс -->
+        <div class="pf-card">
+            <h3><i class="fa-solid fa-wallet" style="color:#a78bfa;"></i> Баланс</h3>
+            <div class="pf-bal-row">
+                <span class="pf-bal-amount">{{printf "%.0f" .User.Balance}} ₽</span>
+                <div class="pf-bal-form">
+                    <div class="pf-bal-input-wrap">
+                        <span>₽</span>
+                        <input type="number" id="balanceAmount" value="1000" required min="1" placeholder="Сумма" class="pf-bal-input">
+                    </div>
+                    <div class="pf-bal-btns">
+                        <button onclick="openTopUpModal()" type="button" class="pf-bal-btn green"><i class="fa-solid fa-plus"></i> Пополнить</button>
+                        <button onclick="openWithdrawModal()" type="button" class="pf-bal-btn red"><i class="fa-solid fa-arrow-right-from-bracket"></i> Вывести</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        {{if or (gt .Data.TotalSales 0) (gt (len .Data.MyBoosts) 0)}}
+        <div class="pf-card">
+            <h3><i class="fa-solid fa-chart-simple" style="color:#60a5fa;"></i> Статистика продавца</h3>
+            <div class="seller-stats-grid">
+                <div class="seller-stat-card">
+                    <div class="ss-icon" style="background:rgba(139,92,246,0.1);"><i class="fa-solid fa-chart-line" style="color:#a78bfa;"></i></div>
+                    <div class="ss-val" style="color:#a78bfa;">{{.Data.TotalSales}}</div>
+                    <div class="ss-lbl">Продаж</div>
+                </div>
+                <div class="seller-stat-card">
+                    <div class="ss-icon" style="background:rgba(16,185,129,0.1);"><i class="fa-solid fa-ruble-sign" style="color:#10b981;"></i></div>
+                    <div class="ss-val" style="color:#10b981;">{{printf "%.0f" .Data.TotalEarned}} ₽</div>
+                    <div class="ss-lbl">Доход</div>
+                </div>
+                <div class="seller-stat-card">
+                    <div class="ss-icon" style="background:rgba(52,211,153,0.1);"><i class="fa-solid fa-circle-check" style="color:#34d399;"></i></div>
+                    <div class="ss-val" style="color:#34d399;">{{.Data.CompletedOrders}}</div>
+                    <div class="ss-lbl">Завершено</div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <!-- Покупки -->
+    {{if .Data.Orders}}
+    <div class="pf-card">
+        <h3><i class="fa-solid fa-cart-shopping" style="color:#60a5fa;"></i> Покупки</h3>
+        {{range $i,$o := .Data.Orders}}{{if lt $i 5}}
+        <div class="pf-list-item">
+            <div class="pf-list-icon" style="background:rgba(59,130,246,0.08);"><i class="fa-solid fa-gamepad" style="color:#60a5fa;"></i></div>
+            <div class="pf-list-info"><div class="pf-list-title">{{$o.Title}}</div><div class="pf-list-sub"><i class="fa-solid fa-gamepad"></i> {{$o.Game}}</div></div>
+            <span class="pf-list-amount">{{printf "%.0f" $o.Total}} ₽</span>
+            <span class="pf-list-status {{$o.Status}}">
+                {{if eq $o.Status "processing"}}В работе
+                {{else if eq $o.Status "completed"}}Выполнен
+                {{else if eq $o.Status "refunded"}}Возврат
+                {{else if eq $o.Status "ready"}}Готов
+                {{else if eq $o.Status "pending"}}Ожидает
+                {{else}}{{$o.Status}}{{end}}
+            </span>
+            <a href="/order/{{$o.ID}}" class="pf-btn-icon" style="width:36px;height:36px;border-radius:12px;"><i class="fa-solid fa-comments"></i></a>
+        </div>
+        {{end}}{{end}}
+        {{if gt (len .Data.Orders) 5}}
+        <button class="pf-more" onclick="this.style.display='none';document.querySelectorAll('.h-ord').forEach(e=>e.style.display='flex')">Показать всё ({{len .Data.Orders}})</button>
+        {{end}}
+        {{range $i,$o := .Data.Orders}}{{if ge $i 5}}
+        <div class="pf-list-item h-ord" style="display:none;">
+            <div class="pf-list-icon" style="background:rgba(59,130,246,0.08);"><i class="fa-solid fa-gamepad" style="color:#60a5fa;"></i></div>
+            <div class="pf-list-info"><div class="pf-list-title">{{$o.Title}}</div><div class="pf-list-sub"><i class="fa-solid fa-gamepad"></i> {{$o.Game}}</div></div>
+            <span class="pf-list-amount">{{printf "%.0f" $o.Total}} ₽</span>
+            <span class="pf-list-status {{$o.Status}}">
+                {{if eq $o.Status "processing"}}В Работе
+                {{else if eq $o.Status "completed"}}Выполнен
+                {{else if eq $o.Status "refunded"}}Возврат
+                {{else if eq $o.Status "ready"}}Готов
+                {{else if eq $o.Status "pending"}}Ожидает
+                {{else}}{{$o.Status}}{{end}}
+            </span>
+            <a href="/order/{{$o.ID}}" class="pf-btn-icon" style="width:36px;height:36px;border-radius:12px;"><i class="fa-solid fa-comments"></i></a>
+        </div>
+        {{end}}{{end}}
+    </div>
+    {{end}}
+
+    <!-- Мои предложения -->
+    {{if .Data.MyBoosts}}
+    <div class="pf-card">
+        <h3><i class="fa-solid fa-tag" style="color:#fbbf24;"></i> Мои предложения</h3>
+        {{range .Data.MyBoosts}}
+        <div class="pf-list-item">
+            <div class="pf-list-icon" style="background:rgba(245,158,11,0.08);"><i class="fa-solid fa-tag" style="color:#fbbf24;"></i></div>
+            <div class="pf-list-info"><div class="pf-list-title">{{.Title}}</div><div class="pf-list-sub"><i class="fa-solid fa-gamepad"></i> {{.Game}}</div></div>
+            <span class="pf-list-amount" style="color:#fbbf24;">{{printf "%.0f" .Price}} ₽</span>
+            <a href="/booster/{{.ID}}" class="pf-btn-icon"><i class="fa-solid fa-reply-all"></i></a>
+            <a href="/boost/{{.ID}}/edit" class="pf-btn-icon"><i class="fa-solid fa-pen-to-square"></i></a>
+            <button class="pf-btn-icon" style="color:#f87171;border-color:rgba(239,68,68,0.2);" onclick="deleteBoost({{.ID}})"><i class="fa-solid fa-trash"></i></button>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+
+    <!-- Транзакции -->
+    {{if .Data.Transactions}}
+    <div class="pf-card">
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color:#10b981;"></i> Транзакции</h3>
+        {{range $i,$t := .Data.Transactions}}{{if lt $i 5}}
+        <div class="pf-list-item">
+            <div class="pf-list-icon" style="background:rgba({{if eq $t.Type "income"}}16,185,129{{else}}239,68,68{{end}},0.08);">
+                <i class="fa-solid {{if eq $t.Type "income"}}fa-arrow-down{{else}}fa-arrow-up{{end}}" style="color:{{if eq $t.Type "income"}}#10b981{{else}}#ef4444{{end}};"></i>
+            </div>
+            <div class="pf-list-info"><div class="pf-list-title">{{$t.Description}}</div><div class="pf-list-sub">{{$t.CreatedAt.Format "02.01 15:04"}}</div></div>
+            <span class="pf-list-amount" style="color:{{if eq $t.Type "income"}}#10b981{{else}}#ef4444{{end}};">{{if eq $t.Type "income"}}+{{else}}−{{end}}{{printf "%.0f" $t.Amount}} ₽</span>
+        </div>
+        {{end}}{{end}}
+        {{if gt (len .Data.Transactions) 5}}
+        <button class="pf-more" onclick="this.style.display='none';document.querySelectorAll('.h-tx').forEach(e=>e.style.display='flex')">Показать всё ({{len .Data.Transactions}})</button>
+        {{end}}
+        {{range $i,$t := .Data.Transactions}}{{if ge $i 5}}
+        <div class="pf-list-item h-tx" style="display:none;">
+            <div class="pf-list-icon" style="background:rgba({{if eq $t.Type "income"}}16,185,129{{else}}239,68,68{{end}},0.08);">
+                <i class="fa-solid {{if eq $t.Type "income"}}fa-arrow-down{{else}}fa-arrow-up{{end}}" style="color:{{if eq $t.Type "income"}}#10b981{{else}}#ef4444{{end}};"></i>
+            </div>
+            <div class="pf-list-info"><div class="pf-list-title">{{$t.Description}}</div><div class="pf-list-sub">{{$t.CreatedAt.Format "02.01 15:04"}}</div></div>
+            <span class="pf-list-amount" style="color:{{if eq $t.Type "income"}}#10b981{{else}}#ef4444{{end}};">{{if eq $t.Type "income"}}+{{else}}−{{end}}{{printf "%.0f" $t.Amount}} ₽</span>
+        </div>
+        {{end}}{{end}}
+    </div>
+    {{end}}
+
+    {{else}}
+    <div style="text-align:center;padding:6rem;">
+        <h2 style="color:#fff;">Требуется авторизация</h2>
+        <a href="/login" class="pf-plaque-btn green" style="display:inline-flex;padding:0.7rem 2rem;font-size:0.9rem;">Войти</a>
+    </div>
+    {{end}}
+</section>
+
+<!-- Модалки -->
+<div class="pf-modal-overlay" id="topUpModal">
+    <div class="pf-modal">
+        <div class="pf-modal-header">
+            <h3><i class="fa-solid fa-plus" style="color:#10b981;"></i> Пополнение</h3>
+            <button class="pf-modal-close" onclick="closeModal('topUpModal')">✕</button>
+        </div>
+        <div class="pf-modal-options">
+            <button onclick="submitTopUp('sbp')" class="pf-modal-option">
+                <div class="pf-modal-option-icon" style="background:rgba(139,92,246,0.12);"><i class="fa-solid fa-qrcode" style="color:#a78bfa;"></i></div>
+                <div class="pf-modal-option-info"><div class="pf-modal-option-title">СБП (QR-код)</div><div class="pf-modal-option-desc">Мгновенно, без комиссии</div></div>
+                <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,0.2);"></i>
+            </button>
+            <button onclick="submitTopUp('card')" class="pf-modal-option">
+                <div class="pf-modal-option-icon" style="background:rgba(245,158,11,0.1);"><i class="fa-solid fa-credit-card" style="color:#fbbf24;"></i></div>
+                <div class="pf-modal-option-info"><div class="pf-modal-option-title">Банковская карта</div><div class="pf-modal-option-desc">Visa, Mastercard, МИР</div></div>
+                <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,0.2);"></i>
+            </button>
+            <button onclick="submitTopUp('crypto')" class="pf-modal-option">
+                <div class="pf-modal-option-icon" style="background:rgba(59,130,246,0.1);"><i class="fa-solid fa-bitcoin-sign" style="color:#60a5fa;"></i></div>
+                <div class="pf-modal-option-info"><div class="pf-modal-option-title">Криптовалюта</div><div class="pf-modal-option-desc">BTC, ETH, USDT и другие</div></div>
+                <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,0.2);"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="pf-modal-overlay" id="withdrawModal">
+    <div class="pf-modal">
+        <div class="pf-modal-header">
+            <h3><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f87171;"></i> Вывод средств</h3>
+            <button class="pf-modal-close" onclick="closeModal('withdrawModal')">✕</button>
+        </div>
+        <div class="pf-modal-options">
+            <button onclick="submitWithdraw('card')" class="pf-modal-option">
+                <div class="pf-modal-option-icon" style="background:rgba(16,185,129,0.1);"><i class="fa-solid fa-credit-card" style="color:#10b981;"></i></div>
+                <div class="pf-modal-option-info"><div class="pf-modal-option-title">На банковскую карту</div><div class="pf-modal-option-desc">Visa, Mastercard, МИР • 1-3 дня</div></div>
+                <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,0.2);"></i>
+            </button>
+            <button onclick="submitWithdraw('sbp')" class="pf-modal-option">
+                <div class="pf-modal-option-icon" style="background:rgba(139,92,246,0.1);"><i class="fa-solid fa-building-columns" style="color:#a78bfa;"></i></div>
+                <div class="pf-modal-option-info"><div class="pf-modal-option-title">СБП (по номеру телефона)</div><div class="pf-modal-option-desc">Мгновенно, без комиссии</div></div>
+                <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,0.2);"></i>
+            </button>
+            <button onclick="submitWithdraw('crypto')" class="pf-modal-option">
+                <div class="pf-modal-option-icon" style="background:rgba(245,158,11,0.1);"><i class="fa-solid fa-wallet" style="color:#fbbf24;"></i></div>
+                <div class="pf-modal-option-info"><div class="pf-modal-option-title">Криптокошелёк</div><div class="pf-modal-option-desc">BTC, ETH, USDT • 10-30 мин</div></div>
+                <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,0.2);"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    if(window.location.search)window.history.replaceState({},document.title,window.location.pathname);
+
+    function openTopUpModal() {
+        var amount = document.getElementById('balanceAmount').value;
+        if (!amount || amount <= 0) { showNotification('Введите сумму пополнения', 'error'); return; }
+        document.getElementById('topUpModal').style.display = 'flex';
+    }
+    function openWithdrawModal() {
+        var amount = document.getElementById('balanceAmount').value;
+        if (!amount || amount <= 0) { showNotification('Введите сумму вывода', 'error'); return; }
+        document.getElementById('withdrawModal').style.display = 'flex';
+    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function submitTopUp(method) {
+        var amount = document.getElementById('balanceAmount').value;
+        var form = document.createElement('form'); form.method = 'POST'; form.action = '/profile/topup';
+        var i1 = document.createElement('input'); i1.type = 'hidden'; i1.name = 'amount'; i1.value = amount; form.appendChild(i1);
+        var i2 = document.createElement('input'); i2.type = 'hidden'; i2.name = 'method'; i2.value = method; form.appendChild(i2);
+        document.body.appendChild(form); form.submit();
+    }
+    function submitWithdraw(method) {
+        var amount = document.getElementById('balanceAmount').value;
+        if (!confirm('Вы уверены, что хотите вывести ' + amount + ' ₽?')) return;
+        var form = document.createElement('form'); form.method = 'POST'; form.action = '/profile/withdraw';
+        var i1 = document.createElement('input'); i1.type = 'hidden'; i1.name = 'amount'; i1.value = amount; form.appendChild(i1);
+        var i2 = document.createElement('input'); i2.type = 'hidden'; i2.name = 'method'; i2.value = method; form.appendChild(i2);
+        document.body.appendChild(form); form.submit();
+    }
+    document.getElementById('topUpModal').addEventListener('click', function(e) { if (e.target === this) closeModal('topUpModal'); });
+    document.getElementById('withdrawModal').addEventListener('click', function(e) { if (e.target === this) closeModal('withdrawModal'); });
+</script>
+{{end}}

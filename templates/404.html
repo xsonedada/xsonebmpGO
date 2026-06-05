@@ -1,0 +1,194 @@
+{{define "404.html"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --radius-card: 2.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
+        50% { box-shadow: 0 0 0 20px rgba(139,92,246,0); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .notfound-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .notfound-card {
+        text-align: center;
+        max-width: 520px;
+        width: 100%;
+        padding: 4rem 3rem;
+        border-radius: var(--radius-card);
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.6s ease;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .notfound-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .notfound-card > * { position: relative; z-index: 1; }
+
+    .notfound-icon {
+        width: 88px;
+        height: 88px;
+        border-radius: 24px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        animation: pulseGlow 3s ease-in-out infinite, float 4s ease-in-out infinite;
+    }
+    .notfound-icon i {
+        font-size: 2.4rem;
+        color: var(--accent-light);
+    }
+
+    .notfound-code {
+        font-size: 5.5rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        background: linear-gradient(135deg, #ffffff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 300% 300%;
+        animation: gradientFlow 6s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+        margin: 0 0 0.5rem;
+    }
+
+    .notfound-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 0.8rem;
+        letter-spacing: -0.02em;
+    }
+
+    .notfound-text {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0 0 2rem;
+        font-weight: 500;
+    }
+
+    .notfound-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .notfound-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.8rem;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all var(--transition);
+        letter-spacing: -0.01em;
+    }
+    .notfound-btn-primary {
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+    }
+    .notfound-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        color: #fff;
+    }
+    .notfound-btn-outline {
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text-secondary);
+    }
+    .notfound-btn-outline:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.03);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 500px) {
+        .notfound-card { padding: 3rem 1.5rem; }
+        .notfound-code { font-size: 4rem; }
+    }
+</style>
+
+<section class="notfound-page">
+    <div class="notfound-card">
+        <div class="notfound-icon">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="notfound-code">404</div>
+        <h2 class="notfound-title">Страница не найдена</h2>
+        <p class="notfound-text">
+            Возможно, она была удалена или перемещена. Проверьте правильность адреса или вернитесь на главную.
+        </p>
+        <div class="notfound-actions">
+            <a href="/" class="notfound-btn notfound-btn-primary"><i class="fa-solid fa-house"></i> На главную</a>
+            <a href="/marketplace" class="notfound-btn notfound-btn-outline"><i class="fa-solid fa-store"></i> Маркетплейс</a>
+        </div>
+    </div>
+</section>
+{{end}}

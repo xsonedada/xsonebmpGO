@@ -1,0 +1,723 @@
+{{define "admin-dashboard"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSoneBMP | Админ-панель</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #06060f;
+            --card-bg: rgba(12, 12, 28, 0.8);
+            --border: rgba(255, 255, 255, 0.06);
+            --accent: #a78bfa;
+            --accent-hover: rgba(139, 92, 246, 0.15);
+            --text: #f0f0f0;
+            --muted: rgba(255, 255, 255, 0.4);
+            --sidebar-width: 72px;
+            --sidebar-expanded: 260px;
+            --radius: 1.5rem;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg); font-family: 'Inter', system-ui, sans-serif; 
+            color: var(--text); overflow-x: hidden; line-height: 1.5;
+        }
+
+        .admin-layout { display: flex; min-height: 100vh; }
+
+        /* === SIDEBAR === */
+        .admin-sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: rgba(8, 8, 22, 0.97);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border);
+            z-index: 100;
+            transition: width var(--transition);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar:hover,
+        .admin-sidebar.expanded {
+            width: var(--sidebar-expanded);
+        }
+
+        .admin-sidebar-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--muted);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .admin-sidebar-toggle:hover {
+            color: #fff;
+            background: var(--accent-hover);
+        }
+
+        .admin-sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.4rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: var(--transition);
+            white-space: nowrap;
+            border-left: 3px solid transparent;
+        }
+
+        .admin-nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            color: var(--accent);
+        }
+
+        .admin-nav-item span {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-sidebar:hover .admin-nav-item span,
+        .admin-sidebar.expanded .admin-nav-item span {
+            opacity: 1;
+        }
+
+        .admin-nav-item:hover {
+            background: var(--accent-hover);
+            color: #fff;
+        }
+
+        .admin-nav-item.active {
+            background: var(--accent-hover);
+            color: var(--accent);
+            border-left-color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .admin-nav-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.5rem 1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-sidebar:hover .admin-nav-divider,
+        .admin-sidebar.expanded .admin-nav-divider {
+            opacity: 1;
+        }
+
+        /* === MAIN === */
+        .admin-main {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem 2.5rem;
+            transition: margin-left var(--transition);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 1300px;
+        }
+
+        .admin-sidebar.expanded ~ .admin-main {
+            margin-left: var(--sidebar-expanded);
+        }
+
+        .admin-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-topbar h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #c4b5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-topbar p {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+        }
+
+        .admin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.3rem;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: none;
+        }
+
+        .admin-btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--muted);
+        }
+
+        .admin-btn-outline:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .admin-btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .admin-btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .admin-btn-sm {
+            padding: 0.35rem 0.8rem;
+            font-size: 0.72rem;
+            border-radius: 8px;
+        }
+
+        /* === STATS === */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-stat {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.8rem;
+            transition: var(--transition);
+        }
+
+        .admin-stat:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.1);
+        }
+
+        .admin-stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent);
+        }
+
+        .admin-stat-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .admin-stat-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 0.3rem;
+            font-weight: 600;
+        }
+
+        /* === GRID === */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.8rem;
+        }
+
+        .admin-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .admin-card-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-card-header a {
+            color: var(--accent);
+            font-size: 0.78rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .admin-card-header a:hover {
+            text-decoration: underline;
+        }
+
+        /* === CHART === */
+        .admin-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            height: 180px;
+        }
+
+        .admin-chart-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .admin-chart-bar {
+            width: 100%;
+            max-width: 44px;
+            background: linear-gradient(180deg, #8b5cf6, #6366f1);
+            border-radius: 6px 6px 0 0;
+            min-height: 4px;
+            transition: height 0.4s ease;
+        }
+
+        .admin-chart-label {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        .admin-chart-val {
+            font-size: 0.62rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+
+        /* === ACTIVITY === */
+        .admin-activity {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .admin-activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            gap: 1rem;
+        }
+
+        .admin-activity-left {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .admin-activity-icon {
+            font-size: 1rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .admin-activity-info h4 {
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .admin-activity-info p {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        .admin-activity-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .admin-activity-amount {
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .admin-badge {
+            padding: 0.18rem 0.6rem;
+            border-radius: 100px;
+            font-size: 0.62rem;
+            font-weight: 700;
+        }
+
+        .admin-badge.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .admin-badge.yellow {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+        }
+
+        /* === TABLE === */
+        .admin-table-wrap {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 0.7rem 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-table td {
+            padding: 0.7rem 0.6rem;
+            font-size: 0.82rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .admin-table tr:hover td {
+            background: rgba(139, 92, 246, 0.03);
+        }
+
+        @media (max-width: 1200px) {
+            .admin-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-main {
+                padding: 1rem;
+            }
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+            .admin-activity-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .admin-activity-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        .admin-sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.admin-sidebar-nav::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+}
+    </style>
+</head>
+<body>
+<div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-toggle" id="sidebarToggle">
+            <i class="fa-solid fa-chevron-right" id="toggleIcon"></i>
+        </div>
+        <nav class="admin-sidebar-nav">
+    <a href="/admin" class="admin-nav-item active">
+        <i class="fa-solid fa-gauge-high"></i><span>Обзор</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/admin/users" class="admin-nav-item">
+        <i class="fa-solid fa-users"></i><span>Пользователи</span>
+    </a>
+    <a href="/admin/orders" class="admin-nav-item">
+        <i class="fa-solid fa-boxes-stacked"></i><span>Заказы</span>
+    </a>
+    <a href="/admin/boosts" class="admin-nav-item">
+        <i class="fa-solid fa-tags"></i><span>Товары</span>
+    </a>
+    <a href="/admin/reviews" class="admin-nav-item">
+        <i class="fa-solid fa-star"></i><span>Отзывы</span>
+    </a>
+    <a href="/admin/disputes" class="admin-nav-item">
+        <i class="fa-solid fa-scale-balanced"></i><span>Диспуты</span>
+    </a>
+    <a href="/admin/tickets" class="admin-nav-item">
+        <i class="fa-solid fa-ticket"></i><span>Тикеты</span>
+    </a>
+    <a href="/admin/verifications" class="admin-nav-item">
+        <i class="fa-solid fa-certificate"></i><span>Верификация</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/admin/promocodes" class="admin-nav-item">
+        <i class="fa-solid fa-ticket-simple"></i><span>Промокоды</span>
+    </a>
+    <a href="/admin/sales" class="admin-nav-item">
+        <i class="fa-solid fa-percent"></i><span>Акции</span>
+    </a>
+    <a href="/admin/notify" class="admin-nav-item">
+        <i class="fa-solid fa-bell"></i><span>Рассылка</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/admin/stats" class="admin-nav-item">
+        <i class="fa-solid fa-chart-pie"></i><span>Статистика</span>
+    </a>
+    <a href="/admin/charts" class="admin-nav-item">
+        <i class="fa-solid fa-chart-line"></i><span>Графики</span>
+    </a>
+    <a href="/admin/logs" class="admin-nav-item">
+        <i class="fa-solid fa-clock-rotate-left"></i><span>Логи</span>
+    </a>
+    <a href="/admin/transactions" class="admin-nav-item">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i><span>Транзакции</span>
+    </a>
+    <a href="/admin/settings" class="admin-nav-item">
+        <i class="fa-solid fa-sliders-h"></i><span>Настройки</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/" class="admin-nav-item" target="_blank">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i><span>На сайт</span>
+    </a>
+    <a href="/admin/logout" class="admin-nav-item" style="color:#f87171;">
+        <i class="fa-solid fa-right-from-bracket"></i><span>Выйти</span>
+    </a>
+</nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-main">
+        <div class="admin-container">
+            <!-- TOP BAR -->
+            <div class="admin-topbar">
+                <div>
+                    <h1>Панель управления</h1>
+                    <p>Мониторинг платформы XSoneBMP</p>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <a href="/" class="admin-btn admin-btn-outline" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> На сайт
+                    </a>
+                    <a href="/admin/logout" class="admin-btn admin-btn-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i> Выйти
+                    </a>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="admin-stats">
+                <div class="admin-stat">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="admin-stat-value" style="color:#a78bfa;">{{.Data.UsersCount}}</div>
+                    <div class="admin-stat-label">Пользователей</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    <div class="admin-stat-value" style="color:#10b981;">{{.Data.OrdersCount}}</div>
+                    <div class="admin-stat-label">Заказов</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-tags"></i></div>
+                    <div class="admin-stat-value" style="color:#fbbf24;">{{.Data.BoostsCount}}</div>
+                    <div class="admin-stat-label">Товаров</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="admin-stat-icon"><i class="fa-solid fa-ruble-sign"></i></div>
+                    <div class="admin-stat-value" style="color:#60a5fa;">{{printf "%.0f" .Data.TotalEarnings}} ₽</div>
+                    <div class="admin-stat-label">Доход</div>
+                </div>
+            </div>
+
+            <!-- CHART + ACTIVITY -->
+            <div class="admin-grid">
+                {{if .Data.ChartData}}
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h3><i class="fa-solid fa-chart-line" style="color:var(--accent);"></i> Доход по месяцам</h3>
+                    </div>
+                    <div class="admin-chart">
+                        {{range .Data.ChartData}}
+                        <div class="admin-chart-item">
+                            <div class="admin-chart-bar" style="height: {{.Percent}}%;"></div>
+                            <div class="admin-chart-label">{{.Date}}</div>
+                            <div class="admin-chart-val">{{printf "%.0f" .Total}} ₽</div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+
+                {{if .Data.RecentOrders}}
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h3><i class="fa-solid fa-clock" style="color:var(--accent);"></i> Последние заказы</h3>
+                        <a href="/admin/orders">Все →</a>
+                    </div>
+                    <div class="admin-activity">
+                        {{range .Data.RecentOrders}}
+                        <div class="admin-activity-item">
+                            <div class="admin-activity-left">
+                                <div class="admin-activity-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                                <div class="admin-activity-info">
+                                    <h4>{{.Title}}</h4>
+                                    <p>{{.Username}} • #{{.ID}}</p>
+                                </div>
+                            </div>
+                            <div class="admin-activity-right">
+                                <div>
+                                    <div class="admin-activity-amount">{{printf "%.0f" .Total}} ₽</div>
+                                    <span class="admin-badge {{if eq .Status "completed"}}green{{else}}yellow{{end}}">{{.Status}}</span>
+                                </div>
+                                <a href="/admin/order/{{.ID}}" class="admin-btn admin-btn-outline admin-btn-sm" title="Детали заказа">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+
+            <!-- USERS TABLE -->
+            {{if .Data.RecentUsers}}
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h3><i class="fa-solid fa-users" style="color:var(--accent);"></i> Последние пользователи</h3>
+                    <a href="/admin/users">Все →</a>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Email</th>
+                                <th>Баланс</th>
+                                <th>Заказов</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Data.RecentUsers}}
+                            <tr>
+                                <td>#{{.ID}}</td>
+                                <td><strong>{{.Username}}</strong></td>
+                                <td>{{.Email}}</td>
+                                <td>{{printf "%.0f" .Balance}} ₽</td>
+                                <td>{{.Orders}}</td>
+                                <td>
+                                    <a href="/admin/user/{{.ID}}" class="admin-btn admin-btn-outline admin-btn-sm">Ред.</a>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </main>
+</div>
+
+<script>
+(function() {
+    var sidebar = document.getElementById('adminSidebar');
+    var toggle = document.getElementById('sidebarToggle');
+    var icon = document.getElementById('toggleIcon');
+    var expanded = false;
+
+    toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        expanded = !expanded;
+        if (expanded) {
+            sidebar.classList.add('expanded');
+            icon.className = 'fa-solid fa-chevron-left';
+        } else {
+            sidebar.classList.remove('expanded');
+            icon.className = 'fa-solid fa-chevron-right';
+        }
+    });
+
+    // Закрытие по клику вне сайдбара
+    document.addEventListener('click', function(e) {
+        if (expanded && !sidebar.contains(e.target)) {
+            expanded = false;
+            sidebar.classList.remove('expanded');
+            icon.className = 'fa-solid fa-chevron-right';
+        }
+    });
+})();
+</script>
+</body>
+</html>
+{{end}}

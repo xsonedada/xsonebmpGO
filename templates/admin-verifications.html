@@ -1,0 +1,303 @@
+{{define "admin-verifications"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .verifications-page {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .verifications-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .verifications-back:hover { color: #f87171; }
+
+    .verifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .verifications-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .verifications-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+    .verifications-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .verifications-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .verification-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2rem;
+        padding: 1.8rem 2rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .verification-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .verification-card > * { position: relative; z-index: 1; }
+    .verification-card.pending { border-left: 3px solid #fbbf24; }
+    .verification-card.approved { border-left: 3px solid #10b981; }
+    .verification-card.rejected { border-left: 3px solid #ef4444; }
+    .verification-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 25px rgba(139,92,246,0.06);
+    }
+
+    .verification-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .verification-user {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 250px;
+    }
+    .verification-avatar {
+        width: 48px; height: 48px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .verification-info { flex: 1; min-width: 0; }
+    .verification-info h4 {
+        margin: 0 0 0.2rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    .verification-info h4 span {
+        color: rgba(255,255,255,0.35);
+        font-weight: 500;
+    }
+    .verification-desc {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.82rem;
+        margin: 0.2rem 0;
+        line-height: 1.4;
+    }
+    .verification-meta {
+        color: rgba(255,255,255,0.28);
+        font-size: 0.73rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        margin-top: 0.3rem;
+    }
+
+    .verification-right {
+        text-align: right;
+        flex-shrink: 0;
+    }
+    .verification-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .verification-status.pending {
+        background: rgba(245,158,11,0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(245,158,11,0.15);
+    }
+    .verification-status.approved {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+    .verification-status.rejected {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+
+    .verification-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.8rem;
+    }
+    .verification-actions form {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+    }
+    .verification-actions input {
+        padding: 0.5rem 0.8rem;
+        border-radius: 0.8rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.78rem;
+        width: 150px;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .verification-actions input:focus {
+        border-color: rgba(139,92,246,0.4);
+    }
+    .verification-actions input::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+    .verification-btn {
+        padding: 0.5rem 0.9rem;
+        border-radius: 0.8rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.82rem;
+        transition: all 0.2s;
+        color: #fff;
+    }
+    .verification-btn.approve {
+        background: rgba(16,185,129,0.12);
+        border: 1px solid rgba(16,185,129,0.2);
+        color: #10b981;
+    }
+    .verification-btn.approve:hover {
+        background: rgba(16,185,129,0.25);
+    }
+    .verification-btn.reject {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.15);
+        color: #f87171;
+    }
+    .verification-btn.reject:hover {
+        background: rgba(239,68,68,0.2);
+    }
+
+    @media (max-width: 650px) {
+        .verification-inner {
+            flex-direction: column;
+        }
+        .verification-right {
+            text-align: left;
+        }
+        .verification-actions {
+            flex-direction: column;
+        }
+        .verification-actions input {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="verifications-page">
+    <a href="/admin" class="verifications-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="verifications-header">
+        <h1><i class="fa-solid fa-certificate"></i> Заявки на верификацию</h1>
+        <span class="verifications-count">{{len .Data.Verifications}} заявок</span>
+    </div>
+
+    <div class="verifications-grid">
+        {{range .Data.Verifications}}
+        <div class="verification-card {{.Status}}">
+            <div class="verification-inner">
+                <div class="verification-user">
+                    <div class="verification-avatar" style="background: linear-gradient(135deg, {{if eq .Status "approved"}}#10b981,#34d399{{else if eq .Status "rejected"}}#ef4444,#fca5a5{{else}}#8b5cf6,#c084fc{{end}});">
+                        {{slice .Username 0 1}}
+                    </div>
+                    <div class="verification-info">
+                        <h4>{{.FullName}} <span>@{{.Username}}</span></h4>
+                        <p class="verification-desc">{{.Description}}</p>
+                        <div class="verification-meta">
+                            <span><i class="fa-solid fa-address-book"></i> {{.Contact}}</span>
+                            <span><i class="fa-regular fa-calendar"></i> {{.CreatedAt.Format "02.01.2006"}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="verification-right">
+                    <span class="verification-status {{.Status}}">
+                        {{if eq .Status "pending"}}<i class="fa-solid fa-clock"></i> На рассмотрении
+                        {{else if eq .Status "approved"}}<i class="fa-solid fa-circle-check"></i> Одобрено
+                        {{else}}<i class="fa-solid fa-circle-xmark"></i> Отклонено{{end}}
+                    </span>
+                    
+                    {{if eq .Status "pending"}}
+                    <div class="verification-actions">
+                        <form method="POST" action="/admin/verification/{{.ID}}/approve">
+                            <input type="text" name="comment" placeholder="Комментарий">
+                            <button type="submit" class="verification-btn approve"><i class="fa-solid fa-check"></i></button>
+                        </form>
+                        <form method="POST" action="/admin/verification/{{.ID}}/reject">
+                            <input type="text" name="comment" placeholder="Причина отказа">
+                            <button type="submit" class="verification-btn reject"><i class="fa-solid fa-xmark"></i></button>
+                        </form>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}

@@ -1,0 +1,16 @@
+{{define "offline"}}
+<style>
+  .offline-page { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;padding:2rem;animation:fadeUp 0.5s ease; }
+  .offline-icon { font-size:5rem;margin-bottom:1.5rem;opacity:0.3;animation:float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+  .offline-page h1 { font-size:2rem;font-weight:800;margin-bottom:0.5rem;background:linear-gradient(135deg,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .offline-page p { color:rgba(255,255,255,0.5);font-size:1rem;margin-bottom:2rem;max-width:400px; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<section class="offline-page">
+  <div class="offline-icon"><i class="fa-solid fa-wifi" style="font-size:4rem;opacity:0.2;"></i></div>
+  <h1>Нет подключения</h1>
+  <p>Вы сейчас оффлайн. Проверьте интернет и попробуйте снова. Некоторые страницы доступны без сети.</p>
+  <button onclick="location.reload()" class="btn btn-primary"><i class="fa-solid fa-rotate"></i> Попробовать снова</button>
+</section>
+{{end}}

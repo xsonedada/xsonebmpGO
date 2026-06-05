@@ -1,0 +1,189 @@
+{{define "admin-notify"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .notify-page {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .notify-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .notify-back:hover { color: #f87171; }
+
+    .notify-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .notify-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .notify-card > * { position: relative; z-index: 1; }
+
+    .notify-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    .notify-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        background: rgba(245,158,11,0.12);
+        border: 1px solid rgba(245,158,11,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .notify-icon i {
+        color: #fbbf24;
+        font-size: 1.2rem;
+    }
+    .notify-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    .notify-subtitle {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.85rem;
+        margin: 0 0 1.8rem;
+    }
+
+    .notify-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+    .notify-textarea {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.92rem;
+        resize: vertical;
+        min-height: 140px;
+        outline: none;
+        transition: all 0.25s;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    .notify-textarea:focus {
+        border-color: rgba(245,158,11,0.4);
+        box-shadow: 0 0 0 3px rgba(245,158,11,0.06);
+    }
+    .notify-textarea::placeholder {
+        color: rgba(255,255,255,0.18);
+    }
+
+    .notify-quick {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .notify-quick-btn {
+        padding: 0.45rem 1rem;
+        border-radius: 100px;
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.12);
+        color: #fbbf24;
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: all 0.25s;
+        white-space: nowrap;
+    }
+    .notify-quick-btn:hover {
+        background: rgba(245,158,11,0.18);
+        border-color: rgba(245,158,11,0.3);
+    }
+
+    .notify-submit {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #000;
+        border: none;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .notify-submit:hover {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(245,158,11,0.3);
+    }
+</style>
+
+<section class="notify-page">
+    <a href="/admin" class="notify-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="notify-card">
+        <div class="notify-header">
+            <div class="notify-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+                <h3>Массовая рассылка</h3>
+                <p class="notify-subtitle">Отправьте уведомление всем пользователям платформы</p>
+            </div>
+        </div>
+        
+        <form method="POST" action="/admin/notify/send" class="notify-form">
+            <textarea name="message" id="notifyMsg" placeholder="Введите текст уведомления..." class="notify-textarea"></textarea>
+            
+            <div class="notify-quick">
+                <button type="button" class="notify-quick-btn" onclick="document.getElementById('notifyMsg').value='🎉 Новое обновление! Зайдите посмотреть.'">🎉 Обновление</button>
+                <button type="button" class="notify-quick-btn" onclick="document.getElementById('notifyMsg').value='💰 Новая акция! Скидки до 30%.'">💰 Акция</button>
+                <button type="button" class="notify-quick-btn" onclick="document.getElementById('notifyMsg').value='⚠️ Технические работы сегодня в 23:00.'">⚠️ Техработы</button>
+                <button type="button" class="notify-quick-btn" onclick="document.getElementById('notifyMsg').value='👑 PRO подписка теперь со скидкой 40%!'">👑 PRO</button>
+            </div>
+            
+            <button type="submit" class="notify-submit">
+                <i class="fa-solid fa-paper-plane"></i> Отправить всем
+            </button>
+        </form>
+    </div>
+</section>
+{{end}}

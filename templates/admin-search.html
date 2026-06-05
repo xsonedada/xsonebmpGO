@@ -1,0 +1,32 @@
+{{define "admin-search"}}
+<section style="padding: 8rem 2rem 4rem; max-width: 1400px; margin: 0 auto;">
+    <a href="/admin" class="btn btn-outline btn-sm">← Назад</a>
+    <h1 class="gradient-text" style="margin: 1rem 0 2rem;"><i class="fa-solid fa-search"></i> Поиск</h1>
+    
+    <form method="GET" action="/admin/search" style="margin-bottom: 2rem;">
+        <input type="text" name="q" value="{{.Data.Query}}" placeholder="Поиск по всем данным..." style="width: 100%; padding: 1rem; border-radius: 1.5rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 1rem;">
+    </form>
+    
+    {{if .Data.Users}}
+    <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; margin-bottom: 1rem;">
+        <h3>👥 Пользователи</h3>
+        {{range .Data.Users}}
+        <div style="padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            #{{.id}} - {{.name}} ({{.email}})
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+    
+    {{if .Data.Orders}}
+    <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem;">
+        <h3>📦 Заказы</h3>
+        {{range .Data.Orders}}
+        <div style="padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            #{{.id}} - {{.username}} - {{.title}} - {{printf "%.0f" .total}} ₽
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+</section>
+{{end}}

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#050510">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="XSoneBMP">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <title>XSoneBMP - Буст аккаунтов</title>
+    <link rel="stylesheet" href="/static/css/ai-assistant.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="notifications" id="notifications"></div>
+
+    {{if ne .Active "maintenance"}}
+        <!-- ========== ОБЫЧНЫЙ ИНТЕРФЕЙС (ШАПКА, ФУТЕР, СКРИПТЫ) ========== -->
+        <nav class="navbar glass">
+            <div class="nav-container">
+                <a href="/" class="logo">
+                    <span class="logo-icon">◈</span>
+                    <span class="logo-text">XSoneBMP</span>
+                </a>
+                <button class="burger-menu" onclick="toggleMobileMenu()" style="display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="/"><i class="fa-solid fa-house"></i> Главная</a></li>
+                    <li><a href="/marketplace"><i class="fa-solid fa-store"></i> Маркетплейс</a></li>
+                    <li><a href="/about"><i class="fa-solid fa-circle-info"></i> О нас</a></li>
+                    <li><a href="/contact"><i class="fa-solid fa-envelope"></i> Контакты</a></li>
+                </ul>
+                <div class="nav-actions">
+                    {{if .User}}
+                        <div class="notification-bell" onclick="toggleNotifications()">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="notifBadge">0</span>
+                        </div>
+                        <div id="notifDropdown" style="display: none; position: fixed; top: 85px; right: 20px; width: 400px; max-height: 480px; background: rgba(20, 20, 45, 0.98); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.7); z-index: 9999; overflow: hidden;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: white;">
+                                    <i class="fa-solid fa-bell" style="color: #a78bfa; margin-right: 8px;"></i>Уведомления
+                                </h3>
+                                <button onclick="markAllRead()" style="background: none; border: none; color: #a78bfa; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                    <i class="fa-solid fa-check-double"></i> Прочитать все
+                                </button>
+                            </div>
+                            <div id="notifList" style="padding: 8px; max-height: 400px; overflow-y: auto;">
+                                <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3);">
+                                    <div style="font-size: 3rem; margin-bottom: 12px;">🔔</div>
+                                    <p style="margin: 0; font-size: 0.9rem;">Пока нет уведомлений</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/cart" class="cart-btn">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span class="cart-badge" id="cartCount">0</span>
+                        </a>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-trigger" onclick="toggleDropdown()">
+                                <i class="fa-solid fa-user"></i>
+                                <span>{{.User.Username}}</span>
+                                <i class="fa-solid fa-chevron-down" style="font-size: 0.6rem; opacity: 0.5;"></i>
+                            </div>
+                            <div class="user-dropdown-menu">
+                                <div class="dropdown-header">
+                                    <i class="fa-solid fa-wallet"></i><b> {{printf "%.0f" .User.Balance}} ₽</b>
+                                </div>
+                                <div class="dropdown-items">
+                                    <a href="/profile" class="dropdown-item"><i class="fa-solid fa-user-gear"></i> Личный кабинет</a>
+                                    <a href="/seller/orders" class="dropdown-item"><i class="fa-solid fa-boxes-stacked"></i> Заказы покупателей</a>
+                                    <a href="/add-boost" class="dropdown-item"><i class="fa-solid fa-circle-plus"></i> Добавить предложение</a>
+                                    <a href="/achievements" class="dropdown-item"><i class="fa-solid fa-trophy"></i> Достижения</a>
+                                    <a href="/support" class="dropdown-item"><i class="fa-solid fa-headset"></i> Поддержка</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="#" class="dropdown-item sound-dropdown-item" id="soundToggleDropdown" onclick="toggleDropdownSound(); return false;">
+                                        <i class="fa-solid fa-volume-high" id="soundIconDropdown"></i>
+                                        <span id="soundLabelDropdown">Звук включен</span>
+                                    </a>
+                                    <a href="/upgrade-pro" class="dropdown-item pro-buy-btn" style="color: #fbbf24;"><i class="fa-solid fa-crown"></i> Купить PRO</a>
+                                    <a href="/qr-generate" class="dropdown-item"><i class="fa-solid fa-qrcode"></i> QR-вход</a>
+                                    <a href="/logout" class="dropdown-item logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Выйти</a>
+                                </div>
+                            </div>
+                        </div>
+                    {{else}}
+                        <a href="/login" class="btn btn-outline btn-sm"><i class="fa-solid fa-right-to-bracket"></i> Войти</a>
+                        <a href="/register" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus"></i> Регистрация</a>
+                    {{end}}
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            {{if eq .Active "home"}}
+                {{template "home.html" .Data}}
+            {{else if eq .Active "profile"}}
+                {{template "profile.html" .}}
+            {{else if eq .Active "cart"}}
+                {{template "cart.html"}}
+            {{else if eq .Active "login"}}
+                {{template "login.html" .}}
+            {{else if eq .Active "register"}}
+                {{template "register.html" .}}
+            {{else if eq .Active "add-boost"}}
+                {{template "add-boost" .}}
+            {{else if eq .Active "edit-profile"}}
+                {{template "edit-profile" .}}
+            {{else if eq .Active "seller"}}{{template "seller" .}}
+            {{else if eq .Active "seller-orders"}}{{template "seller-orders" .}}
+            {{else if eq .Active "order"}}{{template "order" .}}
+            {{else if eq .Active "404"}}{{template "404.html" .}}
+            {{else if eq .Active "referral"}}{{template "referral" .}}
+            {{else if eq .Active "contact"}}{{template "contact" .}}
+            {{else if eq .Active "marketplace"}}{{template "marketplace.html" .}}
+            {{else if eq .Active "forgot-password"}}{{template "forgot-password" .}}
+            {{else if eq .Active "reset-password"}}{{template "reset-password" .}}
+            {{else if eq .Active "about"}}{{template "about.html" .}}
+            {{else if eq .Active "verification"}}{{template "verification" .}}
+            {{else if eq .Active "edit-seller-profile"}}{{template "edit-seller-profile" .}}
+            {{else if eq .Active "upgrade-pro"}}{{template "upgrade-pro" .}}
+            {{else if eq .Active "seller-stats"}}{{template "seller-stats" .}}
+            {{else if eq .Active "seller-insights"}}{{template "seller-insights" .}}
+            {{else if eq .Active "seller-templates"}}{{template "seller-templates" .}}
+            {{else if eq .Active "admin-verifications"}}{{template "admin-verifications" .}}
+            {{else if eq .Active "admin-ticket-detail"}}{{template "admin-ticket-detail" .}}
+            {{else if eq .Active "admin-login"}}{{template "admin-login" .}}
+            {{else if eq .Active "admin"}}{{template "admin-dashboard" .}}
+            {{else if eq .Active "admin-users"}}{{template "admin-users" .}}
+            {{else if eq .Active "admin-orders"}}{{template "admin-orders" .}}
+            {{else if eq .Active "qr-scan"}}{{template "qr-scan" .}}
+            {{else if eq .Active "qr-confirm"}}{{template "qr-confirm" .}}
+            {{else if eq .Active "qr-login"}}{{template "qr-login" .}}
+            {{else if eq .Active "qr-generate"}}{{template "qr-generate" .}}
+            {{else if eq .Active "offline"}}{{template "offline" .}}
+            {{else if eq .Active "admin-boosts"}}{{template "admin-boosts" .}}
+            {{else if eq .Active "admin-reviews"}}{{template "admin-reviews" .}}
+            {{else if eq .Active "admin-notify"}}{{template "admin-notify" .}}
+            {{else if eq .Active "admin-stats"}}{{template "admin-stats" .}}
+            {{else if eq .Active "admin-search"}}{{template "admin-search" .}}
+            {{else if eq .Active "admin-charts"}}{{template "admin-charts" .}}
+            {{else if eq .Active "admin-order-detail"}}
+    {{template "admin-order-detail" .}}
+            {{else if eq .Active "admin-edit-user"}}{{template "admin-edit-user" .}}
+            {{else if eq .Active "admin-logs"}}{{template "admin-logs" .}}
+            {{else if eq .Active "admin-settings"}}{{template "admin-settings" .}}
+            {{else if eq .Active "seller-order"}}{{template "seller-order" .}}
+            {{else if eq .Active "edit-boost"}}{{template "edit-boost" .}}
+            {{else if eq .Active "achievements"}}{{template "achievements" .}}
+            {{else if eq .Active "admin-promocodes"}}{{template "admin-promocodes" .}}
+            {{else if eq .Active "admin-sales"}}{{template "admin-sales" .}}
+            {{else if eq .Active "dispute-open"}}{{template "dispute-open" .}}
+            {{else if eq .Active "dispute-detail"}}{{template "dispute-detail" .}}
+            {{else if eq .Active "admin-disputes"}}{{template "admin-disputes" .}}
+            {{else if eq .Active "support"}}{{template "support" .}}
+            {{else if eq .Active "support-create"}}{{template "support-create" .}}
+            {{else if eq .Active "support-ticket"}}{{template "support-ticket" .}}
+            {{else if eq .Active "admin-tickets"}}{{template "admin-tickets" .}}
+            {{else if eq .Active "sessions"}}{{template "sessions" .}}
+            {{else}}
+                {{template "detail.html" .}}
+            {{end}}
+        </main>
+
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="footer-logo">
+                            <span class="footer-logo-icon">◈</span>
+                            <span class="footer-logo-text">XSoneBMP</span>
+                        </div>
+                        <p class="footer-desc">Игровой маркетплейс нового поколения. Покупайте и продавайте буст, скины, аккаунты.</p>
+                        <div class="footer-socials">
+                            <a href="#" class="footer-social-link" rel="noopener noreferrer"><i class="fa-brands fa-discord"></i></a>
+                            <a href="#" class="footer-social-link" rel="noopener noreferrer"><i class="fa-brands fa-telegram"></i></a>
+                            <a href="#" class="footer-social-link" rel="noopener noreferrer"><i class="fa-brands fa-github"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-col">
+                        <h4 class="footer-title">Платформа</h4>
+                        <a href="/marketplace" class="footer-link">Маркетплейс</a>
+                        <a href="/about" class="footer-link">О платформе</a>
+                        <a href="/contact" class="footer-link">Контакты</a>
+                        <a href="/support" class="footer-link">Поддержка</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4 class="footer-title">Услуги</h4>
+                        <a href="/marketplace?game=Dota+2" class="footer-link">Dota 2</a>
+                        <a href="/marketplace?game=CS2" class="footer-link">CS2</a>
+                        <a href="/marketplace?game=Valorant" class="footer-link">Valorant</a>
+                        <a href="/marketplace?game=League+of+Legends" class="footer-link">League of Legends</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4 class="footer-title">Информация</h4>
+                        <a href="/profile" class="footer-link">Профиль</a>
+                        <a href="/upgrade-pro" class="footer-link footer-pro-link">👑 PRO подписка</a>
+                        <a href="/achievements" class="footer-link">Достижения</a>
+                        <a href="/support" class="footer-link">Поддержка</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p class="footer-copy">© 2026 XSoneBMP. Все права защищены 🌌</p>
+                    <p class="footer-dev">Разработано <b>xsone</b> aka <b>Pavlov Alexey</b></p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Кнопка установки PWA -->
+        <button id="installBtn" onclick="installPWA()" 
+            style="display:none;position:fixed;bottom:24px;left:24px;z-index:997;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);cursor:pointer;font-size:0.8rem;transition:all 0.3s;align-items:center;justify-content:center;"
+            onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.12)'"
+            onmouseout="this.style.color='rgba(255,255,255,0.4)';this.style.background='rgba(255,255,255,0.06)'"
+            title="Установить приложение">
+            <i class="fa-solid fa-download"></i>
+        </button>
+
+        <!-- iOS инструкция -->
+        <div id="iosGuide" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(5,5,16,0.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;">
+            <div style="animation:fadeUp 0.4s ease;max-width:320px;">
+                <div style="font-size:3rem;margin-bottom:1rem;">📱</div>
+                <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">Установите приложение</h2>
+                <p style="color:rgba(255,255,255,0.5);margin-bottom:1.5rem;line-height:1.5;">
+                    Нажмите кнопку <b style="color:#60a5fa;">Поделиться</b> <i class="fa-solid fa-share-from-square" style="color:#60a5fa;"></i> в Safari, затем <b style="color:#10b981;">На экран «Домой»</b> <i class="fa-solid fa-plus" style="color:#10b981;"></i>
+                </p>
+                <button onclick="document.getElementById('iosGuide').style.display='none'" style="padding:0.7rem 2rem;border-radius:2rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-size:0.9rem;cursor:pointer;">Понятно</button>
+            </div>
+        </div>
+
+        <div id="pwaWelcome" style="display:flex;position:fixed;inset:0;z-index:99999;background:rgba(5,5,16,0.97);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;opacity:0;visibility:hidden;transition:opacity 0.5s ease, visibility 0.5s ease;">
+            <div style="animation: welcomeIn 0.6s ease;">
+                <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#8b5cf6,#c084fc);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;color:white;box-shadow:0 0 40px rgba(139,92,246,0.4);">
+                    <i class="fa-solid fa-hand-sparkles"></i>
+                </div>
+                <h1 style="font-size:2rem;font-weight:900;margin-bottom:0.5rem;background:linear-gradient(135deg,#fff,#c4b5fd);background-clip:text;-webkit-text-fill-color:transparent;">Добро пожаловать!</h1>
+                <p style="color:rgba(255,255,255,0.5);font-size:1rem;margin-bottom:2rem;max-width:300px;">
+                    {{if .User}}С возвращением, <b>{{.User.Username}}</b>!{{else}}Вы в приложении XSoneBMP{{end}}
+                </p>
+                <button onclick="closeWelcome()" style="padding:0.8rem 2.5rem;border-radius:2rem;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;color:white;font-size:1rem;font-weight:700;cursor:pointer;">
+                    <i class="fa-solid fa-rocket"></i> Начать
+                </button>
+            </div>
+        </div>
+
+        <script src="/static/js/vibration.js"></script>
+        <script>
+            // Проверка платформы и PWA
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            var isAndroid = /Android/.test(navigator.userAgent);
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+            var deferredPrompt;
+
+            window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (!isStandalone) {
+                    document.getElementById('installBtn').style.display = 'flex';
+                }
+            });
+
+            if (isIOS && !isStandalone) {
+                var btn = document.getElementById('installBtn');
+                btn.style.display = 'flex';
+                btn.innerHTML = '<i class="fa-solid fa-download"></i>';
+            }
+
+            function installPWA() {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function(result) {
+                        if (result.outcome === 'accepted') {
+                            document.getElementById('installBtn').style.display = 'none';
+                        }
+                        deferredPrompt = null;
+                    });
+                } else if (isIOS) {
+                    document.getElementById('iosGuide').style.display = 'flex';
+                }
+            }
+
+            if (isStandalone) {
+                var btn = document.getElementById('installBtn');
+                if (btn) btn.style.display = 'none';
+            }
+
+            function closeWelcome() {
+                var el = document.getElementById('pwaWelcome');
+                el.style.animation = 'welcomeOut 0.4s ease forwards';
+                setTimeout(function() {
+                    el.style.opacity = '0';
+                    el.style.visibility = 'hidden';
+                }, 380);
+            }
+
+            function showWelcome() {
+                var el = document.getElementById('pwaWelcome');
+                el.style.opacity = '1';
+                el.style.visibility = 'visible';
+            }
+
+            if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+                var shown = sessionStorage.getItem('pwa_welcome');
+                if (!shown) {
+                    setTimeout(showWelcome, 300);
+                    sessionStorage.setItem('pwa_welcome', '1');
+                } else {
+                    document.getElementById('pwaWelcome').style.display = 'none';
+                }
+            } else {
+                document.getElementById('pwaWelcome').style.display = 'none';
+            }
+        </script>
+        <script src="/static/js/audio/engine.js" defer></script>
+<script src="/static/js/ai-assistant.js" defer></script>
+<script src="/static/js/app.js" defer></script>
+        <script>setInterval(function() {fetch('/api/ping');}, 10000);</script>
+        <script>
+        fetch('/api/check-pro').then(r => r.json()).then(data => {
+            if (data.is_pro) document.querySelector('.pro-buy-btn')?.remove();
+        });
+        </script>
+        <!-- Service Worker и уведомления -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                        .then(function(reg) { console.log('✅ SW:', reg.scope); })
+                        .catch(function() {});
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(initPushButton, 500);
+            });
+
+            function initPushButton() {
+                if (!('Notification' in window)) return;
+                var dropdown = document.querySelector('.dropdown-items');
+                if (!dropdown) { setTimeout(initPushButton, 1000); return; }
+                checkAndBuildButton(dropdown);
+            }
+
+            async function checkAndBuildButton(dropdown) {
+                if (!dropdown || document.getElementById('pushDropdownBtn')) return;
+                var hasSub = false;
+                try {
+                    var reg = await navigator.serviceWorker.ready;
+                    var sub = await reg.pushManager.getSubscription();
+                    hasSub = sub !== null;
+                } catch(e) {}
+                var perm = Notification.permission;
+                var divider = document.createElement('div'); divider.id = 'pushDivider';
+                var item = document.createElement('a'); item.href = '#'; item.id = 'pushDropdownBtn'; item.className = 'dropdown-item';
+                if (hasSub) {
+                    item.innerHTML = '<i class="fa-solid fa-bell" style="color:#a78bfa;"></i> Уведомления включены';
+                    item.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); if (confirm('Отключить уведомления?')) unsubscribePush(); });
+                } else if (perm === 'denied') {
+                    item.innerHTML = '<i class="fa-solid fa-bell-slash" style="color:#ef4444;"></i> Уведомления заблокированы';
+                    item.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); alert('Разрешите уведомления в настройках браузера:\nНастройки → Уведомления → XSoneBMP'); });
+                } else {
+                    item.style.color = '#a78bfa';
+                    item.innerHTML = '<i class="fa-solid fa-bell"></i> Включить уведомления';
+                    item.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); requestPushPermission(); });
+                }
+                var proBtn = dropdown.querySelector('.pro-buy-btn');
+                if (proBtn) { dropdown.insertBefore(divider, proBtn); dropdown.insertBefore(item, proBtn); }
+                else { var logoutBtn = dropdown.querySelector('.logout'); if (logoutBtn) { dropdown.insertBefore(divider, logoutBtn); dropdown.insertBefore(item, logoutBtn); } else { dropdown.appendChild(divider); dropdown.appendChild(item); } }
+            }
+
+            async function requestPushPermission() {
+                try {
+                    var perm = await Notification.requestPermission();
+                    if (perm === 'granted') {
+                        var reg = await navigator.serviceWorker.ready;
+                        await subscribeToPush(reg);
+                    }
+                    refreshPushButton();
+                } catch(e) {}
+            }
+
+            async function subscribeToPush(reg) {
+                try {
+                    var resp = await fetch('/api/push/key');
+                    var data = await resp.json();
+                    var sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(data.key) });
+                    var rawKey = sub.getKey('p256dh');
+                    var authKey = sub.getKey('auth');
+                    await fetch('/api/push/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            endpoint: sub.endpoint,
+                            auth: btoa(String.fromCharCode.apply(null, new Uint8Array(authKey))),
+                            p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))),
+                            user_agent: navigator.userAgent
+                        })
+                    });
+                } catch(e) {}
+            }
+
+            async function unsubscribePush() {
+                try {
+                    var reg = await navigator.serviceWorker.ready;
+                    var sub = await reg.pushManager.getSubscription();
+                    if (sub) {
+                        await fetch('/api/push/unsubscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: sub.endpoint }) });
+                        try { await sub.unsubscribe(); } catch(e) {}
+                    } else {
+                        await fetch('/api/push/unsubscribe-all', { method: 'POST' });
+                    }
+                } catch(e) {}
+                refreshPushButton();
+            }
+
+            function refreshPushButton() {
+                var oldBtn = document.getElementById('pushDropdownBtn');
+                var oldDiv = document.getElementById('pushDivider');
+                if (oldBtn) oldBtn.remove();
+                if (oldDiv) oldDiv.remove();
+                initPushButton();
+            }
+
+            function urlBase64ToUint8Array(base64String) {
+                var padding = '='.repeat((4 - base64String.length % 4) % 4);
+                var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                var rawData = window.atob(base64);
+                var outputArray = new Uint8Array(rawData.length);
+                for (var i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+                return outputArray;
+            }
+        </script>
+        <style>
+            @keyframes welcomeIn { from { opacity:0; transform:scale(0.9) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
+            @keyframes welcomeOut { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(1.05); } }
+        </style>
+    {{else}}
+        <!-- ========== СТРАНИЦА ТЕХНИЧЕСКОГО ОБСЛУЖИВАНИЯ (БЕЗ ШАПКИ, ФУТЕРА И ЛИШНИХ СКРИПТОВ) ========== -->
+        <main style="width:100%; margin:0; padding:0;">
+            {{template "maintenance" .}}
+        </main>
+    {{end}}
+</body>
+</html>

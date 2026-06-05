@@ -1,0 +1,309 @@
+{{define "login.html"}}
+<style>
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6rem 1.5rem 3rem;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2.5rem;
+        padding: 3rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeSlide 0.55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .login-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.02), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .login-card > * { position: relative; z-index: 1; }
+
+    .login-title {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #a78bfa 100%);
+        background-size: 300% 300%;
+        animation: gradientShift 6s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.5rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .login-subtitle {
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+        font-size: 0.9rem;
+        margin: 0 0 2rem;
+    }
+
+    .login-alert {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .login-alert.error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.2);
+        color: #fca5a5;
+    }
+
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .login-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .login-form-group label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.35);
+        font-weight: 600;
+        margin-left: 0.3rem;
+    }
+    .login-input {
+        padding: 0.85rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .login-input::placeholder { color: rgba(255,255,255,0.2); }
+    .login-input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        color: #fff;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .login-btn:hover {
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(139,92,246,0.35);
+    }
+    .login-btn:active { transform: translateY(0); }
+
+    .login-links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        margin-top: 1.5rem;
+    }
+    .login-link {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+    }
+    .login-link a {
+        color: #a78bfa;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .login-link a:hover { color: #c4b5fd; }
+
+    .login-forgot {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.3);
+        text-decoration: none;
+        border-bottom: 1px dashed rgba(255,255,255,0.12);
+        padding-bottom: 2px;
+        transition: all 0.2s;
+    }
+    .login-forgot:hover { color: #a78bfa; border-color: #a78bfa; }
+
+    .login-welcome {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(139,92,246,0.06);
+        border: 1px solid rgba(139,92,246,0.1);
+        margin-bottom: 1.5rem;
+    }
+    .login-welcome-icon {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        background: rgba(139,92,246,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    .login-welcome-text {
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.6);
+        line-height: 1.4;
+    }
+    .login-welcome-text strong { color: #c4b5fd; }
+
+    /* QR-секция */
+    .login-divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .login-divider::before,
+    .login-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255,255,255,0.06);
+    }
+    .login-divider span {
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.25);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .qr-login-btn {
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(139,92,246,0.3);
+        color: #a78bfa;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .qr-login-btn:hover {
+        background: rgba(139,92,246,0.1);
+        border-color: #8b5cf6;
+        color: #c4b5fd;
+    }
+</style>
+
+<section class="login-page">
+    <div class="login-card">
+        <h1 class="login-title">
+            <i class="fa-solid fa-right-to-bracket" style="font-size:1.6rem; -webkit-text-fill-color:#a78bfa;"></i> Вход
+        </h1>
+        <p class="login-subtitle">Добро пожаловать обратно!</p>
+        
+        {{if .Error}}
+            <div class="login-alert error">
+                <i class="fa-solid fa-circle-exclamation"></i> {{.Error}}
+            </div>
+        {{end}}
+
+        <div class="login-welcome">
+            <div class="login-welcome-icon">
+                <i class="fa-solid fa-hand-sparkles" style="color:#a78bfa;"></i>
+            </div>
+            <div class="login-welcome-text">
+                <strong>С возвращением!</strong><br>
+                Войдите чтобы продолжить пользоваться платформой
+            </div>
+        </div>
+        
+        <form method="POST" action="/login" class="login-form">
+            <!-- CSRF-токен -->
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
+            <!-- Honeypot -->
+            <input type="text" name="website" style="display:none;" tabindex="-1" autocomplete="off">
+            
+            <div class="login-form-group">
+                <label><i class="fa-solid fa-user" style="font-size:0.65rem;"></i> Имя пользователя или Email</label>
+                <input type="text" name="username" class="login-input" required placeholder="login/email@gmail.com" autocomplete="username">
+            </div>
+            <div class="login-form-group">
+                <label><i class="fa-solid fa-lock" style="font-size:0.65rem;"></i> Пароль</label>
+                <input type="password" name="password" class="login-input" required placeholder="Ваш пароль" autocomplete="current-password">
+            </div>
+            <button type="submit" class="login-btn">
+                <i class="fa-solid fa-rocket"></i> Войти
+            </button>
+        </form>
+        
+        <div class="login-divider">
+            <span>или</span>
+        </div>
+        
+        <a href="/qr-login" class="qr-login-btn">
+            <i class="fa-solid fa-qrcode"></i> Войти по QR-коду
+        </a>
+        
+        <div class="login-links">
+            <a href="/forgot-password" class="login-forgot">
+                <i class="fa-solid fa-circle-question"></i> Забыли пароль?
+            </a>
+            <p class="login-link">
+                Нет аккаунта? <a href="/register">Зарегистрируйтесь <i class="fa-solid fa-arrow-right"></i></a>
+            </p>
+        </div>
+    </div>
+</section>
+{{end}}

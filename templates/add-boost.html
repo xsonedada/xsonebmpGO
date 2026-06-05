@@ -1,0 +1,584 @@
+{{define "add-boost"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .ab-page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .ab-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .ab-back:hover { color: var(--accent-light); }
+
+    .ab-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 3rem 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .ab-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ab-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ab-card > * { position: relative; z-index: 1; }
+
+    .ab-hero {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 2.5rem;
+    }
+    .ab-icon {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        animation: float 3s ease-in-out infinite;
+    }
+    .ab-icon i { color: var(--accent-light); font-size: 1.3rem; }
+    .ab-hero-text h1 {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+        letter-spacing: -0.03em;
+    }
+    .ab-hero-text p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .ab-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .ab-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .ab-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-left: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .ab-label i {
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .ab-input,
+    .ab-textarea {
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+    }
+    .ab-input:focus,
+    .ab-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .ab-input::placeholder,
+    .ab-textarea::placeholder {
+        color: var(--text-dim);
+    }
+    .ab-textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+
+    /* Кастомный поиск-селект */
+    .game-search-wrapper {
+        position: relative;
+    }
+    .game-search-input {
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+        cursor: pointer;
+        caret-color: var(--accent-light);
+    }
+    .game-search-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .game-search-input::placeholder {
+        color: var(--text-dim);
+    }
+    .game-search-icon {
+        position: absolute;
+        right: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        pointer-events: none;
+        transition: transform var(--transition);
+    }
+    .game-search-wrapper.open .game-search-icon {
+        transform: translateY(-50%) rotate(180deg);
+    }
+    
+    .game-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background: rgba(20,20,50,0.98);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 1px solid var(--border);
+        border-radius: 1.2rem;
+        max-height: 260px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+        animation: fadeSlide 0.2s ease;
+    }
+    .game-search-wrapper.open .game-dropdown {
+        display: block;
+    }
+    .game-dropdown-item {
+        padding: 0.75rem 1.3rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: rgba(255,255,255,0.7);
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .game-dropdown-item:last-child {
+        border-bottom: none;
+    }
+    .game-dropdown-item i {
+        color: var(--accent-light);
+        font-size: 0.8rem;
+        width: 18px;
+        text-align: center;
+    }
+    .game-dropdown-item:hover,
+    .game-dropdown-item.active {
+        background: rgba(139,92,246,0.12);
+        color: #fff;
+    }
+    .game-dropdown-item.selected {
+        background: rgba(139,92,246,0.08);
+        color: var(--accent-light);
+        font-weight: 600;
+    }
+    .game-dropdown-item.selected::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-left: auto;
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .game-dropdown-empty {
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+    }
+    .game-dropdown-empty i {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.3;
+    }
+
+    /* Скрытый инпут */
+    .hidden-game-input {
+        display: none;
+    }
+
+    input[type='number'] {
+        -moz-appearance: textfield;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+
+    .ab-submit {
+        padding: 0.95rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        margin-top: 0.3rem;
+    }
+    .ab-submit:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+    .ab-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.3);
+    }
+
+    /* Скроллбар */
+    .game-dropdown::-webkit-scrollbar {
+        width: 4px;
+    }
+    .game-dropdown::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .game-dropdown::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+    }
+
+    @media (max-width: 480px) {
+        .ab-card { padding: 2rem 1.5rem; }
+        .ab-hero-text h1 { font-size: 1.5rem; }
+    }
+</style>
+
+<section class="ab-page">
+    <a href="/profile" class="ab-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="ab-card">
+        <div class="ab-hero">
+            <div class="ab-icon">
+                <i class="fa-solid fa-circle-plus"></i>
+            </div>
+            <div class="ab-hero-text">
+                <h1>Новое предложение</h1>
+                <p>Начните продавать</p>
+            </div>
+        </div>
+
+        <form method="POST" action="/add-boost" class="ab-form">
+            <!-- Поиск игры -->
+            <div class="ab-group">
+                <label class="ab-label"><i class="fa-solid fa-gamepad"></i> Игра</label>
+                <div class="game-search-wrapper" id="gameSearchWrapper">
+                    <input 
+                        type="text" 
+                        class="game-search-input" 
+                        id="gameSearchInput" 
+                        placeholder="Начните вводить название игры..." 
+                        autocomplete="off"
+                    >
+                    <i class="fa-solid fa-chevron-down game-search-icon"></i>
+                    <div class="game-dropdown" id="gameDropdown"></div>
+                    <input type="hidden" name="game" id="selectedGame" value="">
+                </div>
+            </div>
+
+            <div class="ab-group">
+                <label class="ab-label"><i class="fa-solid fa-tag"></i> Название</label>
+                <input type="text" name="title" placeholder="Буст до Legend за 3 дня" required class="ab-input">
+            </div>
+            <div class="ab-group">
+                <label class="ab-label"><i class="fa-solid fa-align-left"></i> Описание</label>
+                <textarea name="description" placeholder="Опишите вашу услугу..." required class="ab-textarea"></textarea>
+            </div>
+            <div class="ab-group">
+                <label class="ab-label"><i class="fa-solid fa-ruble-sign"></i> Цена</label>
+                <input type="number" name="price" placeholder="500" min="1" inputmode="numeric" required class="ab-input">
+            </div>
+            <button type="submit" class="ab-submit"><i class="fa-solid fa-rocket"></i> Разместить</button>
+        </form>
+    </div>
+</section>
+
+<script>
+(function() {
+    // Список игр (можно загружать через API)
+    const games = [
+        "Dota 2",
+        "League of Legends",
+        "Valorant",
+        "CS2",
+        "World of Warcraft",
+        "Apex Legends",
+        "Fortnite",
+        "Overwatch 2",
+        "PUBG",
+        "Rainbow Six Siege",
+        "Genshin Impact",
+        "Diablo IV",
+        "Path of Exile",
+        "Destiny 2",
+        "Call of Duty: Warzone",
+        "Escape from Tarkov",
+        "Rocket League",
+        "Hearthstone",
+        "Lost Ark",
+        "Final Fantasy XIV",
+        "Elden Ring",
+        "Minecraft",
+        "Roblox",
+        "GTA V",
+        "Red Dead Redemption 2",
+        "Rust",
+        "ARK: Survival Evolved",
+        "DayZ",
+        "Warframe",
+        "The Division 2"
+    ];
+
+    const wrapper = document.getElementById('gameSearchWrapper');
+    const input = document.getElementById('gameSearchInput');
+    const dropdown = document.getElementById('gameDropdown');
+    const hiddenInput = document.getElementById('selectedGame');
+    let activeIndex = -1;
+
+    // Открыть дропдаун
+    function openDropdown() {
+        wrapper.classList.add('open');
+        filterGames(input.value);
+    }
+
+    // Закрыть дропдаун
+    function closeDropdown() {
+        wrapper.classList.remove('open');
+        activeIndex = -1;
+    }
+
+    // Фильтрация игр
+    function filterGames(query) {
+        const filtered = query.trim() === '' 
+            ? games 
+            : games.filter(game => game.toLowerCase().includes(query.toLowerCase()));
+        
+        if (filtered.length === 0) {
+            dropdown.innerHTML = '<div class="game-dropdown-empty"><i class="fa-solid fa-gamepad"></i> Игра не найдена</div>';
+        } else {
+            dropdown.innerHTML = filtered.map((game, index) => {
+                const isSelected = game === hiddenInput.value;
+                return '<div class="game-dropdown-item' + 
+                    (isSelected ? ' selected' : '') + 
+                    (index === activeIndex ? ' active' : '') + 
+                    '" data-game="' + game + '" data-index="' + index + '">' +
+                    '<i class="fa-solid fa-gamepad"></i> ' + game +
+                    '</div>';
+            }).join('');
+        }
+    }
+
+    // Выбор игры
+    function selectGame(game) {
+        hiddenInput.value = game;
+        input.value = game;
+        closeDropdown();
+        filterGames('');
+    }
+
+    // Клик по инпуту
+    input.addEventListener('click', function() {
+        if (wrapper.classList.contains('open')) {
+            closeDropdown();
+        } else {
+            openDropdown();
+        }
+    });
+
+    // Ввод текста
+    input.addEventListener('input', function() {
+        if (!wrapper.classList.contains('open')) {
+            openDropdown();
+        }
+        activeIndex = -1;
+        filterGames(input.value);
+    });
+
+    // Клик по элементу списка
+    dropdown.addEventListener('click', function(e) {
+        const item = e.target.closest('.game-dropdown-item');
+        if (item) {
+            selectGame(item.dataset.game);
+        }
+    });
+
+    // Навигация стрелками
+    input.addEventListener('keydown', function(e) {
+        const items = dropdown.querySelectorAll('.game-dropdown-item');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!wrapper.classList.contains('open')) {
+                openDropdown();
+            }
+            activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            updateActiveItem(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, 0);
+            updateActiveItem(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (wrapper.classList.contains('open') && activeIndex >= 0 && items[activeIndex]) {
+                selectGame(items[activeIndex].dataset.game);
+            }
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    function updateActiveItem(items) {
+        items.forEach((item, i) => {
+            item.classList.toggle('active', i === activeIndex);
+        });
+        const activeItem = items[activeIndex];
+        if (activeItem) {
+            activeItem.scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    // Закрытие при клике вне
+    document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) {
+            closeDropdown();
+            // Восстанавливаем значение, если игра была выбрана
+            if (hiddenInput.value && input.value !== hiddenInput.value) {
+                input.value = hiddenInput.value;
+            }
+        }
+    });
+
+    // При потере фокуса восстанавливаем выбранное значение
+    input.addEventListener('blur', function() {
+        setTimeout(function() {
+            if (hiddenInput.value && input.value !== hiddenInput.value) {
+                input.value = hiddenInput.value;
+            }
+        }, 150);
+    });
+})();
+</script>
+{{end}}

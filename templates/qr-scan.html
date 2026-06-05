@@ -1,0 +1,236 @@
+{{define "qr-scan"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.3); }
+        50% { box-shadow: 0 0 0 18px rgba(139,92,246,0); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(15px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .qr-scan-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .qr-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 3.5rem 2.5rem;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        animation: fadeUp 0.5s ease;
+        position: relative;
+        overflow: hidden;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .qr-card:hover {
+        border-color: rgba(139,92,246,0.2);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .qr-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .qr-card > * { position: relative; z-index: 1; }
+
+    .qr-icon {
+        width: 68px; height: 68px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.7rem;
+        color: white;
+        box-shadow: 0 8px 24px rgba(139,92,246,0.3);
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .qr-title {
+        font-size: 1.9rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.03em;
+    }
+
+    .qr-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin: 0 0 2rem;
+        font-weight: 500;
+    }
+
+    .qr-code-wrap {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 1.8rem;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 16px 40px rgba(139,92,246,0.2);
+        animation: pulseGlow 4s ease-in-out infinite;
+        position: relative;
+        z-index: 1;
+    }
+    .qr-code-wrap::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 2rem;
+        border: 2px solid rgba(139,92,246,0.2);
+        pointer-events: none;
+    }
+    .qr-code-wrap canvas,
+    .qr-code-wrap img {
+        display: block;
+        border-radius: 0.5rem;
+    }
+
+    .qr-status {
+        padding: 0.8rem 1.6rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(139,92,246,0.08);
+        border: 1px solid rgba(139,92,246,0.15);
+        color: var(--accent-light);
+        transition: all var(--transition);
+    }
+    .qr-status i { font-size: 0.9rem; }
+    .qr-status.success {
+        background: rgba(16,185,129,0.08);
+        border-color: rgba(16,185,129,0.2);
+        color: #6ee7b7;
+        animation: fadeSlide 0.3s ease;
+    }
+    .qr-status.error {
+        background: rgba(239,68,68,0.08);
+        border-color: rgba(239,68,68,0.2);
+        color: #fca5a5;
+        animation: fadeSlide 0.3s ease;
+    }
+
+    @media (max-width: 480px) {
+        .qr-card { padding: 2.5rem 1.5rem; border-radius: 2rem; }
+        .qr-code-wrap { padding: 1.5rem; }
+        .qr-title { font-size: 1.6rem; }
+    }
+</style>
+
+<section class="qr-scan-page">
+    <div class="qr-card">
+        <div class="qr-icon"><i class="fa-solid fa-qrcode"></i></div>
+        <h1 class="qr-title">QR-вход</h1>
+        <p class="qr-subtitle">Отсканируйте код на телефоне для входа</p>
+
+        <div class="qr-code-wrap">
+            <div id="qrCode"></div>
+        </div>
+
+        <div class="qr-status" id="qrStatus">
+            <i class="fa-solid fa-spinner fa-spin"></i> Ожидание сканирования...
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+var token = new URLSearchParams(window.location.search).get('token');
+var confirmUrl = window.location.origin + '/qr-login?token=' + token;
+
+new QRCode(document.getElementById('qrCode'), {
+    text: confirmUrl,
+    width: 200, height: 200,
+    colorDark: '#8b5cf6', colorLight: '#ffffff'
+});
+
+function checkStatus() {
+    fetch('/qr/check/' + token)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var s = document.getElementById('qrStatus');
+            if (data.status === 'confirmed') {
+                s.innerHTML = '<i class="fa-solid fa-check-circle"></i> Вход выполнен!';
+                s.className = 'qr-status success';
+                setTimeout(function() { window.location.href = '/profile'; }, 1000);
+            } else if (data.status === 'expired') {
+                s.innerHTML = '<i class="fa-solid fa-clock"></i> QR-код истёк';
+                s.className = 'qr-status error';
+            }
+        });
+}
+
+setInterval(checkStatus, 2000);
+checkStatus();
+</script>
+{{end}}

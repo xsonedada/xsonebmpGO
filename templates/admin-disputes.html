@@ -1,0 +1,300 @@
+{{define "admin-disputes"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .disputes-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .disputes-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .disputes-back:hover { color: #f87171; }
+
+    .disputes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .disputes-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .disputes-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+
+    .disputes-header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .disputes-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .disputes-tabs {
+        display: flex;
+        gap: 0.3rem;
+        background: rgba(255,255,255,0.03);
+        padding: 4px;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .disputes-tab {
+        padding: 0.55rem 1.2rem;
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.82rem;
+        transition: all 0.25s;
+        background: transparent;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+    }
+    .disputes-tab.active {
+        background: rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .disputes-tab:hover:not(.active) {
+        color: #fff;
+        background: rgba(255,255,255,0.03);
+    }
+
+    .disputes-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .dispute-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.5rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+        text-decoration: none;
+        color: #fff;
+        display: block;
+    }
+    .dispute-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .dispute-card > * { position: relative; z-index: 1; }
+    .dispute-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+        color: #fff;
+    }
+    .dispute-card.urgent {
+        border-left: 3px solid #ef4444;
+    }
+
+    .dispute-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    @media (max-width: 650px) {
+        .dispute-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    .dispute-left {
+        flex: 1;
+        min-width: 250px;
+    }
+    .dispute-id {
+        font-weight: 800;
+        color: #f87171;
+        font-size: 0.9rem;
+    }
+    .dispute-order {
+        color: rgba(255,255,255,0.3);
+        font-size: 0.78rem;
+        margin-left: 0.3rem;
+    }
+    .dispute-user {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+    }
+    .dispute-user-avatar {
+        width: 34px; height: 34px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #fff;
+    }
+    .dispute-username {
+        font-weight: 600;
+        color: #fff;
+        font-size: 0.88rem;
+    }
+    .dispute-reason {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .dispute-right {
+        text-align: right;
+        flex-shrink: 0;
+    }
+    .dispute-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .dispute-status.open {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+    .dispute-status.resolved {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+    .dispute-date {
+        color: rgba(255,255,255,0.25);
+        font-size: 0.75rem;
+        margin-top: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        justify-content: flex-end;
+    }
+</style>
+
+<section class="disputes-page">
+    <a href="/admin" class="disputes-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="disputes-header">
+        <h1><i class="fa-solid fa-scale-balanced"></i> Диспуты</h1>
+        <div class="disputes-header-right">
+            <span class="disputes-count" id="disputesCount">{{len .Data.Disputes}} диспутов</span>
+            <div class="disputes-tabs">
+                <button class="disputes-tab active" onclick="filterDisputes('all', this)">Все</button>
+                <button class="disputes-tab" onclick="filterDisputes('open', this)">Открытые</button>
+                <button class="disputes-tab" onclick="filterDisputes('resolved', this)">Решённые</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="disputes-grid" id="disputesList">
+        {{range .Data.Disputes}}
+        <a href="/dispute/{{.ID}}" class="dispute-card {{if eq .Status "open"}}urgent{{end}}" data-status="{{.Status}}">
+            <div class="dispute-inner">
+                <div class="dispute-left">
+                    <span class="dispute-id">#{{.ID}}</span>
+                    <span class="dispute-order">— Заказ #{{.OrderID}}</span>
+                    <div class="dispute-user">
+                        <div class="dispute-user-avatar" style="background: linear-gradient(135deg, #8b5cf6, #c084fc);">
+                            {{slice .Username 0 1}}
+                        </div>
+                        <span class="dispute-username">{{.Username}}</span>
+                    </div>
+                    <div class="dispute-reason">
+                        <i class="fa-solid fa-circle-exclamation"></i> {{.Reason}}
+                    </div>
+                </div>
+                <div class="dispute-right">
+                    <span class="dispute-status {{if eq .Status "open"}}open{{else}}resolved{{end}}">
+                        {{if eq .Status "open"}}<i class="fa-solid fa-circle"></i> Открыт{{else}}<i class="fa-solid fa-circle-check"></i> Решён{{end}}
+                    </span>
+                    <div class="dispute-date">
+                        <i class="fa-regular fa-clock"></i> {{.CreatedAt.Format "02.01 15:04"}}
+                    </div>
+                </div>
+            </div>
+        </a>
+        {{end}}
+    </div>
+</section>
+
+<script>
+function filterDisputes(status, btn) {
+    // Обновляем активную кнопку
+    document.querySelectorAll('.disputes-tab').forEach(function(b) {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    
+    // Фильтруем карточки
+    var cards = document.querySelectorAll('#disputesList .dispute-card');
+    var visibleCount = 0;
+    
+    cards.forEach(function(card) {
+        if (status === 'all' || card.dataset.status === status) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Обновляем счётчик
+    document.getElementById('disputesCount').textContent = visibleCount + ' диспутов';
+}
+</script>
+{{end}}

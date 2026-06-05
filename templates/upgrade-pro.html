@@ -1,0 +1,449 @@
+{{define "upgrade-pro"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+    @keyframes pulseGlowPro {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.35), 0 0 0 1px rgba(245,158,11,0.2); }
+        50% { box-shadow: 0 0 0 18px rgba(245,158,11,0), 0 0 0 1px rgba(251,191,36,0.6); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .pro-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .pro-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .pro-back:hover { color: var(--accent-light); }
+
+    /* Hero */
+    .pro-hero {
+        text-align: center;
+        animation: fadeUp 0.6s ease;
+    }
+    .pro-hero-icon {
+        font-size: 4rem;
+        animation: float 3s ease-in-out infinite;
+        display: block;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 0 12px rgba(251,191,36,0.4));
+    }
+    .pro-hero h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #fde68a 50%, #f59e0b 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 6s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.03em;
+    }
+    .pro-hero p {
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+        margin: 0;
+    }
+
+    /* Активный PRO */
+    .pro-active {
+        background: var(--surface);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(245,158,11,0.25);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        text-align: center;
+        animation: pulseGlowPro 3s infinite;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .pro-active h2 {
+        color: var(--gold);
+        margin: 0 0 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .pro-active p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Преимущества */
+    .pro-benefits {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        animation: fadeUp 0.7s ease;
+    }
+    @media (max-width: 650px) { .pro-benefits { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 400px) { .pro-benefits { grid-template-columns: 1fr; } }
+
+    .pro-benefit {
+        background: var(--surface);
+        backdrop-filter: blur(35px);
+        -webkit-backdrop-filter: blur(35px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-item);
+        padding: 1.8rem 1.2rem;
+        text-align: center;
+        transition: all var(--transition);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    .pro-benefit::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 8s infinite;
+        pointer-events: none;
+    }
+    .pro-benefit > * { position: relative; z-index: 1; }
+    .pro-benefit:hover {
+        border-color: rgba(245,158,11,0.25);
+        transform: translateY(-5px);
+        box-shadow: 0 16px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(245,158,11,0.1);
+    }
+    .pro-benefit .bi {
+        font-size: 2.2rem;
+        display: block;
+        margin-bottom: 0.8rem;
+    }
+    .pro-benefit h4 {
+        margin: 0 0 0.3rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    .pro-benefit p {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    /* Табы */
+    .pro-tabs {
+        display: flex;
+        background: rgba(255,255,255,0.03);
+        border-radius: 100px;
+        padding: 4px;
+        border: 1px solid rgba(255,255,255,0.05);
+        animation: fadeUp 0.8s ease;
+        backdrop-filter: blur(20px);
+    }
+    .pro-tab {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all var(--transition);
+        background: transparent;
+        color: var(--text-secondary);
+    }
+    .pro-tab.active {
+        background: rgba(245,158,11,0.12);
+        color: var(--gold);
+        box-shadow: 0 4px 12px rgba(245,158,11,0.08);
+    }
+    .pro-tab:hover:not(.active) {
+        color: #fff;
+        background: rgba(255,255,255,0.04);
+    }
+
+    /* План */
+    .pro-plan {
+        background: var(--surface);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        text-align: center;
+        animation: fadeUp 0.9s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .pro-plan::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.025) 50%, transparent 60%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 8s infinite;
+        pointer-events: none;
+    }
+    .pro-plan > * { position: relative; z-index: 1; }
+    .pro-plan:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6);
+    }
+    .pro-plan.popular {
+        border-color: rgba(245,158,11,0.3);
+        box-shadow: 0 0 40px rgba(245,158,11,0.06);
+    }
+    .pro-plan.popular:hover {
+        border-color: rgba(245,158,11,0.5);
+        box-shadow: 0 0 50px rgba(245,158,11,0.12);
+    }
+    .pro-plan.popular::before {
+        content: 'ПОПУЛЯРНЫЙ';
+        position: absolute;
+        top: 34px; right: -34px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #0a0a1a;
+        padding: 0.3rem 2.5rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        transform: rotate(45deg);
+        z-index: 2;
+        letter-spacing: 0.06em;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .pro-plan .plan-name {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+    }
+    .pro-plan .plan-price {
+        font-size: 3.2rem;
+        font-weight: 900;
+        color: var(--gold);
+        line-height: 1;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .pro-plan .plan-period {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    .pro-plan .plan-old-price {
+        text-decoration: line-through;
+        color: var(--text-dim);
+        font-size: 1.3rem;
+        font-weight: 600;
+        opacity: 0.7;
+    }
+    .pro-plan .plan-save {
+        display: inline-block;
+        background: rgba(16,185,129,0.12);
+        border: 1px solid rgba(16,185,129,0.2);
+        color: #6ee7b7;
+        padding: 0.2rem 0.8rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .pro-plan .plan-desc {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin: 0.8rem 0 0;
+    }
+
+    .pro-btn {
+        width: 100%;
+        padding: 0.9rem 1.5rem;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        border: none;
+        transition: all var(--transition);
+        margin-top: 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+    }
+    .pro-btn-primary {
+        background: var(--accent);
+        color: #fff;
+    }
+    .pro-btn-primary:hover {
+        background: #7c3aed;
+        box-shadow: 0 12px 24px rgba(139,92,246,0.35);
+        transform: translateY(-2px);
+    }
+    .pro-btn-gold {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #0a0a1a;
+        font-weight: 800;
+    }
+    .pro-btn-gold:hover {
+        box-shadow: 0 12px 24px rgba(245,158,11,0.4);
+        transform: translateY(-2px);
+    }
+    .pro-btn-ghost {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: none;
+    }
+    .pro-btn-ghost:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.03);
+        transform: translateY(-2px);
+    }
+
+    /* Убираем стандартные стили кнопок в формах */
+    form { margin: 0; }
+</style>
+
+<section class="pro-page">
+    <a href="/profile" class="pro-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+    
+    <div class="pro-hero">
+        <span class="pro-hero-icon">👑</span>
+        <h1>XSoneBMP PRO</h1>
+        <p>Расширьте возможности и зарабатывайте больше</p>
+    </div>
+
+    {{if .IsPro}}
+    <div class="pro-active">
+        <h2><i class="fa-solid fa-crown"></i> PRO активен!</h2>
+        <p>Действует до {{.ProExpires.Format "02.01.2006"}}</p>
+    </div>
+    {{end}}
+
+    <div class="pro-benefits">
+        <div class="pro-benefit"><span class="bi">💰</span><h4>Комиссия 2%</h4><p>Вместо 5%</p></div>
+        <div class="pro-benefit"><span class="bi">🎨</span><h4>Кастомизация</h4><p>Свой стиль профиля</p></div>
+        <div class="pro-benefit"><span class="bi">📊</span><h4>Аналитика</h4><p>Расширенная статистика</p></div>
+        <div class="pro-benefit"><span class="bi">📌</span><h4>Приоритет</h4><p>Выше в поиске</p></div>
+        <div class="pro-benefit"><span class="bi">💬</span><h4>Шаблоны</h4><p>Автосообщения</p></div>
+        <div class="pro-benefit"><span class="bi">👑</span><h4>PRO бейдж</h4><p>Выделяйтесь</p></div>
+    </div>
+
+    <div class="pro-tabs" id="planTabs">
+        <button class="pro-tab active" onclick="switchPlan('trial', this)">🎁 Пробный</button>
+        <button class="pro-tab" onclick="switchPlan('month', this)">📅 Месяц</button>
+        <button class="pro-tab" onclick="switchPlan('year', this)">💎 Год</button>
+    </div>
+
+    <div id="planTrial" class="pro-plan">
+        <div class="plan-name">Пробный период</div>
+        <div class="plan-price">0 ₽</div>
+        <div class="plan-period">7 дней бесплатно</div>
+        <p class="plan-desc">Затем 100 ₽/мес. Отменить можно в любой момент.</p>
+        <form method="POST" action="/upgrade-pro">
+            <input type="hidden" name="duration" value="trial">
+            <button type="submit" class="pro-btn pro-btn-primary"><i class="fa-solid fa-gift"></i> Начать пробный период</button>
+        </form>
+    </div>
+
+    <div id="planMonth" class="pro-plan" style="display:none;">
+        <div class="plan-name">Ежемесячно</div>
+        <div class="plan-price">100 ₽</div>
+        <div class="plan-period">в месяц</div>
+        <form method="POST" action="/upgrade-pro">
+            <input type="hidden" name="duration" value="month">
+            <button type="submit" class="pro-btn pro-btn-primary"><i class="fa-solid fa-crown"></i> Купить за 100 ₽</button>
+        </form>
+    </div>
+
+    <div id="planYear" class="pro-plan popular" style="display:none;">
+        <div class="plan-name">Годовая подписка</div>
+        <div class="plan-price">
+            500 ₽
+            <span class="plan-old-price">1 200 ₽</span>
+            <span class="plan-save">-60%</span>
+        </div>
+        <div class="plan-period">~42 ₽/мес</div>
+        <p class="plan-desc">Экономия ~700 ₽ в год</p>
+        <form method="POST" action="/upgrade-pro">
+            <input type="hidden" name="duration" value="year">
+            <button type="submit" class="pro-btn pro-btn-gold"><i class="fa-solid fa-crown"></i> Купить со скидкой</button>
+        </form>
+    </div>
+</section>
+
+<script>
+function switchPlan(plan, btn) {
+    document.querySelectorAll('.pro-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('planTrial').style.display = plan === 'trial' ? 'block' : 'none';
+    document.getElementById('planMonth').style.display = plan === 'month' ? 'block' : 'none';
+    document.getElementById('planYear').style.display = plan === 'year' ? 'block' : 'none';
+}
+</script>
+{{end}}

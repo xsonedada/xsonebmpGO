@@ -1,0 +1,399 @@
+{{define "support-ticket"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --info: #60a5fa;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .ticket-page {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .ticket-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .ticket-back:hover { color: var(--accent-light); }
+
+    .ticket-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .ticket-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ticket-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ticket-card > * { position: relative; z-index: 1; }
+
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1.8rem;
+    }
+    .ticket-header-left { flex: 1; min-width: 0; }
+    .ticket-id {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.3rem;
+        letter-spacing: -0.03em;
+    }
+    .ticket-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+    }
+    .ticket-category {
+        padding: 0.25rem 0.75rem;
+        border-radius: 100px;
+        background: rgba(139,92,246,0.08);
+        border: 1px solid rgba(139,92,246,0.12);
+        color: var(--accent-light);
+        font-weight: 600;
+        font-size: 0.72rem;
+    }
+    .ticket-status {
+        padding: 0.45rem 1.2rem;
+        border-radius: 100px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        border: 1px solid;
+    }
+    .ticket-status.open {
+        background: rgba(245,158,11,0.08);
+        color: #fcd34d;
+        border-color: rgba(245,158,11,0.2);
+    }
+    .ticket-status.progress {
+        background: rgba(59,130,246,0.08);
+        color: #93c5fd;
+        border-color: rgba(59,130,246,0.2);
+    }
+    .ticket-status.closed {
+        background: rgba(16,185,129,0.08);
+        color: #6ee7b7;
+        border-color: rgba(16,185,129,0.2);
+    }
+
+    .ticket-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin: 0 0 1.5rem;
+    }
+
+    .ticket-close-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.55rem 1.3rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.2);
+        color: #f87171;
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 600;
+        transition: all var(--transition);
+    }
+    .ticket-close-btn:hover {
+        background: rgba(239,68,68,0.15);
+        border-color: rgba(239,68,68,0.35);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(239,68,68,0.15);
+    }
+
+    /* Чат */
+    .ticket-chat-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease 0.1s both;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .ticket-chat-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ticket-chat-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ticket-chat-card > * { position: relative; z-index: 1; }
+
+    .ticket-chat-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .ticket-chat-messages {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        padding-right: 0.5rem;
+    }
+    .ticket-msg {
+        padding: 1rem 1.3rem;
+        border-radius: 1.3rem;
+        max-width: 80%;
+        border: 1px solid;
+    }
+    .ticket-msg.admin {
+        background: rgba(59,130,246,0.08);
+        border-color: rgba(59,130,246,0.15);
+        align-self: flex-start;
+        border-bottom-left-radius: 0.3rem;
+    }
+    .ticket-msg.user {
+        background: rgba(139,92,246,0.1);
+        border-color: rgba(139,92,246,0.15);
+        align-self: flex-end;
+        border-bottom-right-radius: 0.3rem;
+    }
+    .ticket-msg-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
+    }
+    .ticket-msg-name {
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #fff;
+    }
+    .ticket-msg-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.55rem;
+        border-radius: 100px;
+        background: rgba(245,158,11,0.15);
+        border: 1px solid rgba(245,158,11,0.2);
+        color: #fcd34d;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .ticket-msg-text {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.75);
+        margin: 0;
+        line-height: 1.55;
+        word-break: break-word;
+    }
+    .ticket-msg-time {
+        font-size: 0.68rem;
+        color: var(--text-dim);
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .ticket-chat-form {
+        display: flex;
+        gap: 0.6rem;
+    }
+    .ticket-chat-input {
+        flex: 1;
+        padding: 0.85rem 1.3rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all var(--transition);
+    }
+    .ticket-chat-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.08);
+        background: rgba(139,92,246,0.04);
+    }
+    .ticket-chat-input::placeholder { color: var(--text-dim); }
+    .ticket-chat-submit {
+        padding: 0.85rem 1.6rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+        box-shadow: 0 6px 16px rgba(139,92,246,0.25);
+    }
+    .ticket-chat-submit:hover {
+        background: #7c3aed;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(139,92,246,0.4);
+    }
+
+    @media (max-width: 600px) {
+        .ticket-msg { max-width: 90%; }
+    }
+</style>
+
+<section class="ticket-page">
+    <a href="/support" class="ticket-back"><i class="fa-solid fa-arrow-left"></i> Назад к тикетам</a>
+
+    <div class="ticket-card">
+        <div class="ticket-header">
+            <div class="ticket-header-left">
+                <h1 class="ticket-id">#{{.Data.Ticket.ID}} — {{.Data.Ticket.Subject}}</h1>
+                <div class="ticket-meta">
+                    <span class="ticket-category">{{.Data.Ticket.Category}}</span>
+                    <span><i class="fa-regular fa-clock"></i> {{.Data.Ticket.CreatedAt.Format "02.01.2006 15:04"}}</span>
+                </div>
+            </div>
+            <span class="ticket-status 
+                {{if eq .Data.Ticket.Status "open"}}open
+                {{else if eq .Data.Ticket.Status "in_progress"}}progress
+                {{else}}closed{{end}}">
+                {{if eq .Data.Ticket.Status "open"}}<i class="fa-solid fa-circle" style="font-size:0.35rem;"></i> Открыт
+                {{else if eq .Data.Ticket.Status "in_progress"}}<i class="fa-solid fa-spinner"></i> В работе
+                {{else}}<i class="fa-solid fa-circle-check"></i> Закрыт{{end}}
+            </span>
+        </div>
+        <p class="ticket-desc">{{.Data.Ticket.Description}}</p>
+
+        {{if ne .Data.Ticket.Status "closed"}}
+        <a href="/support/ticket/{{.Data.Ticket.ID}}/close" class="ticket-close-btn" onclick="return confirm('Закрыть тикет?')">
+            <i class="fa-solid fa-xmark"></i> Закрыть тикет
+        </a>
+        {{end}}
+    </div>
+
+    <div class="ticket-chat-card">
+        <h3 class="ticket-chat-title"><i class="fa-solid fa-comments" style="color:#a78bfa;"></i> Обсуждение</h3>
+        <div class="ticket-chat-messages">
+            {{range .Data.Messages}}
+            <div class="ticket-msg {{if .IsAdmin}}admin{{else}}user{{end}}">
+                <div class="ticket-msg-header">
+                    <span class="ticket-msg-name">{{.Username}}</span>
+                    {{if .IsAdmin}}<span class="ticket-msg-badge"><i class="fa-solid fa-shield-halved"></i> Админ</span>{{end}}
+                </div>
+                <p class="ticket-msg-text">{{.Message}}</p>
+                <span class="ticket-msg-time">{{.CreatedAt.Format "15:04 02.01"}}</span>
+            </div>
+            {{end}}
+        </div>
+        {{if ne .Data.Ticket.Status "closed"}}
+        <form method="POST" action="/support/ticket/{{.Data.Ticket.ID}}/message" class="ticket-chat-form">
+            <input type="text" name="message" placeholder="Введите сообщение..." required class="ticket-chat-input" autocomplete="off">
+            <button type="submit" class="ticket-chat-submit"><i class="fa-solid fa-paper-plane"></i> Отправить</button>
+        </form>
+        {{end}}
+    </div>
+</section>
+{{end}}

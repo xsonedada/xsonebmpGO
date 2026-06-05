@@ -1,0 +1,557 @@
+{{define "dispute-detail"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .dispute-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .dispute-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .dispute-back:hover { color: #f87171; }
+
+    .dispute-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .dispute-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .dispute-card > * { position: relative; z-index: 1; }
+
+    .dispute-hero {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    .dispute-hero-icon {
+        width: 56px; height: 56px;
+        border-radius: 16px;
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .dispute-hero-icon i {
+        color: #f87171;
+        font-size: 1.4rem;
+    }
+    .dispute-hero h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+    }
+    .dispute-hero p {
+        color: rgba(255,255,255,0.35);
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    .dispute-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .dispute-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        font-size: 0.9rem;
+    }
+    .dispute-row:last-child { border-bottom: none; }
+    .dispute-row .lbl {
+        color: rgba(255,255,255,0.4);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .dispute-row .val {
+        font-weight: 600;
+        color: #fff;
+    }
+    .dispute-row .val.reason {
+        color: #fca5a5;
+    }
+    .dispute-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+    .dispute-status-badge.open {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+    .dispute-status-badge.resolved {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+
+    .dispute-decision {
+        padding: 1.3rem 1.5rem;
+        border-radius: 1.5rem;
+        background: rgba(245,158,11,0.06);
+        border: 1px solid rgba(245,158,11,0.12);
+        border-left: 3px solid #fbbf24;
+        margin-top: 1rem;
+    }
+    .dispute-decision-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #fbbf24;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .dispute-decision p {
+        color: rgba(255,255,255,0.7);
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    .dispute-admin-form {
+        padding: 2rem;
+        border-radius: 2rem;
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(245,158,11,0.15);
+        animation: fadeUp 0.5s ease;
+    }
+    .dispute-admin-form h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fbbf24;
+        margin: 0 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .dispute-admin-form label {
+        display: block;
+        margin-bottom: 0.4rem;
+        color: rgba(255,255,255,0.5);
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .dispute-admin-form select,
+    .dispute-admin-form textarea {
+        width: 100%;
+        padding: 0.85rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.25s;
+        margin-bottom: 1.2rem;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    .dispute-admin-form select:focus,
+    .dispute-admin-form textarea:focus {
+        border-color: rgba(245,158,11,0.5);
+        box-shadow: 0 0 0 3px rgba(245,158,11,0.06);
+    }
+    .dispute-admin-form textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    .dispute-admin-form select option {
+        background: #1a1a3e;
+        color: #fff;
+    }
+    .dispute-admin-btn {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #000;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .dispute-admin-btn:hover {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(245,158,11,0.3);
+    }
+
+    .dispute-chat-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease 0.1s both;
+    }
+    .dispute-chat-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .dispute-chat-card > * { position: relative; z-index: 1; }
+    .dispute-chat-card h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 0 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Баннер статуса админа */
+    .dispute-admin-banner {
+        padding: 1rem 1.3rem;
+        border-radius: 1.2rem;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .dispute-admin-banner.reviewing {
+        background: rgba(245,158,11,0.06);
+        border: 1px solid rgba(245,158,11,0.1);
+    }
+    .dispute-admin-banner.resolved-banner {
+        background: rgba(16,185,129,0.06);
+        border: 1px solid rgba(16,185,129,0.1);
+    }
+    .dispute-admin-banner-icon {
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .dispute-admin-banner.reviewing .dispute-admin-banner-icon {
+        background: rgba(245,158,11,0.15);
+    }
+    .dispute-admin-banner.resolved-banner .dispute-admin-banner-icon {
+        background: rgba(16,185,129,0.15);
+    }
+    .dispute-admin-banner.reviewing .dispute-admin-banner-icon i { color: #fbbf24; }
+    .dispute-admin-banner.resolved-banner .dispute-admin-banner-icon i { color: #10b981; }
+    
+    .dispute-admin-banner strong {
+        font-size: 0.85rem;
+    }
+    .dispute-admin-banner.reviewing strong { color: #fbbf24; }
+    .dispute-admin-banner.resolved-banner strong { color: #10b981; }
+    
+    .dispute-admin-banner p {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.78rem;
+        margin: 0.2rem 0 0;
+    }
+
+    .dispute-messages {
+        max-height: 380px;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        padding-right: 0.3rem;
+    }
+    .dispute-msg {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1.2rem;
+        max-width: 80%;
+    }
+    .dispute-msg.admin {
+        background: rgba(245,158,11,0.1);
+        border: 1px solid rgba(245,158,11,0.15);
+        align-self: flex-start;
+        border-bottom-left-radius: 0.3rem;
+    }
+    .dispute-msg.mine {
+        background: rgba(139,92,246,0.15);
+        border: 1px solid rgba(139,92,246,0.1);
+        align-self: flex-end;
+        border-bottom-right-radius: 0.3rem;
+    }
+    .dispute-msg.other {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.03);
+        align-self: flex-start;
+        border-bottom-left-radius: 0.3rem;
+    }
+    .dispute-msg-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.3rem;
+    }
+    .dispute-msg-name {
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #fff;
+    }
+    .dispute-msg-tag {
+        padding: 0.1rem 0.5rem;
+        border-radius: 100px;
+        background: #fbbf24;
+        color: #000;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+    .dispute-msg-text {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.7);
+        margin: 0;
+        line-height: 1.5;
+    }
+    .dispute-msg-time {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.25);
+        display: block;
+        margin-top: 0.3rem;
+    }
+
+    .dispute-chat-form {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .dispute-chat-input {
+        flex: 1;
+        padding: 0.8rem 1.2rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.25s;
+    }
+    .dispute-chat-input:focus { border-color: rgba(139,92,246,0.4); }
+    .dispute-chat-input::placeholder { color: rgba(255,255,255,0.2); }
+    .dispute-chat-submit {
+        padding: 0.8rem 1.5rem;
+        border-radius: 100px;
+        background: #8b5cf6;
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+    }
+    .dispute-chat-submit:hover { background: #7c3aed; }
+
+    .dispute-closed {
+        text-align: center;
+        padding: 1rem;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.85rem;
+    }
+</style>
+
+<section class="dispute-page">
+    <a href="/profile" class="dispute-back"><i class="fa-solid fa-arrow-left"></i> Назад</a>
+    
+    <div class="dispute-card">
+        <div class="dispute-hero">
+            <div class="dispute-hero-icon">
+                <i class="fa-solid fa-flag"></i>
+            </div>
+            <div>
+                <h1>Спор #{{.Data.Dispute.ID}}</h1>
+                <p>Заказ #{{.Data.Order.ID}} • {{.Data.Order.Title}}</p>
+            </div>
+        </div>
+
+        <div class="dispute-details">
+            <div class="dispute-row">
+                <span class="lbl"><i class="fa-solid fa-user"></i> Продавец</span>
+                <span class="val">{{.Data.Order.Booster}}</span>
+            </div>
+            <div class="dispute-row">
+                <span class="lbl"><i class="fa-solid fa-ruble-sign"></i> Сумма</span>
+                <span class="val">{{printf "%.0f" .Data.Order.Total}} ₽</span>
+            </div>
+            <div class="dispute-row">
+                <span class="lbl"><i class="fa-solid fa-circle-exclamation"></i> Причина</span>
+                <span class="val reason">{{.Data.Dispute.Reason}}</span>
+            </div>
+            <div class="dispute-row">
+                <span class="lbl"><i class="fa-solid fa-circle"></i> Статус</span>
+                <span class="dispute-status-badge {{if eq .Data.Dispute.Status "open"}}open{{else}}resolved{{end}}">
+                    {{if eq .Data.Dispute.Status "open"}}<i class="fa-solid fa-circle"></i> Открыт
+                    {{else}}<i class="fa-solid fa-circle-check"></i> Решён{{end}}
+                </span>
+            </div>
+        </div>
+
+        {{if .Data.Dispute.AdminDecision}}
+        <div class="dispute-decision">
+            <div class="dispute-decision-header">
+                <i class="fa-solid fa-gavel"></i> Решение администратора
+            </div>
+            <p>{{.Data.Dispute.AdminDecision}}</p>
+        </div>
+        {{end}}
+    </div>
+
+    {{if .Data.IsAdmin}}
+    {{if eq .Data.Dispute.Status "open"}}
+    <div class="dispute-admin-form">
+        <h3><i class="fa-solid fa-gavel"></i> Решение администратора</h3>
+        <form method="POST" action="/dispute/{{.Data.Dispute.ID}}/resolve">
+            <label>Выберите решение</label>
+            <select name="decision" required>
+                <option value="">-- Выберите --</option>
+                <option value="refund">💰 Возврат денег покупателю</option>
+                <option value="complete">✅ Заказ выполнен (в пользу продавца)</option>
+            </select>
+            <label>Комментарий к решению</label>
+            <textarea name="comment" rows="4" placeholder="Опишите причину решения..."></textarea>
+            <button type="submit" class="dispute-admin-btn">
+                <i class="fa-solid fa-check"></i> Вынести решение
+            </button>
+        </form>
+    </div>
+    {{end}}
+    {{end}}
+
+    <div class="dispute-chat-card">
+        <h3><i class="fa-solid fa-comments" style="color:#a78bfa;"></i> Обсуждение спора</h3>
+
+        {{$adminHere := false}}
+        {{range .Data.Messages}}{{if .IsAdmin}}{{$adminHere = true}}{{end}}{{end}}
+        
+        {{if $adminHere}}
+            {{if eq .Data.Dispute.Status "open"}}
+            <!-- Админ в чате, спор ещё открыт -->
+            <div class="dispute-admin-banner reviewing">
+                <div class="dispute-admin-banner-icon"><i class="fa-solid fa-crown"></i></div>
+                <div>
+                    <strong>Администратор рассматривает спор</strong>
+                    <p>Ожидайте решения</p>
+                </div>
+            </div>
+            {{else}}
+            <!-- Админ в чате, спор решён -->
+            <div class="dispute-admin-banner resolved-banner">
+                <div class="dispute-admin-banner-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <strong>Администратор вынес решение</strong>
+                    <p>Спор завершён</p>
+                </div>
+            </div>
+            {{end}}
+        {{end}}
+
+        <div class="dispute-messages">
+            {{range .Data.Messages}}
+            <div class="dispute-msg 
+                {{if .IsAdmin}}admin
+                {{else if eq .UserID $.Data.Dispute.UserID}}mine
+                {{else}}other{{end}}">
+                <div class="dispute-msg-header">
+                    <span class="dispute-msg-name">{{.Username}}</span>
+                    {{if .IsAdmin}}<span class="dispute-msg-tag">👑 АДМИН</span>{{end}}
+                </div>
+                <p class="dispute-msg-text">{{.Message}}</p>
+                <span class="dispute-msg-time">{{.CreatedAt.Format "15:04 02.01"}}</span>
+            </div>
+            {{else}}
+            <p style="text-align:center; color:rgba(255,255,255,0.3); padding:2rem;">Нет сообщений</p>
+            {{end}}
+        </div>
+
+        {{if eq .Data.Dispute.Status "open"}}
+        <form method="POST" action="/dispute/{{.Data.Dispute.ID}}/message" class="dispute-chat-form">
+            <input type="text" name="message" placeholder="Введите сообщение..." required autocomplete="off" class="dispute-chat-input">
+            <button type="submit" class="dispute-chat-submit"><i class="fa-solid fa-paper-plane"></i> Отправить</button>
+        </form>
+        {{else}}
+        <div class="dispute-closed"><i class="fa-solid fa-lock"></i> Спор закрыт</div>
+        {{end}}
+    </div>
+</section>
+
+<script>
+var lastCount = {{len .Data.Messages}};
+var disputeID = {{.Data.Dispute.ID}};
+var currentUID = {{.User.ID}};
+
+setInterval(async function() {
+    try {
+        var res = await fetch('/api/dispute/' + disputeID + '/messages');
+        var msgs = await res.json();
+        if (msgs && msgs.length > lastCount) {
+            location.reload();
+        }
+    } catch(e) {}
+}, 5000);
+</script>
+{{end}}

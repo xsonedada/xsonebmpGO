@@ -1,0 +1,342 @@
+{{define "admin-charts"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .charts-page {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .charts-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .charts-back:hover { color: #f87171; }
+
+    .charts-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .charts-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .charts-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+
+    /* Статистика */
+    .chart-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+    @media (max-width: 768px) {
+        .chart-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    .chart-stat {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2rem;
+        padding: 1.6rem 1.2rem;
+        text-align: center;
+        transition: all 0.35s;
+        animation: fadeUp 0.5s ease both;
+        position: relative;
+        overflow: hidden;
+    }
+    .chart-stat::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.015), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .chart-stat > * { position: relative; z-index: 1; }
+    .chart-stat:hover {
+        border-color: rgba(239,68,68,0.2);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+    }
+    .chart-stat-icon {
+        width: 42px; height: 42px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.8rem;
+        font-size: 1rem;
+    }
+    .chart-stat-val {
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+    .chart-stat-lbl {
+        color: rgba(255,255,255,0.28);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+        margin-top: 0.2rem;
+    }
+
+    /* Графики */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+    @media (max-width: 900px) {
+        .charts-grid { grid-template-columns: 1fr; }
+    }
+    .chart-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2rem;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .chart-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .chart-card > * { position: relative; z-index: 1; }
+    .chart-card h3 {
+        margin: 0 0 1.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .chart-card canvas {
+        max-height: 220px;
+    }
+
+    /* Таблица */
+    .data-table-wrap {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2rem;
+        padding: 2rem;
+        overflow-x: auto;
+        animation: fadeUp 0.5s ease;
+    }
+    .data-table-wrap h3 {
+        margin: 0 0 1.2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-table th {
+        padding: 0.8rem 1rem;
+        text-align: left;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .data-table td {
+        padding: 0.8rem 1rem;
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.6);
+        border-bottom: 1px solid rgba(255,255,255,0.025);
+    }
+    .data-table tr:hover td {
+        background: rgba(239,68,68,0.03);
+    }
+    .data-table .revenue {
+        color: #10b981;
+        font-weight: 700;
+    }
+
+    .charts-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        border-radius: 2rem;
+        background: rgba(14,14,38,0.7);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255,255,255,0.04);
+        color: rgba(255,255,255,0.25);
+    }
+    .charts-empty i {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.8rem;
+    }
+</style>
+
+<section class="charts-page">
+    <a href="/admin" class="charts-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="charts-header">
+        <h1><i class="fa-solid fa-chart-line"></i> Графики и статистика</h1>
+    </div>
+
+    <div class="chart-stats">
+        <div class="chart-stat">
+            <div class="chart-stat-icon" style="background:rgba(139,92,246,0.1);"><i class="fa-solid fa-users" style="color:#a78bfa;"></i></div>
+            <div class="chart-stat-val" style="color:#a78bfa;">{{.Data.UsersCount}}</div>
+            <div class="chart-stat-lbl">Пользователей</div>
+        </div>
+        <div class="chart-stat">
+            <div class="chart-stat-icon" style="background:rgba(16,185,129,0.1);"><i class="fa-solid fa-boxes-stacked" style="color:#10b981;"></i></div>
+            <div class="chart-stat-val" style="color:#10b981;">{{.Data.OrdersCount}}</div>
+            <div class="chart-stat-lbl">Заказов</div>
+        </div>
+        <div class="chart-stat">
+            <div class="chart-stat-icon" style="background:rgba(245,158,11,0.1);"><i class="fa-solid fa-ruble-sign" style="color:#fbbf24;"></i></div>
+            <div class="chart-stat-val" style="color:#fbbf24;">{{printf "%.0f" .Data.TotalEarnings}} ₽</div>
+            <div class="chart-stat-lbl">Доход</div>
+        </div>
+        <div class="chart-stat">
+            <div class="chart-stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fa-solid fa-tags" style="color:#60a5fa;"></i></div>
+            <div class="chart-stat-val" style="color:#60a5fa;">{{.Data.BoostsCount}}</div>
+            <div class="chart-stat-lbl">Товаров</div>
+        </div>
+    </div>
+
+    {{if .Data.ChartData}}
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3><i class="fa-solid fa-calendar-days" style="color:#a78bfa;"></i> Заказы по дням</h3>
+            <canvas id="ordersChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fa-solid fa-ruble-sign" style="color:#10b981;"></i> Доход по дням</h3>
+            <canvas id="revenueChart" height="200"></canvas>
+        </div>
+    </div>
+    {{else}}
+    <div class="charts-empty">
+        <i class="fa-solid fa-chart-bar"></i>
+        <p>Нет данных для графиков</p>
+    </div>
+    {{end}}
+
+    {{if .Data.ChartData}}
+    <div class="data-table-wrap">
+        <h3><i class="fa-solid fa-table" style="color:#a78bfa;"></i> Данные по дням</h3>
+        <table class="data-table">
+            <thead>
+                <tr><th>Дата</th><th>Заказов</th><th>Доход</th></tr>
+            </thead>
+            <tbody>
+                {{range .Data.ChartData}}
+                <tr>
+                    <td>{{.Date}}</td>
+                    <td>{{.Count}}</td>
+                    <td class="revenue">{{printf "%.0f" .Total}} ₽</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    {{end}}
+</section>
+
+{{if .Data.ChartData}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('ordersChart'),{
+    type:'bar',
+    data:{
+        labels:[{{range .Data.ChartData}}"{{.Date}}",{{end}}],
+        datasets:[{
+            data:[{{range .Data.ChartData}}{{.Count}},{{end}}],
+            backgroundColor:'rgba(139,92,246,0.7)',
+            borderColor:'#8b5cf6',
+            borderWidth:1,
+            borderRadius:6
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+            x:{ticks:{color:'rgba(255,255,255,0.3)',font:{size:11}},grid:{display:false}},
+            y:{ticks:{color:'rgba(255,255,255,0.3)',font:{size:11},stepSize:1},grid:{color:'rgba(255,255,255,0.04)'}}
+        }
+    }
+});
+
+new Chart(document.getElementById('revenueChart'),{
+    type:'line',
+    data:{
+        labels:[{{range .Data.ChartData}}"{{.Date}}",{{end}}],
+        datasets:[{
+            data:[{{range .Data.ChartData}}{{printf "%.0f" .Total}},{{end}}],
+            borderColor:'#10b981',
+            backgroundColor:'rgba(16,185,129,0.08)',
+            fill:true,
+            tension:0.4,
+            pointRadius:4,
+            pointBackgroundColor:'#10b981',
+            pointBorderColor:'#fff',
+            pointBorderWidth:2,
+            borderWidth:2
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+            x:{ticks:{color:'rgba(255,255,255,0.3)',font:{size:11}},grid:{display:false}},
+            y:{ticks:{color:'rgba(255,255,255,0.3)',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}}
+        }
+    }
+});
+</script>
+{{end}}
+{{end}}

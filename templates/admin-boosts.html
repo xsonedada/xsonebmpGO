@@ -1,0 +1,289 @@
+{{define "admin-boosts"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .boosts-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .boosts-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .boosts-back:hover { color: #f87171; }
+
+    .boosts-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .boosts-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .boosts-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+
+    .boosts-header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .boosts-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .boosts-search {
+        position: relative;
+    }
+    .boosts-search input {
+        padding: 0.6rem 1rem 0.6rem 2.5rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.85rem;
+        outline: none;
+        width: 260px;
+        transition: all 0.25s;
+    }
+    .boosts-search input:focus {
+        border-color: rgba(239,68,68,0.4);
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+    }
+    .boosts-search input::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+    .boosts-search i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.25);
+        font-size: 0.8rem;
+    }
+
+    .boosts-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .boost-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.3rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .boost-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .boost-card > * { position: relative; z-index: 1; }
+    .boost-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+    }
+
+    .boost-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+    @media (max-width: 700px) {
+        .boost-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    .boost-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 200px;
+    }
+    .boost-id {
+        font-weight: 800;
+        color: #f87171;
+        font-size: 0.88rem;
+        white-space: nowrap;
+    }
+    .boost-title {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.92rem;
+    }
+    .boost-game {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.3);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .boost-right {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    .boost-owner {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .boost-price {
+        font-weight: 800;
+        font-size: 1rem;
+        color: #fff;
+    }
+    .boost-rating {
+        color: #fbbf24;
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+    .boost-reviews {
+        color: rgba(255,255,255,0.3);
+        font-size: 0.72rem;
+    }
+
+    .boost-delete {
+        padding: 0.45rem 0.8rem;
+        border-radius: 0.8rem;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        text-decoration: none;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+    .boost-delete:hover {
+        background: rgba(239,68,68,0.18);
+        border-color: rgba(239,68,68,0.3);
+    }
+
+    .boosts-no-results {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255,255,255,0.25);
+        font-size: 0.9rem;
+    }
+</style>
+
+<section class="boosts-page">
+    <a href="/admin" class="boosts-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="boosts-header">
+        <h1><i class="fa-solid fa-tags"></i> Товары</h1>
+        <div class="boosts-header-right">
+            <span class="boosts-count" id="boostsCount">{{len .Data.Boosts}} товаров</span>
+            <div class="boosts-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="boostSearch" placeholder="Поиск по названию, игре, продавцу..." oninput="filterBoosts()">
+            </div>
+        </div>
+    </div>
+
+    <div class="boosts-grid" id="boostsList">
+        {{range .Data.Boosts}}
+        <div class="boost-card" data-title="{{.Title}}" data-game="{{.Game}}" data-owner="{{.Owner}}">
+            <div class="boost-inner">
+                <div class="boost-left">
+                    <span class="boost-id">#{{.ID}}</span>
+                    <div>
+                        <div class="boost-title">{{.Title}}</div>
+                        <div class="boost-game"><i class="fa-solid fa-gamepad"></i> {{.Game}}</div>
+                    </div>
+                </div>
+                <div class="boost-right">
+                    <span class="boost-owner"><i class="fa-solid fa-user"></i> {{.Owner}}</span>
+                    <span class="boost-price">{{printf "%.0f" .Price}} ₽</span>
+                    <span class="boost-rating"><i class="fa-solid fa-star"></i> {{printf "%.1f" .Rating}}</span>
+                    <span class="boost-reviews">({{.Reviews}} отзывов)</span>
+                    <a href="/admin/boost/{{.ID}}/delete" class="boost-delete" onclick="return confirm('Удалить товар?')">
+                        <i class="fa-solid fa-trash-can"></i> Удалить
+                    </a>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+
+<script>
+function filterBoosts() {
+    var query = document.getElementById('boostSearch').value.toLowerCase();
+    var cards = document.querySelectorAll('#boostsList .boost-card');
+    var visibleCount = 0;
+    
+    cards.forEach(function(card) {
+        var title = card.dataset.title.toLowerCase();
+        var game = card.dataset.game.toLowerCase();
+        var owner = card.dataset.owner.toLowerCase();
+        
+        if (title.includes(query) || game.includes(query) || owner.includes(query)) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('boostsCount').textContent = visibleCount + ' товаров';
+}
+</script>
+{{end}}

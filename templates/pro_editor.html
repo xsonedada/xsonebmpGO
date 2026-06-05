@@ -1,0 +1,403 @@
+{{define "pro_editor"}}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PRO настройки профиля</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            padding: 2rem;
+        }
+        .editor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .editor-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #8b5cf6, #c084fc);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 100px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .save-btn:hover { transform: scale(1.02); }
+        
+        .editor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        .editor-card {
+            background: rgba(14,14,35,0.9);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+        .editor-card h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .editor-card label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-top: 1rem;
+            margin-bottom: 0.3rem;
+        }
+        .editor-card input, .editor-card select, .editor-card textarea {
+            width: 100%;
+            padding: 0.7rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.8rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        .badge-item, .social-item, .portfolio-item {
+            background: rgba(255,255,255,0.05);
+            padding: 0.8rem;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .add-btn {
+            background: rgba(139,92,246,0.2);
+            border: 1px dashed rgba(139,92,246,0.5);
+            padding: 0.5rem;
+            border-radius: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .remove-btn {
+            background: rgba(239,68,68,0.2);
+            border: none;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            color: #ef4444;
+            cursor: pointer;
+            float: right;
+        }
+        .preview-box {
+            background: rgba(14,14,35,0.9);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(139,92,246,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="editor-header">
+            <h1 class="editor-title"><i class="fa-solid fa-crown"></i> PRO настройки профиля</h1>
+            <button class="save-btn" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+        </div>
+        
+        <form id="proForm">
+            <div class="editor-grid">
+                
+                <!-- Внешний вид -->
+                <div class="editor-card">
+                    <h3><i class="fa-solid fa-palette"></i> Внешний вид</h3>
+                    
+                    <label>Тема</label>
+                    <select name="theme">
+                        <option value="dark">🌙 Тёмная</option>
+                        <option value="light">☀️ Светлая</option>
+                        <option value="midnight">🌌 Полуночная</option>
+                        <option value="sunset">🌅 Закатная</option>
+                        <option value="system">🖥️ Системная</option>
+                    </select>
+                    
+                    <label>Акцентный цвет</label>
+                    <input type="color" name="accent_color" value="#8b5cf6">
+                    
+                    <label>Скругление карточек</label>
+                    <select name="card_radius">
+                        <option value="2.5rem">Большое (2.5rem)</option>
+                        <option value="1.5rem">Среднее (1.5rem)</option>
+                        <option value="0.8rem">Маленькое (0.8rem)</option>
+                        <option value="0">Прямые углы</option>
+                    </select>
+                    
+                    <label>Уровень анимации</label>
+                    <select name="animation_level">
+                        <option value="full">🎬 Полная</option>
+                        <option value="minimal">✨ Минимальная</option>
+                        <option value="none">⏸️ Без анимации</option>
+                    </select>
+                    
+                    <label>URL аватара</label>
+                    <input type="text" name="avatar_url" placeholder="https://example.com/avatar.jpg">
+                    
+                    <label>Фоновое изображение</label>
+                    <input type="text" name="background_image" placeholder="https://example.com/bg.jpg">
+                    
+                    <label>Фоновый градиент</label>
+                    <input type="text" name="background_gradient" placeholder="linear-gradient(135deg, #1a0b2e, #2d1b4e)">
+                </div>
+                
+                <!-- Контент -->
+                <div class="editor-card">
+                    <h3><i class="fa-solid fa-star"></i> Бейджи</h3>
+                    <div id="badgesList"></div>
+                    <div class="add-btn" onclick="addBadge()">+ Добавить бейдж</div>
+                    
+                    <h3 style="margin-top: 1.5rem;"><i class="fa-solid fa-images"></i> Портфолио</h3>
+                    <div id="portfolioList"></div>
+                    <div class="add-btn" onclick="addPortfolio()">+ Добавить работу</div>
+                    
+                    <h3 style="margin-top: 1.5rem;"><i class="fa-solid fa-link"></i> Соцсети</h3>
+                    <div id="socialList"></div>
+                    <div class="add-btn" onclick="addSocial()">+ Добавить соцсеть</div>
+                </div>
+                
+                <!-- Текст и настройки -->
+                <div class="editor-card">
+                    <h3><i class="fa-solid fa-message"></i> Текст</h3>
+                    
+                    <label>Бегущая строка</label>
+                    <input type="text" name="marque_text" placeholder="🔥 Скидка 20% на все услуги! 🔥">
+                    
+                    <label>Приветственное сообщение</label>
+                    <textarea name="welcome_message" rows="2" placeholder="Добро пожаловать в мой магазин!"></textarea>
+                    
+                    <label>Голосовое приветствие (ссылка на аудио)</label>
+                    <input type="text" name="voice_greeting" placeholder="https://example.com/greeting.mp3">
+                    
+                    <label>Кастомный футер (HTML)</label>
+                    <textarea name="custom_footer" rows="3" placeholder="💜 Спасибо за доверие!"></textarea>
+                    
+                    <h3 style="margin-top: 1rem;"><i class="fa-solid fa-code"></i> Продвинутые настройки</h3>
+                    
+                    <label>Какую статистику подсветить</label>
+                    <select name="accent_stat">
+                        <option value="sales">Продажи</option>
+                        <option value="rating">Рейтинг</option>
+                        <option value="reviews">Отзывы</option>
+                        <option value="boosts">Товары</option>
+                    </select>
+                    
+                    <label>Скрыть блоки статистики</label>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <label><input type="checkbox" name="hide_sales"> Продажи</label>
+                        <label><input type="checkbox" name="hide_rating"> Рейтинг</label>
+                        <label><input type="checkbox" name="hide_reviews_stat"> Отзывы</label>
+                        <label><input type="checkbox" name="hide_boosts"> Товары</label>
+                    </div>
+                    
+                    <label><input type="checkbox" name="hide_reviews"> Скрыть все отзывы</label>
+                    
+                    <label>Кастомный CSS</label>
+                    <textarea name="custom_css" rows="4" placeholder=".s-stat { background: red; }"></textarea>
+                    
+                    <label>Кастомный JS</label>
+                    <textarea name="custom_js" rows="4" placeholder="console.log('PRO custom JS');"></textarea>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Превью -->
+        <div class="preview-box">
+            <h3><i class="fa-solid fa-eye"></i> Превью (Shift + клик по товару для быстрого просмотра)</h3>
+            <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem;">Сохраните настройки, чтобы увидеть изменения</p>
+        </div>
+    </div>
+    
+    <script>
+        let badges = [];
+        let portfolio = [];
+        let social = [];
+        
+        // Загрузка сохранённых настроек
+        async function loadSettings() {
+            const res = await fetch('/api/pro-settings');
+            const data = await res.json();
+            if(data) {
+                document.querySelector('[name="theme"]').value = data.theme || 'dark';
+                document.querySelector('[name="accent_color"]').value = data.accent_color || '#8b5cf6';
+                document.querySelector('[name="card_radius"]').value = data.card_radius || '2.5rem';
+                document.querySelector('[name="animation_level"]').value = data.animation_level || 'full';
+                document.querySelector('[name="avatar_url"]').value = data.avatar_url || '';
+                document.querySelector('[name="background_image"]').value = data.background_image || '';
+                document.querySelector('[name="background_gradient"]').value = data.background_gradient || '';
+                document.querySelector('[name="marque_text"]').value = data.marque_text || '';
+                document.querySelector('[name="welcome_message"]').value = data.welcome_message || '';
+                document.querySelector('[name="voice_greeting"]').value = data.voice_greeting || '';
+                document.querySelector('[name="custom_footer"]').value = data.custom_footer || '';
+                document.querySelector('[name="accent_stat"]').value = data.accent_stat || 'sales';
+                document.querySelector('[name="custom_css"]').value = data.custom_css || '';
+                document.querySelector('[name="custom_js"]').value = data.custom_js || '';
+                
+                if(data.hide_stats) {
+                    document.querySelector('[name="hide_sales"]').checked = data.hide_stats.includes('sales');
+                    document.querySelector('[name="hide_rating"]').checked = data.hide_stats.includes('rating');
+                    document.querySelector('[name="hide_reviews_stat"]').checked = data.hide_stats.includes('reviews');
+                    document.querySelector('[name="hide_boosts"]').checked = data.hide_stats.includes('boosts');
+                }
+                document.querySelector('[name="hide_reviews"]').checked = data.hide_reviews || false;
+                
+                badges = data.custom_badges || [];
+                portfolio = data.portfolio || [];
+                social = data.social_links || [];
+                
+                renderBadges();
+                renderPortfolio();
+                renderSocial();
+            }
+        }
+        
+        function renderBadges() {
+            const container = document.getElementById('badgesList');
+            container.innerHTML = badges.map((b, i) => `
+                <div class="badge-item">
+                    <button class="remove-btn" onclick="removeBadge(${i})">✖</button>
+                    <input type="text" placeholder="Эмодзи" value="${b.emoji}" onchange="badges[${i}].emoji = this.value" style="width: 60px;">
+                    <input type="text" placeholder="Текст" value="${b.text}" onchange="badges[${i}].text = this.value">
+                    <input type="color" value="${b.color}" onchange="badges[${i}].color = this.value" style="width: 50px;">
+                    <input type="text" placeholder="Подсказка" value="${b.tooltip || ''}" onchange="badges[${i}].tooltip = this.value">
+                </div>
+            `).join('');
+        }
+        
+        function addBadge() {
+            badges.push({ emoji: '🏆', text: 'Новый бейдж', color: '#8b5cf6', tooltip: '' });
+            renderBadges();
+        }
+        
+        function removeBadge(i) {
+            badges.splice(i, 1);
+            renderBadges();
+        }
+        
+        function renderPortfolio() {
+            const container = document.getElementById('portfolioList');
+            container.innerHTML = portfolio.map((p, i) => `
+                <div class="portfolio-item">
+                    <button class="remove-btn" onclick="removePortfolio(${i})">✖</button>
+                    <input type="text" placeholder="Название" value="${p.title}" onchange="portfolio[${i}].title = this.value">
+                    <input type="text" placeholder="Ссылка" value="${p.url}" onchange="portfolio[${i}].url = this.value">
+                    <input type="text" placeholder="Превью (URL)" value="${p.thumbnail}" onchange="portfolio[${i}].thumbnail = this.value">
+                    <input type="text" placeholder="Видео (URL)" value="${p.video_url || ''}" onchange="portfolio[${i}].video_url = this.value">
+                </div>
+            `).join('');
+        }
+        
+        function addPortfolio() {
+            portfolio.push({ title: 'Новая работа', url: '', thumbnail: '', video_url: '' });
+            renderPortfolio();
+        }
+        
+        function removePortfolio(i) {
+            portfolio.splice(i, 1);
+            renderPortfolio();
+        }
+        
+        function renderSocial() {
+            const container = document.getElementById('socialList');
+            container.innerHTML = social.map((s, i) => `
+                <div class="social-item">
+                    <button class="remove-btn" onclick="removeSocial(${i})">✖</button>
+                    <select onchange="social[${i}].name = this.value">
+                        <option ${s.name === 'Discord' ? 'selected' : ''}>Discord</option>
+                        <option ${s.name === 'Telegram' ? 'selected' : ''}>Telegram</option>
+                        <option ${s.name === 'YouTube' ? 'selected' : ''}>YouTube</option>
+                        <option ${s.name === 'Twitter' ? 'selected' : ''}>Twitter</option>
+                        <option ${s.name === 'TikTok' ? 'selected' : ''}>TikTok</option>
+                    </select>
+                    <input type="text" placeholder="URL" value="${s.url}" onchange="social[${i}].url = this.value">
+                    <input type="text" placeholder="Иконка (fa-brands fa-...)" value="${s.icon}" onchange="social[${i}].icon = this.value">
+                </div>
+            `).join('');
+        }
+        
+        function addSocial() {
+            social.push({ name: 'Discord', url: '', icon: 'fa-brands fa-discord' });
+            renderSocial();
+        }
+        
+        function removeSocial(i) {
+            social.splice(i, 1);
+            renderSocial();
+        }
+        
+        async function saveSettings() {
+            const hideStats = [];
+            if(document.querySelector('[name="hide_sales"]').checked) hideStats.push('sales');
+            if(document.querySelector('[name="hide_rating"]').checked) hideStats.push('rating');
+            if(document.querySelector('[name="hide_reviews_stat"]').checked) hideStats.push('reviews');
+            if(document.querySelector('[name="hide_boosts"]').checked) hideStats.push('boosts');
+            
+            const settings = {
+                theme: document.querySelector('[name="theme"]').value,
+                accent_color: document.querySelector('[name="accent_color"]').value,
+                card_radius: document.querySelector('[name="card_radius"]').value,
+                animation_level: document.querySelector('[name="animation_level"]').value,
+                avatar_url: document.querySelector('[name="avatar_url"]').value,
+                background_image: document.querySelector('[name="background_image"]').value,
+                background_gradient: document.querySelector('[name="background_gradient"]').value,
+                marque_text: document.querySelector('[name="marque_text"]').value,
+                welcome_message: document.querySelector('[name="welcome_message"]').value,
+                voice_greeting: document.querySelector('[name="voice_greeting"]').value,
+                custom_footer: document.querySelector('[name="custom_footer"]').value,
+                accent_stat: document.querySelector('[name="accent_stat"]').value,
+                custom_css: document.querySelector('[name="custom_css"]').value,
+                custom_js: document.querySelector('[name="custom_js"]').value,
+                hide_stats: hideStats,
+                hide_reviews: document.querySelector('[name="hide_reviews"]').checked,
+                custom_badges: badges,
+                portfolio: portfolio,
+                social_links: social
+            };
+            
+            const res = await fetch('/api/pro-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            });
+            
+            if(res.ok) {
+                alert('✅ Настройки сохранены! Страница обновится...');
+                window.location.href = '/seller/' + window.location.pathname.split('/').pop();
+            } else {
+                alert('❌ Ошибка сохранения');
+            }
+        }
+        
+        loadSettings();
+    </script>
+</body>
+</html>
+{{end}}

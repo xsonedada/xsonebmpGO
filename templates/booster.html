@@ -1,0 +1,371 @@
+{{define "booster.html"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.35), 0 0 0 1px rgba(139,92,246,0.2); }
+        50% { box-shadow: 0 0 0 18px rgba(139,92,246,0), 0 0 0 1px rgba(192,132,252,0.6); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .booster-page {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .booster-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .booster-back:hover { color: var(--accent-light); }
+
+    .booster-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .booster-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .booster-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .booster-card > * { position: relative; z-index: 1; }
+
+    /* Header */
+    .booster-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+    @media (max-width: 700px) {
+        .booster-header { flex-direction: column; text-align: center; align-items: center; }
+    }
+
+    .booster-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    @media (max-width: 700px) {
+        .booster-header-left { flex-direction: column; }
+    }
+
+    .booster-avatar-wrap {
+        position: relative;
+        flex-shrink: 0;
+        border-radius: 28px;
+        padding: 3px;
+        background: linear-gradient(135deg, #8b5cf6, #c084fc, #8b5cf6);
+        background-size: 200% 200%;
+        animation: pulseGlow 4s ease-in-out infinite, gradientFlow 4s ease infinite;
+    }
+    .booster-avatar {
+        width: 88px; height: 88px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: #0a0a1f;
+        color: #c084fc;
+        text-transform: uppercase;
+    }
+    .booster-name {
+        font-size: 2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.4rem;
+        letter-spacing: -0.03em;
+    }
+    .booster-stats {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.6rem;
+        font-weight: 500;
+    }
+    .booster-stats span {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .booster-stats .stars { color: #fcd34d; }
+    .booster-stats .completed { color: #6ee7b7; }
+    .booster-games {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+    .booster-game-tag {
+        padding: 0.25rem 0.75rem;
+        border-radius: 100px;
+        background: rgba(139,92,246,0.08);
+        border: 1px solid rgba(139,92,246,0.12);
+        color: var(--accent-light);
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .booster-header-right {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        min-width: 170px;
+    }
+    .booster-price-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+    }
+    .booster-price-value {
+        font-size: 2.2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #b794ff, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+    }
+    .booster-btn {
+        padding: 0.8rem 2rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        letter-spacing: -0.01em;
+    }
+    .booster-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        color: #fff;
+    }
+
+    /* Section title */
+    .booster-section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.02em;
+    }
+
+    /* Description */
+    .booster-description {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Reviews */
+    .booster-reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .booster-review-item {
+        padding: 1.3rem 1.6rem;
+        border-radius: var(--radius-item);
+        background: rgba(255,255,255,0.015);
+        border: 1px solid rgba(255,255,255,0.04);
+        transition: all var(--transition);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .booster-review-item:hover {
+        background: rgba(139,92,246,0.04);
+        border-color: rgba(139,92,246,0.15);
+        transform: translateX(6px);
+    }
+    .booster-review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.4rem;
+    }
+    .booster-review-author {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+    .booster-review-stars {
+        color: var(--gold);
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        display: flex;
+        gap: 2px;
+    }
+    .booster-review-text {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    @media (max-width: 480px) {
+        .booster-card { padding: 1.8rem 1.3rem; border-radius: 1.8rem; }
+        .booster-name { font-size: 1.5rem; }
+        .booster-price-value { font-size: 1.8rem; }
+    }
+</style>
+
+<section class="booster-page">
+    <a href="javascript:history.back()" class="booster-back"><i class="fa-solid fa-arrow-left"></i> Назад</a>
+
+    <!-- Header Card -->
+    <div class="booster-card">
+        <div class="booster-header">
+            <div class="booster-header-left">
+                <div class="booster-avatar-wrap">
+                    <div class="booster-avatar">{{slice .Booster.Name 0 2}}</div>
+                </div>
+                <div>
+                    <h1 class="booster-name">{{.Booster.Name}}</h1>
+                    <div class="booster-stats">
+                        <span class="stars"><i class="fa-solid fa-star"></i> {{.Booster.Rating}}</span>
+                        <span class="completed"><i class="fa-solid fa-circle-check"></i> {{.Booster.CompletedOrders}} заказов</span>
+                        <span><i class="fa-solid fa-chart-bar"></i> {{.Booster.TotalOrders}} всего</span>
+                    </div>
+                    <div class="booster-games">
+                        {{range .Booster.Games}}
+                        <span class="booster-game-tag">{{.}}</span>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            <div class="booster-header-right">
+                <div class="booster-price-label">Стоимость</div>
+                <div class="booster-price-value">{{.Booster.Price}}</div>
+                <button class="booster-btn"><i class="fa-solid fa-rocket"></i> Заказать буст</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Card -->
+    <div class="booster-card">
+        <h2 class="booster-section-title"><i class="fa-solid fa-user" style="color:#a78bfa;"></i> О бустере</h2>
+        <p class="booster-description">{{.Booster.Description}}</p>
+    </div>
+
+    <!-- Reviews Card -->
+    <div class="booster-card">
+        <h2 class="booster-section-title"><i class="fa-solid fa-comments" style="color:#a78bfa;"></i> Отзывы</h2>
+        <div class="booster-reviews-list">
+            {{range .Booster.Reviews_list}}
+            <div class="booster-review-item">
+                <div class="booster-review-header">
+                    <span class="booster-review-author">{{.User}}</span>
+                    <div class="booster-review-stars">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <p class="booster-review-text">{{.Text}}</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+{{end}}

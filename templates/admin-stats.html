@@ -1,0 +1,33 @@
+{{define "admin-stats"}}
+<section style="padding: 8rem 2rem 4rem; max-width: 1400px; margin: 0 auto;">
+    <a href="/admin" class="btn btn-outline btn-sm">← Назад</a>
+    <h1 class="gradient-text" style="margin: 1rem 0 2rem;"><i class="fa-solid fa-chart-bar"></i> Расширенная статистика</h1>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800;" class="gradient-text">{{.Data.TotalUsers}}</div>
+            <div style="color: rgba(255,255,255,0.5);">Всего пользователей</div>
+        </div>
+        <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800;" class="gradient-text">{{.Data.TodayUsers}}</div>
+            <div style="color: rgba(255,255,255,0.5);">Новых сегодня</div>
+        </div>
+        <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800;" class="gradient-text">{{.Data.TodayOrders}}</div>
+            <div style="color: rgba(255,255,255,0.5);">Заказов сегодня</div>
+        </div>
+        <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800;" class="gradient-text">{{printf "%.0f" .Data.TotalRevenue}} ₽</div>
+            <div style="color: rgba(255,255,255,0.5);">Общий доход</div>
+        </div>
+        <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800;" class="gradient-text">{{printf "%.0f" .Data.AvgOrderValue}} ₽</div>
+            <div style="color: rgba(255,255,255,0.5);">Средний чек</div>
+        </div>
+        <div class="glass" style="padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 800;" class="gradient-text">{{.Data.CompletedOrders}}/{{.Data.TotalOrders}}</div>
+            <div style="color: rgba(255,255,255,0.5);">Выполнено заказов</div>
+        </div>
+    </div>
+</section>
+{{end}}

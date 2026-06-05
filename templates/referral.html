@@ -1,0 +1,543 @@
+{{define "referral"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .ref-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+
+    .ref-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .ref-back:hover { color: var(--accent-light); }
+
+    /* Hero */
+    .ref-hero {
+        text-align: center;
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 4.5rem 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.6s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .ref-hero:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ref-hero::before {
+        content: '';
+        position: absolute;
+        top: -30%; right: -15%;
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: float 6s ease-in-out infinite;
+    }
+    .ref-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -40%; left: -20%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(16,185,129,0.04) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+    .ref-hero .shimmer-line {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ref-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1.4rem;
+        border-radius: 2rem;
+        background: rgba(139,92,246,0.12);
+        border: 1px solid rgba(139,92,246,0.22);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #a78bfa;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    .ref-title {
+        font-size: clamp(2.4rem, 5vw, 3.4rem);
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #e0d5ff 30%, #a78bfa 60%, #c084fc 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+        letter-spacing: -0.03em;
+    }
+    .ref-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+    }
+    .ref-link-box {
+        display: flex;
+        max-width: 540px;
+        margin: 0 auto;
+        gap: 0.6rem;
+        position: relative;
+        z-index: 1;
+    }
+    .ref-input {
+        flex: 1;
+        padding: 0.9rem 1.3rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.6);
+        font-size: 0.85rem;
+        outline: none;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        letter-spacing: 0.02em;
+        transition: all var(--transition);
+    }
+    .ref-input:focus {
+        border-color: rgba(139,92,246,0.4);
+        background: rgba(139,92,246,0.04);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.08);
+    }
+    .ref-copy-btn {
+        padding: 0.9rem 1.6rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border: none;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        font-size: 0.85rem;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        letter-spacing: -0.01em;
+    }
+    .ref-copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(139,92,246,0.4);
+    }
+    .ref-copy-btn:active { transform: translateY(0); }
+
+    /* Статистика */
+    .ref-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        animation: fadeUp 0.7s ease;
+    }
+    .ref-stat {
+        background: var(--surface);
+        backdrop-filter: blur(35px);
+        -webkit-backdrop-filter: blur(35px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-item);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all var(--transition);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    }
+    .ref-stat:hover {
+        transform: translateY(-6px);
+        border-color: rgba(139,92,246,0.25);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ref-stat::after {
+        content: '';
+        position: absolute;
+        top: -20px; right: -20px;
+        width: 120px; height: 120px;
+        background: radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .ref-stat-val {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #a78bfa, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        z-index: 1;
+        letter-spacing: -0.02em;
+    }
+    .ref-stat-lbl {
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 0.5rem;
+        position: relative;
+        z-index: 1;
+        font-weight: 600;
+    }
+
+    /* Заголовки секций */
+    .ref-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+    .ref-section-icon {
+        width: 44px; height: 44px;
+        border-radius: 14px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-light);
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+    .ref-section-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+
+    /* Как это работает */
+    .ref-how {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        animation: fadeUp 0.8s ease;
+    }
+    .ref-step {
+        background: var(--surface);
+        backdrop-filter: blur(35px);
+        -webkit-backdrop-filter: blur(35px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-item);
+        padding: 2rem 1.3rem;
+        text-align: center;
+        transition: all var(--transition);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    }
+    .ref-step:hover {
+        transform: translateY(-6px);
+        border-color: rgba(139,92,246,0.2);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ref-step-num {
+        position: absolute;
+        top: -15px; right: -15px;
+        font-size: 4.5rem;
+        font-weight: 900;
+        color: rgba(139,92,246,0.025);
+        pointer-events: none;
+        line-height: 1;
+    }
+    .ref-step-icon {
+        width: 58px; height: 58px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.2rem;
+        font-size: 1.3rem;
+        position: relative;
+        z-index: 1;
+    }
+    .ref-step h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+        position: relative;
+        z-index: 1;
+        color: #fff;
+        letter-spacing: -0.01em;
+    }
+    .ref-step p {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        margin: 0;
+        line-height: 1.4;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* История заработка */
+    .ref-card {
+        background: var(--surface);
+        backdrop-filter: blur(40px) saturate(140%);
+        -webkit-backdrop-filter: blur(40px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.9s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .ref-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ref-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ref-card > * { position: relative; z-index: 1; }
+    .ref-earn-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        transition: all var(--transition);
+        border-radius: 0.8rem;
+        margin: 0 -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .ref-earn-item:last-child { border-bottom: none; }
+    .ref-earn-item:hover {
+        background: rgba(139,92,246,0.04);
+        transform: translateX(6px);
+    }
+
+    .ref-empty {
+        text-align: center;
+        padding: 3.5rem 2rem;
+        color: var(--text-dim);
+        background: var(--surface);
+        backdrop-filter: blur(40px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+        animation: fadeUp 0.9s ease;
+    }
+    .ref-empty i {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.25;
+    }
+    .ref-empty p { font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+        .ref-page { padding: 3rem 1rem 3rem; }
+        .ref-hero { padding: 3rem 1.5rem; }
+        .ref-stats { grid-template-columns: repeat(2, 1fr); }
+        .ref-how { grid-template-columns: repeat(2, 1fr); }
+        .ref-title { font-size: 2rem; }
+        .ref-link-box { flex-direction: column; }
+        .ref-card { padding: 1.5rem; }
+    }
+    @media (max-width: 480px) {
+        .ref-how { grid-template-columns: 1fr; }
+        .ref-stats { grid-template-columns: 1fr; }
+    }
+</style>
+
+<section class="ref-page">
+    <a href="/profile" class="ref-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="ref-hero">
+        <div class="shimmer-line"></div>
+        <span class="ref-badge"><i class="fa-solid fa-users"></i> Партнёрская программа</span>
+        <h1 class="ref-title">Приглашайте друзей</h1>
+        <p class="ref-subtitle">Зарабатывайте 5% с заказов друзей и 2% с заказов их друзей</p>
+        <div class="ref-link-box">
+            <input type="text" class="ref-input" value="{{.RefLink}}" readonly id="refLink" onclick="this.select()">
+            <button class="ref-copy-btn" onclick="copyRef()"><i class="fa-solid fa-copy"></i> Копировать ссылку</button>
+        </div>
+    </div>
+
+    <div class="ref-stats">
+        <div class="ref-stat">
+            <div class="ref-stat-val">{{.DirectCount}}</div>
+            <div class="ref-stat-lbl">Приглашено друзей</div>
+        </div>
+        <div class="ref-stat">
+            <div class="ref-stat-val">{{.Level2Count}}</div>
+            <div class="ref-stat-lbl">2 уровень</div>
+        </div>
+        <div class="ref-stat">
+            <div class="ref-stat-val">{{printf "%.0f" .DirectEarnings}} ₽</div>
+            <div class="ref-stat-lbl">Заработано</div>
+        </div>
+    </div>
+
+    <div class="ref-section-header">
+        <div class="ref-section-icon"><i class="fa-solid fa-diagram-project"></i></div>
+        <h2 class="ref-section-title">Как это работает</h2>
+    </div>
+    <div class="ref-how">
+        <div class="ref-step">
+            <span class="ref-step-num">01</span>
+            <div class="ref-step-icon" style="background:rgba(139,92,246,0.08);color:#a78bfa;border:1px solid rgba(139,92,246,0.15);">
+                <i class="fa-solid fa-share-nodes"></i>
+            </div>
+            <h3>Поделитесь</h3>
+            <p>Отправьте ссылку другу</p>
+        </div>
+        <div class="ref-step">
+            <span class="ref-step-num">02</span>
+            <div class="ref-step-icon" style="background:rgba(16,185,129,0.08);color:#6ee7b7;border:1px solid rgba(16,185,129,0.15);">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3>Регистрация</h3>
+            <p>Друг регистрируется</p>
+        </div>
+        <div class="ref-step">
+            <span class="ref-step-num">03</span>
+            <div class="ref-step-icon" style="background:rgba(245,158,11,0.08);color:#fbbf24;border:1px solid rgba(245,158,11,0.15);">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <h3>Покупки</h3>
+            <p>5% с заказов друга</p>
+        </div>
+        <div class="ref-step">
+            <span class="ref-step-num">04</span>
+            <div class="ref-step-icon" style="background:rgba(59,130,246,0.08);color:#93c5fd;border:1px solid rgba(59,130,246,0.15);">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <h3>Вывод</h3>
+            <p>Деньги на баланс</p>
+        </div>
+    </div>
+
+    {{if .Earnings}}
+    <div class="ref-card">
+        <div class="ref-section-header" style="margin-bottom:1.5rem;">
+            <div class="ref-section-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <h2 class="ref-section-title">История заработка</h2>
+        </div>
+        {{range .Earnings}}
+        <div class="ref-earn-item">
+            <div>
+                <strong style="color:#fff;font-weight:600;">@{{.Username}}</strong>
+                <span style="color:var(--text-dim);font-size:0.75rem;margin-left:0.6rem;">
+                    {{if eq .Level 1}}1 ур.{{else}}2 ур.{{end}}
+                </span>
+                <div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.2rem;">{{.CreatedAt.Format "02.01.2006 15:04"}}</div>
+            </div>
+            <span style="color:#6ee7b7;font-weight:700;font-size:0.92rem;">+{{printf "%.0f" .Amount}} ₽</span>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="ref-empty">
+        <i class="fa-solid fa-inbox"></i>
+        <p>Здесь будет история вашего заработка</p>
+    </div>
+    {{end}}
+</section>
+
+<script>
+function copyRef() {
+    var input = document.getElementById('refLink');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value).then(function() {
+        showNotification('Ссылка скопирована!', 'success');
+    });
+}
+</script>
+{{end}}

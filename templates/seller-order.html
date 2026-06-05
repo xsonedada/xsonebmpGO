@@ -1,0 +1,675 @@
+{{define "seller-order"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes glowPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
+        50% { box-shadow: 0 0 0 14px rgba(139,92,246,0); }
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(15px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .seller-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .seller-breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .seller-breadcrumbs a {
+        color: var(--accent-light);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .seller-breadcrumbs a:hover { color: #fff; }
+
+    .seller-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .seller-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .seller-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .seller-card > * { position: relative; z-index: 1; }
+
+    .seller-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 2.2rem;
+    }
+    .seller-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+    }
+    .seller-icon-box {
+        width: 54px; height: 54px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .seller-icon-box i { color: var(--accent-light); font-size: 1.3rem; }
+    .seller-title {
+        font-size: 1.9rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #ffffff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+        line-height: 1.1;
+    }
+    .seller-date {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin: 0;
+        font-weight: 500;
+    }
+    .seller-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1.4rem;
+        border-radius: 100px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        backdrop-filter: blur(20px);
+        border: 1px solid;
+    }
+
+    .seller-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+    .seller-info-col {
+        flex: 1;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .seller-info-item {
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .seller-info-item:last-child { border-bottom: none; }
+    .seller-info-icon-sm {
+        width: 42px; height: 42px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.95rem;
+    }
+    .seller-info-content {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .seller-info-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+    }
+    .seller-info-value {
+        font-weight: 600;
+        color: #fff;
+        font-size: 0.95rem;
+        text-align: right;
+    }
+    .seller-info-value.price {
+        font-size: 1.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #b794ff, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+    }
+    .seller-commission {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        margin-top: 0.15rem;
+        font-weight: 500;
+    }
+    .seller-commission .pro {
+        color: var(--gold);
+        font-weight: 600;
+    }
+
+    .seller-actions-col {
+        text-align: center;
+        min-width: 210px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+    .btn-ready {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #0a0a1a;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        width: 100%;
+        box-shadow: 0 6px 18px rgba(245,158,11,0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+    .btn-ready:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(245,158,11,0.4);
+    }
+    .btn-sp {
+        background: rgba(239,68,68,0.08);
+        color: #f87171;
+        border: 1px solid rgba(239,68,68,0.2);
+        padding: 0.65rem 1.2rem;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        text-align: center;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+    .btn-sp:hover {
+        background: rgba(239,68,68,0.15);
+        border-color: rgba(239,68,68,0.35);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239,68,68,0.15);
+    }
+    .btn-ref {
+        background: rgba(239,68,68,0.04);
+        color: #fca5a5;
+        border: 1px solid rgba(239,68,68,0.1);
+        padding: 0.65rem 1.2rem;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        text-align: center;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+    .btn-ref:hover {
+        background: rgba(239,68,68,0.1);
+        border-color: rgba(239,68,68,0.25);
+        transform: translateY(-2px);
+    }
+    .info-box {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+    .info-box.wait {
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.2);
+        color: #fcd34d;
+    }
+    .info-box.ok {
+        background: rgba(16,185,129,0.08);
+        border: 1px solid rgba(16,185,129,0.2);
+        color: #6ee7b7;
+    }
+    .link-disp {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: #fca5a5;
+        text-decoration: none;
+        padding: 0.5rem 1.1rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.15);
+        font-weight: 600;
+        transition: all var(--transition);
+    }
+    .link-disp:hover {
+        background: rgba(239,68,68,0.15);
+        border-color: rgba(239,68,68,0.3);
+    }
+
+    .seller-progress {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        padding: 0 5px;
+        margin: 0;
+    }
+    .seller-progress::before {
+        content: '';
+        position: absolute;
+        top: 11px;
+        left: 30px;
+        right: 30px;
+        height: 3px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 3px;
+    }
+    .seller-progress-fill {
+        position: absolute;
+        top: 11px;
+        left: 30px;
+        height: 3px;
+        background: var(--success);
+        border-radius: 3px;
+        transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+        max-width: calc(100% - 60px);
+        box-shadow: 0 0 16px rgba(16,185,129,0.5);
+    }
+    .sps {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        z-index: 2;
+        flex: 1;
+    }
+    .spd {
+        width: 15px; height: 15px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.1);
+        border: 2px solid rgba(255,255,255,0.12);
+        transition: all 0.5s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 5px;
+    }
+    .spd.done {
+        background: var(--success);
+        border-color: var(--success);
+        box-shadow: 0 0 14px rgba(16,185,129,0.6);
+    }
+    .spd.active {
+        background: var(--accent);
+        border-color: var(--accent-light);
+        animation: glowPulse 3s infinite;
+    }
+    .sps-label {
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        color: var(--text-dim);
+        transition: color 0.3s;
+    }
+    .spd.done ~ .sps-label,
+    .spd.active ~ .sps-label {
+        color: rgba(255,255,255,0.7);
+    }
+
+    .seller-chat h3 {
+        margin: 0 0 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+    .seller-chat-messages {
+        height: 380px;
+        overflow-y: auto;
+        padding: 1.2rem;
+        margin: 1rem 0;
+        background: rgba(0,0,0,0.2);
+        border-radius: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    .seller-msg-wrap { max-width: 75%; }
+    .seller-msg-wrap.mine { align-self: flex-end; }
+    .seller-msg-bubble {
+        padding: 0.7rem 1.1rem;
+        border-radius: 1.2rem;
+        font-size: 0.86rem;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+    .seller-msg-wrap.mine .seller-msg-bubble {
+        background: rgba(139,92,246,0.2);
+        border: 1px solid rgba(139,92,246,0.15);
+        border-bottom-right-radius: 0.3rem;
+    }
+    .seller-msg-wrap:not(.mine) .seller-msg-bubble {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-bottom-left-radius: 0.3rem;
+    }
+    .seller-msg-bubble strong {
+        font-size: 0.7rem;
+        display: block;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+        opacity: 0.6;
+    }
+    .seller-msg-bubble p { margin: 0.3rem 0; }
+    .seller-msg-bubble small {
+        color: var(--text-dim);
+        font-size: 0.65rem;
+        display: block;
+        margin-top: 0.3rem;
+    }
+    .seller-chat-form {
+        display: flex;
+        gap: 0.6rem;
+    }
+    .seller-chat-form input {
+        flex: 1;
+        padding: 0.85rem 1.3rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all var(--transition);
+    }
+    .seller-chat-form input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.08);
+        background: rgba(139,92,246,0.04);
+    }
+    .seller-chat-form button {
+        padding: 0.85rem 1.8rem;
+        border-radius: 100px;
+        border: none;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 6px 16px rgba(139,92,246,0.25);
+    }
+    .seller-chat-form button:hover {
+        background: #7c3aed;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(139,92,246,0.4);
+    }
+</style>
+
+<section class="seller-page">
+    <div class="seller-breadcrumbs">
+        <a href="/seller/orders"><i class="fa-solid fa-list-check"></i> Заказы</a>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.6rem;"></i>
+        <span>Заказ #{{.Data.Order.ID}}</span>
+    </div>
+
+    {{$o := .Data.Order}}
+
+    <div class="seller-card">
+        <div class="seller-header">
+            <div class="seller-header-left">
+                <div class="seller-icon-box">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+                <div>
+                    <h1 class="seller-title">Заказ #{{$o.ID}}</h1>
+                    <p class="seller-date">{{$o.CreatedAt.Format "02.01.2006 15:04"}}</p>
+                </div>
+            </div>
+            <span class="seller-status" style="
+                {{if eq $o.Status "processing"}}background:rgba(59,130,246,0.08);color:#93c5fd;border-color:rgba(59,130,246,0.2);
+                {{else if eq $o.Status "ready"}}background:rgba(245,158,11,0.08);color:#fcd34d;border-color:rgba(245,158,11,0.2);
+                {{else if eq $o.Status "completed"}}background:rgba(16,185,129,0.08);color:#6ee7b7;border-color:rgba(16,185,129,0.2);
+                {{else if eq $o.Status "disputed"}}background:rgba(239,68,68,0.08);color:#fca5a5;border-color:rgba(239,68,68,0.2);
+                {{else}}background:rgba(139,92,246,0.08);color:var(--accent-light);border-color:rgba(139,92,246,0.2);{{end}}">
+                {{if eq $o.Status "processing"}}<i class="fa-solid fa-spinner fa-spin"></i> В работе
+                {{else if eq $o.Status "ready"}}<i class="fa-solid fa-clock"></i> Готово
+                {{else if eq $o.Status "completed"}}<i class="fa-solid fa-circle-check"></i> Завершен
+                {{else if eq $o.Status "disputed"}}<i class="fa-solid fa-flag"></i> Спор
+                {{end}}
+            </span>
+        </div>
+
+        <div class="seller-body">
+            <div class="seller-info-col">
+                <div class="seller-info-item">
+                    <div class="seller-info-icon-sm" style="background:rgba(139,92,246,0.12);"><i class="fa-solid fa-gamepad" style="color:#a78bfa;"></i></div>
+                    <div class="seller-info-content"><span class="seller-info-label">Игра</span><strong style="color:#fff;">{{$o.Game}}</strong></div>
+                </div>
+                <div class="seller-info-item">
+                    <div class="seller-info-icon-sm" style="background:rgba(245,158,11,0.12);"><i class="fa-solid fa-tag" style="color:#fbbf24;"></i></div>
+                    <div class="seller-info-content"><span class="seller-info-label">Услуга</span><strong style="color:#fff;">{{$o.Title}}</strong></div>
+                </div>
+                <div class="seller-info-item">
+                    <div class="seller-info-icon-sm" style="background:rgba(59,130,246,0.12);"><i class="fa-solid fa-ruble-sign" style="color:#93c5fd;"></i></div>
+                    <div class="seller-info-content">
+                        <span class="seller-info-label">Сумма</span>
+                        <div style="text-align:right;">
+                            <div class="seller-info-value price">{{printf "%.0f" $o.Total}} ₽</div>
+                            <div class="seller-commission">
+                                {{if .Data.IsPro}}
+                                <span class="pro"><i class="fa-solid fa-crown"></i> PRO комиссия 2%</span>
+                                {{else}}
+                                Комиссия платформы: 5%
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seller-actions-col">
+                {{if eq $o.Status "processing"}}
+                <form method="POST" action="/seller/order/{{$o.ID}}/ready" style="width:100%;">
+                    <button type="submit" class="btn-ready">
+                        <i class="fa-solid fa-check-double"></i> Отметить готовым
+                    </button>
+                </form>
+                {{end}}
+
+                {{if or (eq $o.Status "processing") (eq $o.Status "ready")}}
+                <a href="/order/{{$o.ID}}/dispute" class="btn-sp">
+                    <i class="fa-solid fa-flag"></i> Открыть спор
+                </a>
+                <a href="/api/escrow/refund/{{$o.ID}}" class="btn-ref" onclick="return confirm('Вернуть деньги покупателю?')">
+                    <i class="fa-solid fa-rotate-left"></i> Вернуть деньги
+                </a>
+                {{end}}
+
+                {{if eq $o.Status "ready"}}
+                <div class="info-box wait">
+                    <i class="fa-solid fa-hourglass-half"></i> Ожидает подтверждения покупателя
+                </div>
+                {{end}}
+
+                {{if eq $o.Status "completed"}}
+                <div class="info-box ok">
+                    <i class="fa-solid fa-check-circle"></i> Заказ выполнен! Средства зачислены.
+                </div>
+                {{end}}
+
+                {{if .Data.DisputeID}}
+                <a href="/dispute/{{.Data.DisputeID}}" class="link-disp">
+                    <i class="fa-solid fa-arrow-right"></i> Перейти к спору #{{.Data.DisputeID}}
+                </a>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="seller-progress">
+            <div class="seller-progress-fill" style="width:{{if eq $o.Status "processing"}}33%{{else if eq $o.Status "ready"}}58%{{else if eq $o.Status "completed"}}100%{{else}}0%{{end}};"></div>
+            <div class="sps"><div class="spd done"></div><span class="sps-label">Заказ</span></div>
+            <div class="sps"><div class="spd {{if eq $o.Status "processing"}}active{{else if or (eq $o.Status "ready") (eq $o.Status "completed")}}done{{end}}"></div><span class="sps-label">В работе</span></div>
+            <div class="sps"><div class="spd {{if eq $o.Status "ready"}}active{{else if eq $o.Status "completed"}}done{{end}}"></div><span class="sps-label">Проверка</span></div>
+            <div class="sps"><div class="spd {{if eq $o.Status "completed"}}done{{end}}"></div><span class="sps-label">Готово</span></div>
+        </div>
+    </div>
+
+    <div class="seller-card seller-chat">
+        <h3><i class="fa-solid fa-comments" style="color:#a78bfa;"></i> Чат с покупателем</h3>
+
+        <div class="seller-chat-messages" id="chatMessages">
+            {{range .Data.Messages}}
+            <div class="seller-msg-wrap {{if eq .UserID $.User.ID}}mine{{end}}">
+                <div class="seller-msg-bubble">
+                    <strong>{{.Username}}</strong>
+                    <p>{{.Text}}</p>
+                    <small>{{.CreatedAt.Format "15:04"}}</small>
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        <form method="POST" action="/seller/order/{{$o.ID}}/message" class="seller-chat-form">
+            <input type="text" name="message" placeholder="Введите сообщение..." required autocomplete="off">
+            <button type="submit"><i class="fa-solid fa-paper-plane"></i> Отправить</button>
+        </form>
+    </div>
+</section>
+
+<script>
+var lastMsg = {{len .Data.Messages}};
+setInterval(async function() {
+    try {
+        var res = await fetch('/api/order/{{$o.ID}}/messages');
+        var msgs = await res.json();
+        if (msgs && msgs.length > lastMsg) {
+            var html = '';
+            for (var i = 0; i < msgs.length; i++) {
+                var m = msgs[i];
+                html += '<div class="seller-msg-wrap' + (m.user_id == {{$.User.ID}} ? ' mine' : '') + '">' +
+                    '<div class="seller-msg-bubble">' +
+                    '<strong>' + m.username + '</strong>' +
+                    '<p>' + m.text + '</p>' +
+                    '<small>' + new Date(m.created_at).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'}) + '</small>' +
+                    '</div></div>';
+            }
+            document.getElementById('chatMessages').innerHTML = html;
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+            lastMsg = msgs.length;
+        }
+    } catch(e) {}
+}, 3000);
+</script>
+{{end}}

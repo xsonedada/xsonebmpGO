@@ -1,0 +1,413 @@
+{{define "seller-insights"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .insights-page {
+        max-width: 1340px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .insights-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .insights-back:hover { color: var(--accent-light); }
+
+    .insights-header {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    .insights-header-icon {
+        width: 56px; height: 56px;
+        border-radius: 18px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 3s ease-in-out infinite;
+    }
+    .insights-header-icon i { color: var(--accent-light); font-size: 1.4rem; }
+    .insights-header-text h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+        letter-spacing: -0.03em;
+    }
+    .insights-header-text p {
+        color: var(--gold);
+        font-size: 0.85rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 600;
+    }
+
+    /* Карточка */
+    .insight-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .insight-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .insight-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .insight-card > * { position: relative; z-index: 1; }
+    .insight-card h4 {
+        margin: 0 0 1.5rem;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.02em;
+    }
+
+    .insight-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.4rem;
+    }
+    @media (max-width: 800px) {
+        .insight-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Рекомендации */
+    .insight-rec {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        font-size: 0.85rem;
+        transition: all var(--transition);
+        border-radius: 0.8rem;
+        margin: 0 -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .insight-rec:last-child { border-bottom: none; }
+    .insight-rec:hover {
+        background: rgba(139,92,246,0.04);
+        transform: translateX(6px);
+    }
+    .insight-rec-info { flex: 1; min-width: 0; }
+    .insight-rec-info strong { color: #fff; font-size: 0.9rem; font-weight: 600; }
+    .insight-rec-game { color: var(--text-secondary); font-size: 0.76rem; display: flex; align-items: center; gap: 0.3rem; }
+    .insight-rec-price { font-weight: 700; white-space: nowrap; color: #fff; font-size: 0.9rem; }
+    .insight-rec-market { color: var(--text-dim); white-space: nowrap; font-size: 0.8rem; }
+
+    .insight-badge {
+        display: inline-block;
+        padding: 0.25rem 0.8rem;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        white-space: nowrap;
+        border: 1px solid;
+    }
+    .insight-badge.green { background: rgba(16,185,129,0.08); color: #6ee7b7; border-color: rgba(16,185,129,0.2); }
+    .insight-badge.yellow { background: rgba(245,158,11,0.08); color: #fcd34d; border-color: rgba(245,158,11,0.2); }
+    .insight-badge.purple { background: rgba(139,92,246,0.08); color: var(--accent-light); border-color: rgba(139,92,246,0.2); }
+    .insight-badge.red { background: rgba(239,68,68,0.08); color: #fca5a5; border-color: rgba(239,68,68,0.2); }
+
+    /* Топ продавцов */
+    .insight-seller-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.55rem 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        transition: all var(--transition);
+        border-radius: 0.8rem;
+        margin: 0 -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .insight-seller-row:hover {
+        background: rgba(139,92,246,0.04);
+        transform: translateX(6px);
+    }
+    .insight-seller-row .name { color: #fff; font-weight: 600; }
+    .insight-seller-row .pro-badge { color: var(--gold); margin-left: 0.3rem; font-size: 0.7rem; }
+
+    /* Цены */
+    .insight-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        transition: all var(--transition);
+        border-radius: 0.8rem;
+        margin: 0 -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .insight-price-row:hover {
+        background: rgba(139,92,246,0.04);
+        transform: translateX(6px);
+    }
+    .insight-price-row .val { font-weight: 600; }
+
+    .insight-section-title {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Таблица */
+    .insight-table-wrap {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        overflow-x: auto;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .insight-table-wrap:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .insight-table-wrap h4 {
+        margin: 0 0 1.5rem;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.02em;
+    }
+    .insight-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .insight-table th {
+        padding: 0.85rem 1rem;
+        text-align: left;
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .insight-table td {
+        padding: 0.85rem 1rem;
+        font-size: 0.86rem;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        color: var(--text-secondary);
+        transition: background var(--transition);
+    }
+    .insight-table tbody tr:hover td {
+        background: rgba(139,92,246,0.04);
+    }
+    .insight-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .insight-table .game-name {
+        color: #fff;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+</style>
+
+<section class="insights-page">
+    <a href="/profile" class="insights-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="insights-header">
+        <div class="insights-header-icon">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+        </div>
+        <div class="insights-header-text">
+            <h1>Аналитика рынка</h1>
+            <p><i class="fa-solid fa-crown"></i> PRO • Полный анализ конкурентов</p>
+        </div>
+    </div>
+
+    {{if .Data.MyBoostsRecs}}
+    <div class="insight-card">
+        <h4><i class="fa-solid fa-lightbulb" style="color:#fbbf24;"></i> Рекомендации по ценам</h4>
+        {{range .Data.MyBoostsRecs}}
+        <div class="insight-rec">
+            <div class="insight-rec-info">
+                <strong>{{.Title}}</strong>
+                <div class="insight-rec-game"><i class="fa-solid fa-gamepad"></i> {{.Game}}</div>
+            </div>
+            <span class="insight-rec-price">{{printf "%.0f" .MyPrice}} ₽</span>
+            <span class="insight-rec-market">Рынок: {{printf "%.0f" .MarketAvg}} ₽</span>
+            <span class="insight-badge {{if eq (slice .Recommendation 0 1) "📉"}}green{{else if eq (slice .Recommendation 0 1) "📈"}}red{{else}}purple{{end}}">{{.Recommendation}}</span>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+
+    <div class="insight-grid">
+        <div class="insight-card">
+            <h4><i class="fa-solid fa-crown" style="color:#fbbf24;"></i> Топ продавцов</h4>
+            {{range .Data.TopSellers}}
+            <div class="insight-seller-row">
+                <span><span class="name">{{.Username}}</span>{{if .IsPro}} <span class="pro-badge"><i class="fa-solid fa-crown"></i></span>{{end}}</span>
+                <span>{{.Offers}} товаров • {{printf "%.0f" .AvgPrice}} ₽</span>
+            </div>
+            {{end}}
+        </div>
+        <div class="insight-card">
+            <h4><i class="fa-solid fa-money-bill-trend-up" style="color:#6ee7b7;"></i> Самые дорогие</h4>
+            {{range .Data.ExpensiveGames}}
+            <div class="insight-price-row">
+                <span><i class="fa-solid fa-gamepad"></i> {{.Game}}</span>
+                <span class="val" style="color:#fcd34d;">{{printf "%.0f" .Avg}} ₽</span>
+            </div>
+            {{end}}
+            <h4 class="insight-section-title"><i class="fa-solid fa-piggy-bank" style="color:#93c5fd;"></i> Самые дешёвые</h4>
+            {{range .Data.CheapGames}}
+            <div class="insight-price-row">
+                <span><i class="fa-solid fa-gamepad"></i> {{.Game}}</span>
+                <span class="val" style="color:#6ee7b7;">{{printf "%.0f" .Avg}} ₽</span>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <div class="insight-table-wrap">
+        <h4><i class="fa-solid fa-table" style="color:#a78bfa;"></i> Все игры</h4>
+        <table class="insight-table">
+            <thead>
+                <tr>
+                    <th>Игра</th>
+                    <th>Предложений</th>
+                    <th>Продавцов</th>
+                    <th>Средняя</th>
+                    <th>Мин</th>
+                    <th>Макс</th>
+                    <th>Моя позиция</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data.Insights}}
+                {{$my := index $.Data.MyPositions .Game}}
+                <tr>
+                    <td class="game-name"><i class="fa-solid fa-gamepad"></i> {{.Game}}</td>
+                    <td><span class="insight-badge purple">{{.Offers}}</span></td>
+                    <td>{{.Sellers}}</td>
+                    <td style="color:#fcd34d;font-weight:700;">{{printf "%.0f" .AvgPrice}} ₽</td>
+                    <td style="color:#6ee7b7;">{{printf "%.0f" .MinPrice}} ₽</td>
+                    <td style="color:#93c5fd;">{{printf "%.0f" .MaxPrice}} ₽</td>
+                    <td>
+                        {{if $my}}
+                        <span style="color:#6ee7b7;">{{$my.offers}} предл. • {{printf "%.0f" $my.avg}} ₽</span>
+                        {{else}}
+                        <span style="color:var(--text-dim);">Нет</span>
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</section>
+{{end}}

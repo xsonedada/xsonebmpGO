@@ -1,0 +1,489 @@
+{{define "booster.html"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.5); }
+        50% { box-shadow: 0 0 0 20px rgba(139,92,246,0); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .bp-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+    }
+
+    /* Хлебные крошки */
+    .bp-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: rgba(255,255,255,0.35);
+        font-size: 0.85rem;
+    }
+    .bp-breadcrumb a {
+        color: #a78bfa;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .bp-breadcrumb a:hover { color: #c4b5fd; }
+
+    /* Главная карточка */
+    .bp-hero-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 3rem;
+        padding: 3rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.6s ease;
+    }
+    .bp-hero-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .bp-hero-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.02), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .bp-hero-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Верхняя часть */
+    .bp-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 650px) {
+        .bp-top {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+    }
+
+    .bp-avatar-wrapper {
+        position: relative;
+        flex-shrink: 0;
+    }
+    .bp-avatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa, #c084fc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 900;
+        color: #fff;
+        text-transform: uppercase;
+        animation: float 4s ease-in-out infinite;
+        box-shadow: 0 20px 60px rgba(139,92,246,0.4);
+    }
+    .bp-online-dot {
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #10b981;
+        border: 3px solid rgba(14,14,38,0.85);
+        animation: pulse 2s infinite;
+    }
+
+    .bp-info {
+        flex: 1;
+        padding-top: 0.5rem;
+    }
+    .bp-name {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.8rem;
+        line-height: 1;
+    }
+    .bp-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    .bp-badge {
+        padding: 0.35rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .bp-badge.verified {
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.2);
+        color: #10b981;
+    }
+    .bp-badge.pro {
+        background: rgba(245,158,11,0.1);
+        border: 1px solid rgba(245,158,11,0.2);
+        color: #fbbf24;
+    }
+    .bp-badge.rating {
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        color: #a78bfa;
+    }
+
+    /* Статистика в ряд */
+    .bp-stats-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 500px) {
+        .bp-stats-strip {
+            grid-template-columns: 1fr;
+        }
+    }
+    .bp-stat-item {
+        padding: 1.2rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.04);
+        text-align: center;
+        transition: all 0.2s;
+    }
+    .bp-stat-item:hover {
+        background: rgba(139,92,246,0.04);
+        border-color: rgba(139,92,246,0.12);
+    }
+    .bp-stat-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.2rem;
+    }
+    .bp-stat-val.gold { color: #fbbf24; }
+    .bp-stat-val.green { color: #10b981; }
+    .bp-stat-val.purple { color: #a78bfa; }
+    .bp-stat-lbl {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgba(255,255,255,0.3);
+        font-weight: 600;
+    }
+
+    /* Цена и кнопка */
+    .bp-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    @media (max-width: 500px) {
+        .bp-cta {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    .bp-price-block {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+    }
+    .bp-price {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #a78bfa, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+    .bp-price-label {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.35);
+        font-weight: 600;
+    }
+    .bp-btn {
+        padding: 0.9rem 2.5rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .bp-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(139,92,246,0.5);
+        color: #fff;
+    }
+
+    /* Игры */
+    .bp-games-row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    .bp-game-chip {
+        padding: 0.5rem 1rem;
+        border-radius: 100px;
+        background: rgba(139,92,246,0.08);
+        border: 1px solid rgba(139,92,246,0.12);
+        color: #a78bfa;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    /* Секция О бустере */
+    .bp-about-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.6s ease 0.1s both;
+    }
+    .bp-about-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.02), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .bp-about-card > * {
+        position: relative;
+        z-index: 1;
+    }
+    .bp-section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .bp-description {
+        color: rgba(255,255,255,0.5);
+        font-size: 1rem;
+        line-height: 1.8;
+        margin: 0;
+    }
+
+    /* Секция Отзывы */
+    .bp-reviews-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.6s ease 0.2s both;
+    }
+    .bp-reviews-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.02), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .bp-reviews-card > * {
+        position: relative;
+        z-index: 1;
+    }
+    .bp-review {
+        display: flex;
+        gap: 1.2rem;
+        padding: 1.3rem;
+        border-radius: 1.3rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.03);
+        margin-bottom: 0.8rem;
+        transition: all 0.2s;
+    }
+    .bp-review:last-child {
+        margin-bottom: 0;
+    }
+    .bp-review:hover {
+        background: rgba(139,92,246,0.04);
+        border-color: rgba(139,92,246,0.1);
+    }
+    .bp-review-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: rgba(139,92,246,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #a78bfa;
+        flex-shrink: 0;
+        text-transform: uppercase;
+    }
+    .bp-review-body {
+        flex: 1;
+    }
+    .bp-review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.4rem;
+    }
+    .bp-review-author {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+    .bp-review-stars {
+        color: #fbbf24;
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+    }
+    .bp-review-text {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.88rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+</style>
+
+<div class="bp-container">
+    <!-- Хлебные крошки -->
+    <div class="bp-breadcrumb">
+        <a href="/marketplace"><i class="fa-solid fa-store"></i> Маркетплейс</a>
+        <i class="fa-solid fa-chevron-right" style="font-size:0.6rem;"></i>
+        <span>{{.Booster.Name}}</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="bp-hero-card">
+        <div class="bp-top">
+            <div class="bp-avatar-wrapper">
+                <div class="bp-avatar">{{slice .Booster.Name 0 2}}</div>
+                <div class="bp-online-dot"></div>
+            </div>
+            <div class="bp-info">
+                <h1 class="bp-name">{{.Booster.Name}}</h1>
+                <div class="bp-badges">
+                    <span class="bp-badge verified"><i class="fa-solid fa-shield-check"></i> Проверен</span>
+                    <span class="bp-badge pro"><i class="fa-solid fa-crown"></i> PRO</span>
+                    <span class="bp-badge rating"><i class="fa-solid fa-star"></i> {{.Booster.Rating}}</span>
+                </div>
+                <div class="bp-games-row">
+                    {{range .Booster.Games}}
+                    <span class="bp-game-chip"><i class="fa-solid fa-gamepad"></i> {{.}}</span>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <div class="bp-stats-strip">
+            <div class="bp-stat-item">
+                <div class="bp-stat-val gold"><i class="fa-solid fa-star"></i> {{.Booster.Rating}}</div>
+                <div class="bp-stat-lbl">Рейтинг</div>
+            </div>
+            <div class="bp-stat-item">
+                <div class="bp-stat-val green">{{.Booster.CompletedOrders}}</div>
+                <div class="bp-stat-lbl">Выполнено заказов</div>
+            </div>
+            <div class="bp-stat-item">
+                <div class="bp-stat-val purple">{{.Booster.TotalOrders}}</div>
+                <div class="bp-stat-lbl">Всего заказов</div>
+            </div>
+        </div>
+
+        <div class="bp-cta">
+            <div>
+                <div class="bp-price-label">Стоимость услуг от</div>
+                <div class="bp-price-block">
+                    <span class="bp-price">{{.Booster.Price}}</span>
+                </div>
+            </div>
+            <button class="bp-btn"><i class="fa-solid fa-rocket"></i> Заказать буст</button>
+        </div>
+    </div>
+
+    <!-- О бустере -->
+    <div class="bp-about-card">
+        <h2 class="bp-section-title"><i class="fa-solid fa-circle-info" style="color:#a78bfa;"></i> О бустере</h2>
+        <p class="bp-description">{{.Booster.Description}}</p>
+    </div>
+
+    <!-- Отзывы -->
+    <div class="bp-reviews-card">
+        <h2 class="bp-section-title"><i class="fa-solid fa-comments" style="color:#a78bfa;"></i> Отзывы</h2>
+        {{range .Booster.Reviews_list}}
+        <div class="bp-review">
+            <div class="bp-review-avatar">{{slice .User 0 2}}</div>
+            <div class="bp-review-body">
+                <div class="bp-review-header">
+                    <span class="bp-review-author">{{.User}}</span>
+                    <span class="bp-review-stars">⭐⭐⭐⭐⭐</span>
+                </div>
+                <p class="bp-review-text">{{.Text}}</p>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+{{end}}

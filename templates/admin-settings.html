@@ -1,0 +1,636 @@
+{{define "admin-settings"}}
+<style>
+    /* Анимации и глобальные стили (как в admin-dashboard) */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+        50% { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
+    }
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Основной контейнер */
+    .admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Hero-блок (как в дашборде) */
+    .admin-hero {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2rem 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .admin-hero::before {
+        content: '';
+        position: absolute;
+        top: -30%; right: -15%;
+        width: 350px; height: 350px;
+        background: radial-gradient(circle, rgba(239,68,68,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .admin-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.015), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .admin-hero > * { position: relative; z-index: 1; }
+    .admin-avatar {
+        width: 64px; height: 64px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        flex-shrink: 0;
+        color: #fff;
+        animation: pulseGlow 3s ease-in-out infinite;
+    }
+    .admin-hero-info { flex: 1; }
+    .admin-hero-info h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 0%, #fca5a5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+    .admin-hero-info p {
+        color: rgba(255,255,255,0.35);
+        margin: 0.2rem 0 0;
+        font-size: 0.85rem;
+    }
+    .admin-hero-actions a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1.3rem;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.5);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.25s;
+    }
+    .admin-hero-actions a:hover {
+        color: #f87171;
+        border-color: rgba(239,68,68,0.3);
+        background: rgba(239,68,68,0.08);
+    }
+
+    /* Вкладки (tabs) – в стиле меню дашборда, но горизонтально */
+    .settings-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+    .settings-tab {
+        background: rgba(14,14,38,0.75);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.5rem;
+        padding: 0.9rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.6);
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .settings-tab i { font-size: 1rem; }
+    .settings-tab.active {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 4px 12px rgba(239,68,68,0.25);
+    }
+    .settings-tab:hover:not(.active) {
+        transform: translateY(-2px);
+        border-color: rgba(239,68,68,0.3);
+        background: rgba(239,68,68,0.1);
+        color: white;
+    }
+
+    /* Панели с содержимым */
+    .settings-panel {
+        display: none;
+        animation: fadeUp 0.4s ease;
+    }
+    .settings-panel.active {
+        display: block;
+    }
+
+    /* Карточки (как admin-table-wrap) */
+    .settings-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .settings-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .settings-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 25px rgba(139,92,246,0.1);
+    }
+    .settings-card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin-bottom: 1.5rem;
+        color: #fff;
+        letter-spacing: -0.2px;
+    }
+    .settings-group {
+        margin-bottom: 1.5rem;
+    }
+    .settings-group label {
+        display: block;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 0.5rem;
+    }
+    .settings-group input,
+    .settings-group select,
+    .settings-group textarea {
+        width: 100%;
+        background: rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 1rem;
+        padding: 0.8rem 1rem;
+        color: white;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+    .settings-group input:focus,
+    .settings-group select:focus,
+    .settings-group textarea:focus {
+        outline: none;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239,68,68,0.2);
+    }
+    .settings-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .settings-checkbox input {
+        width: auto;
+        transform: scale(1.2);
+        margin-left: 0.2rem;
+    }
+    .settings-checkbox label {
+        margin: 0;
+        text-transform: none;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.85rem;
+    }
+
+    /* Кнопки */
+    .settings-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 100px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239,68,68,0.3);
+    }
+    .btn-reset {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 0.8rem 2rem;
+        border-radius: 100px;
+        color: rgba(255,255,255,0.7);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-reset:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(239,68,68,0.4);
+        color: #f87171;
+    }
+
+    /* Загрузка файлов */
+    .file-upload {
+        position: relative;
+        display: inline-block;
+    }
+    .file-upload-btn {
+        background: rgba(255,255,255,0.05);
+        border: 1px dashed rgba(255,255,255,0.3);
+        border-radius: 1rem;
+        padding: 0.7rem 1.2rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        cursor: pointer;
+        color: rgba(255,255,255,0.7);
+        font-size: 0.85rem;
+        transition: 0.2s;
+    }
+    .file-upload-btn:hover {
+        background: rgba(239,68,68,0.1);
+        border-color: #ef4444;
+        color: #f87171;
+    }
+    .image-preview {
+        max-width: 120px;
+        max-height: 60px;
+        margin-top: 10px;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.3);
+        padding: 4px;
+    }
+
+    /* Toast уведомление */
+    .toast-notify {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: rgba(14,14,38,0.95);
+        backdrop-filter: blur(16px);
+        border-left: 4px solid #10b981;
+        padding: 12px 24px;
+        border-radius: 1rem;
+        color: white;
+        font-size: 0.9rem;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .toast-notify.error { border-left-color: #ef4444; }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .admin-page { padding: 4rem 1rem 2rem; }
+        .admin-hero { flex-direction: column; text-align: center; padding: 1.5rem; }
+        .admin-avatar { margin: 0 auto; }
+        .settings-tab { padding: 0.6rem 1rem; font-size: 0.75rem; }
+        .settings-card { padding: 1.2rem; }
+        .settings-actions { flex-direction: column; }
+        .btn-save, .btn-reset { width: 100%; justify-content: center; }
+    }
+    .toast-notify {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(14,14,38,0.95);
+    backdrop-filter: blur(16px);
+    border-left: 4px solid #10b981;
+    padding: 12px 24px;
+    border-radius: 1rem;
+    color: white;
+    font-size: 0.9rem;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease;
+}
+.toast-notify.error {
+    border-left-color: #ef4444;
+}
+.toast-notify.info {
+    border-left-color: #3b82f6;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+</style>
+
+<section class="admin-page">
+    <!-- Hero-блок как в дашборде -->
+    <div class="admin-hero">
+    <div class="admin-avatar">⚙️</div>
+    <div class="admin-hero-info">
+        <h1>Настройки платформы</h1>
+        <p>Управление всеми параметрами сайта</p>
+    </div>
+    <div class="admin-hero-actions">
+        <a href="/admin"><i class="fa-solid fa-arrow-left"></i> Назад</a>
+        <a href="/admin/logout"><i class="fa-solid fa-right-from-bracket"></i> Выйти</a>
+    </div>
+</div>
+
+    <!-- Вкладки -->
+    <div class="settings-tabs">
+        <div class="settings-tab active" data-tab="general"><i class="fas fa-globe"></i> Основные</div>
+        <div class="settings-tab" data-tab="finance"><i class="fas fa-coins"></i> Финансы</div>
+        <div class="settings-tab" data-tab="security"><i class="fas fa-shield-alt"></i> Безопасность</div>
+        <div class="settings-tab" data-tab="notifications"><i class="fas fa-bell"></i> Уведомления</div>
+        <div class="settings-tab" data-tab="seo"><i class="fas fa-chart-line"></i> SEO & Метрики</div>
+        <div class="settings-tab" data-tab="integrations"><i class="fas fa-plug"></i> Интеграции</div>
+        <div class="settings-tab" data-tab="design"><i class="fas fa-palette"></i> Дизайн</div>
+        <div class="settings-tab" data-tab="advanced"><i class="fas fa-cogs"></i> Продвинутые</div>
+    </div>
+
+    <form id="settingsForm">
+        <!-- Панель: Основные -->
+        <div class="settings-panel active" id="panel-general">
+            <div class="settings-card">
+                <h3><i class="fas fa-info-circle"></i> Основные настройки</h3>
+                <div class="settings-group"><label>Название сайта</label><input type="text" name="site_name" value="{{ .Settings.site_name }}"></div>
+                <div class="settings-group"><label>Описание сайта (meta description)</label><textarea name="site_description" rows="2">{{ .Settings.site_description }}</textarea></div>
+                <div class="settings-group"><label>Ключевые слова (SEO)</label><input type="text" name="site_keywords" value="{{ .Settings.site_keywords }}"></div>
+                <div class="settings-group"><label>Контактный email</label><input type="email" name="contact_email" value="{{ .Settings.contact_email }}"></div>
+                <div class="settings-group">
+                    <label>Логотип</label>
+                    <div class="file-upload">
+                        <div class="file-upload-btn" onclick="document.getElementById('logoInput').click()"><i class="fas fa-upload"></i> Загрузить логотип</div>
+                        <input type="file" id="logoInput" accept="image/*" style="display:none">
+                    </div>
+                    <img id="logoPreview" class="image-preview" src="{{ .Settings.logo_url }}" onerror="this.style.display='none'">
+                </div>
+                <div class="settings-group">
+                    <label>Favicon</label>
+                    <div class="file-upload">
+                        <div class="file-upload-btn" onclick="document.getElementById('faviconInput').click()"><i class="fas fa-upload"></i> Загрузить favicon</div>
+                        <input type="file" id="faviconInput" accept="image/x-icon,image/png" style="display:none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель: Финансы -->
+        <div class="settings-panel" id="panel-finance">
+            <div class="settings-card">
+                <h3><i class="fas fa-chart-simple"></i> Финансовые параметры</h3>
+                <div class="settings-group"><label>Комиссия платформы (%)</label><input type="number" step="0.5" name="platform_fee" value="{{ .Settings.platform_fee }}"></div>
+                <div class="settings-group"><label>Минимальная сумма вывода ({{ .Settings.currency }})</label><input type="number" step="1" name="min_withdraw" value="{{ .Settings.min_withdraw }}"></div>
+                <div class="settings-group"><label>Валюта</label><select name="currency"><option value="₽" {{if eq .Settings.currency "₽"}}selected{{end}}>Рубль (₽)</option><option value="$" {{if eq .Settings.currency "$"}}selected{{end}}>Доллар ($)</option><option value="€" {{if eq .Settings.currency "€"}}selected{{end}}>Евро (€)</option></select></div>
+                <div class="settings-group"><label>Реферальные отчисления (уровень 1, %)</label><input type="number" step="0.5" name="referral_percent" value="{{ .Settings.referral_percent }}"></div>
+                <div class="settings-group"><label>Реферальные отчисления (уровень 2, %)</label><input type="number" step="0.5" name="referral_level2" value="{{ .Settings.referral_level2 }}"></div>
+            </div>
+        </div>
+
+        <!-- Панель: Безопасность -->
+        <div class="settings-panel" id="panel-security">
+            <div class="settings-card">
+                <h3><i class="fas fa-lock"></i> Безопасность и доступ</h3>
+                <div class="settings-group settings-checkbox"><input type="checkbox" name="enable_registration" id="regToggle" {{if eq .Settings.enable_registration "true"}}checked{{end}}><label>Разрешить регистрацию новых пользователей</label></div>
+                <div class="settings-group"><label>Время жизни сессии (часы)</label><input type="number" name="session_hours" value="{{ .Settings.session_hours }}"></div>
+                <div class="settings-group"><label>Максимум заказов в день (0 = без лимита)</label><input type="number" name="max_orders_per_day" value="{{ .Settings.max_orders_per_day }}"></div>
+                <div class="settings-group"><label>reCAPTCHA Site Key</label><input type="text" name="recaptcha_site_key" value="{{ .Settings.recaptcha_site_key }}"></div>
+                <div class="settings-group"><label>reCAPTCHA Secret Key</label><input type="text" name="recaptcha_secret_key" value="{{ .Settings.recaptcha_secret_key }}"></div>
+            </div>
+        </div>
+
+        <!-- Панель: Уведомления (SMTP + Telegram) -->
+        <div class="settings-panel" id="panel-notifications">
+            <div class="settings-card">
+                <h3><i class="fas fa-envelope"></i> Email (SMTP)</h3>
+                <div class="settings-group"><label>SMTP Host</label><input type="text" name="smtp_host" value="{{ .Settings.smtp_host }}"></div>
+                <div class="settings-group"><label>SMTP Port</label><input type="text" name="smtp_port" value="{{ .Settings.smtp_port }}"></div>
+                <div class="settings-group"><label>SMTP User</label><input type="text" name="smtp_user" value="{{ .Settings.smtp_user }}"></div>
+                <div class="settings-group"><label>SMTP Password</label><input type="password" name="smtp_password" value="{{ .Settings.smtp_password }}"></div>
+                <div class="settings-group"><label>From Email</label><input type="email" name="smtp_from" value="{{ .Settings.smtp_from }}"></div>
+            </div>
+            <div class="settings-card">
+                <h3><i class="fab fa-telegram"></i> Telegram уведомления</h3>
+                <div class="settings-group"><label>Bot Token</label><input type="text" name="telegram_bot_token" value="{{ .Settings.telegram_bot_token }}"></div>
+                <div class="settings-group"><label>Chat ID</label><input type="text" name="telegram_chat_id" value="{{ .Settings.telegram_chat_id }}"></div>
+            </div>
+        </div>
+
+        <!-- Панель: SEO и метрики -->
+        <div class="settings-panel" id="panel-seo">
+            <div class="settings-card">
+                <h3><i class="fas fa-chart-line"></i> Аналитика и кэширование</h3>
+                <div class="settings-group"><label>Google Analytics ID (GA4)</label><input type="text" name="ga_id" value="{{ .Settings.ga_id }}"></div>
+                <div class="settings-group"><label>Yandex Metrika ID</label><input type="text" name="ym_id" value="{{ .Settings.ym_id }}"></div>
+                <div class="settings-group"><label>Таймаут кэша (секунды)</label><input type="number" name="cache_timeout" value="{{ .Settings.cache_timeout }}"></div>
+            </div>
+        </div>
+
+        <!-- Панель: Интеграции -->
+        <div class="settings-panel" id="panel-integrations">
+            <div class="settings-card">
+                <h3><i class="fas fa-code-branch"></i> API и Webhook</h3>
+                <div class="settings-group"><label>Webhook URL (события заказов)</label><input type="url" name="webhook_url" value="{{ .Settings.webhook_url }}" placeholder="https://your-server.com/webhook"></div>
+            </div>
+        </div>
+
+        <!-- Панель: Дизайн -->
+        <div class="settings-panel" id="panel-design">
+            <div class="settings-card">
+                <h3><i class="fas fa-palette"></i> Кастомизация цветов</h3>
+                <div class="settings-group"><label>Основной цвет (primary)</label><input type="color" name="primary_color" value="{{ .Settings.primary_color }}"></div>
+                <div class="settings-group"><label>Вторичный цвет (secondary)</label><input type="color" name="secondary_color" value="{{ .Settings.secondary_color }}"></div>
+            </div>
+        </div>
+
+        <!-- Панель: Продвинутые -->
+        <div class="settings-panel" id="panel-advanced">
+            <div class="settings-card">
+                <div class="settings-group">
+    <label>Время окончания техработ (МСК)</label>
+    <input type="datetime-local" name="maintenance_end_time" value="{{ .Settings.maintenance_end_time }}">
+    <p style="font-size:0.7rem; color:rgba(255,255,255,0.3); margin-top:4px;">Оставьте пустым – таймер будет скрыт или покажет "Скоро открытие"</p>
+</div>
+                <h3><i class="fas fa-database"></i> Режим обслуживания и производительность</h3>
+                <div class="settings-group settings-checkbox"><input type="checkbox" name="maintenance_mode" id="maintenanceMode" {{if eq .Settings.maintenance_mode "true"}}checked{{end}}><label>Режим обслуживания (сайт недоступен для пользователей)</label></div>
+                <div class="settings-group"><label>Сообщение в режиме обслуживания</label><textarea name="maintenance_message" rows="2">{{ .Settings.maintenance_message }}</textarea></div>
+            </div>
+        </div>
+
+        <!-- Кнопки сохранения/сброса -->
+        <div class="settings-actions">
+            <button type="button" class="btn-reset" id="resetDefaultsBtn"><i class="fas fa-undo-alt"></i> Сбросить по умолчанию</button>
+            <button type="submit" class="btn-save"><i class="fas fa-save"></i> Сохранить все</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    // Переключение вкладок
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.dataset.tab;
+            document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(`panel-${target}`).classList.add('active');
+        });
+    });
+
+    // Загрузка логотипа
+    const logoInput = document.getElementById('logoInput');
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('logo', file);
+            showToast('Загрузка...', 'info', 0);
+            fetch('/admin/upload-logo', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('logoPreview').src = data.url + '?t=' + Date.now();
+                        showToast('Логотип обновлён', 'success');
+                    } else showToast(data.error, 'error');
+                })
+                .catch(() => showToast('Ошибка загрузки', 'error'));
+        });
+    }
+
+    // Загрузка favicon
+    const faviconInput = document.getElementById('faviconInput');
+    if (faviconInput) {
+        faviconInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('favicon', file);
+            showToast('Загрузка...', 'info', 0);
+            fetch('/admin/upload-favicon', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => { 
+                    if(data.success) showToast('Favicon обновлён', 'success'); 
+                    else showToast(data.error, 'error'); 
+                })
+                .catch(() => showToast('Ошибка загрузки', 'error'));
+        });
+    }
+
+    // Сохранение всех настроек
+    const form = document.getElementById('settingsForm');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            if (key === 'enable_registration' || key === 'maintenance_mode') {
+                data[key] = value === 'on' ? 'true' : 'false';
+            } else {
+                data[key] = value;
+            }
+        }
+        if (!formData.has('enable_registration')) data.enable_registration = 'false';
+        if (!formData.has('maintenance_mode')) data.maintenance_mode = 'false';
+
+        showToast('Сохранение...', 'info', 0);
+        try {
+            const res = await fetch('/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.success) showToast('Настройки сохранены!', 'success');
+            else showToast('Ошибка: ' + (result.error || 'неизвестная'), 'error');
+        } catch(err) {
+            showToast('Ошибка соединения', 'error');
+        }
+    });
+
+    // Сброс к значениям по умолчанию
+    document.getElementById('resetDefaultsBtn').addEventListener('click', () => {
+        if (confirm('Сбросить ВСЕ настройки к значениям по умолчанию? Это действие нельзя отменить.')) {
+            showToast('Сброс настроек...', 'info', 0);
+            fetch('/admin/settings/reset', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => { 
+                    if(data.success) location.reload(); 
+                    else showToast('Ошибка сброса', 'error'); 
+                })
+                .catch(() => showToast('Ошибка соединения', 'error'));
+        }
+    });
+
+    // Улучшенная функция toast с анимацией
+    function showToast(message, type = 'info', duration = 3000) {
+        // Удаляем предыдущие уведомления, чтобы не накапливались
+        const oldToasts = document.querySelectorAll('.toast-notify');
+        oldToasts.forEach(t => t.remove());
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notify ${type}`;
+        let icon = '';
+        if (type === 'success') icon = '<i class="fas fa-check-circle"></i>';
+        else if (type === 'error') icon = '<i class="fas fa-exclamation-triangle"></i>';
+        else if (type === 'info') icon = '<i class="fas fa-info-circle"></i>';
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        document.body.appendChild(toast);
+
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+    }
+
+    // Устанавливаем CSS переменную primary цвета
+    document.documentElement.style.setProperty('--primary-color', '{{ .Settings.primary_color }}');
+</script>
+{{end}}

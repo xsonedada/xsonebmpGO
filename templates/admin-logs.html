@@ -1,0 +1,218 @@
+{{define "admin-logs"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .logs-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .logs-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .logs-back:hover { color: #f87171; }
+
+    .logs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .logs-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .logs-header h1 i {
+        -webkit-text-fill-color: #9ca3af;
+    }
+    .logs-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .logs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .log-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.5rem;
+        padding: 1.1rem 1.6rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .log-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .log-card > * { position: relative; z-index: 1; }
+    .log-card:hover {
+        border-color: rgba(139,92,246,0.12);
+        box-shadow: 0 0 15px rgba(139,92,246,0.04);
+    }
+
+    .log-inner {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 700px) {
+        .log-inner { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+    }
+
+    .log-id {
+        color: rgba(255,255,255,0.2);
+        font-size: 0.78rem;
+        font-weight: 600;
+        min-width: 40px;
+        font-family: 'Courier New', monospace;
+    }
+    .log-admin {
+        font-weight: 600;
+        color: #a78bfa;
+        min-width: 110px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .log-action {
+        padding: 0.25rem 0.8rem;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .log-action.ban {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+    .log-action.dispute {
+        background: rgba(245,158,11,0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(245,158,11,0.15);
+    }
+    .log-action.other {
+        background: rgba(139,92,246,0.1);
+        color: #a78bfa;
+        border: 1px solid rgba(139,92,246,0.15);
+    }
+
+    .log-details {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.85rem;
+        flex: 1;
+        min-width: 150px;
+    }
+    .log-time {
+        color: rgba(255,255,255,0.25);
+        font-size: 0.75rem;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .logs-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        border-radius: 2rem;
+        background: rgba(14,14,38,0.7);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255,255,255,0.04);
+    }
+    .logs-empty i {
+        font-size: 3rem;
+        color: rgba(255,255,255,0.08);
+        display: block;
+        margin-bottom: 1rem;
+    }
+    .logs-empty p {
+        color: rgba(255,255,255,0.25);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+</style>
+
+<section class="logs-page">
+    <a href="/admin" class="logs-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="logs-header">
+        <h1><i class="fa-solid fa-clock-rotate-left"></i> Логи действий</h1>
+        {{if .Data.Logs}}
+        <span class="logs-count">{{len .Data.Logs}} записей</span>
+        {{end}}
+    </div>
+
+    {{if .Data.Logs}}
+    <div class="logs-list">
+        {{range .Data.Logs}}
+        <div class="log-card">
+            <div class="log-inner">
+                <span class="log-id">#{{.ID}}</span>
+                <span class="log-admin"><i class="fa-solid fa-user-shield"></i> {{if .Username}}{{.Username}}{{else}}Админ #{{.AdminID}}{{end}}</span>
+                <span class="log-action 
+                    {{if eq .Action "ban"}}ban
+                    {{else if eq .Action "resolve_dispute"}}dispute
+                    {{else}}other{{end}}">
+                    {{.Action}}
+                </span>
+                <span class="log-details">{{.Details}}</span>
+                <span class="log-time"><i class="fa-regular fa-clock"></i> {{.CreatedAt.Format "02.01 15:04"}}</span>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="logs-empty">
+        <i class="fa-solid fa-inbox"></i>
+        <p>Логи пусты</p>
+    </div>
+    {{end}}
+</section>
+{{end}}

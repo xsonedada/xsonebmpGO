@@ -1,0 +1,81 @@
+{{define "admin-ticket-detail"}}
+<style>
+    .ticket-page { max-width: 900px; margin: 0 auto; padding: 7rem 2rem 4rem; }
+    
+    .ticket-header-card { background: rgba(20,20,45,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.06); border-radius: 1.5rem; padding: 1.8rem; margin-bottom: 1.5rem; }
+    .ticket-header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem; }
+    .ticket-header-info h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+    .ticket-header-meta { color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+    .ticket-header-meta span { margin-right: 1rem; }
+    
+    .ticket-status-form { display: flex; gap: 0.5rem; align-items: center; }
+    .ticket-status-form select { padding: 0.5rem; border-radius: 0.8rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.85rem; }
+    
+    .chat-card { background: rgba(20,20,45,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.06); border-radius: 1.5rem; padding: 1.5rem; }
+    .chat-card h3 { margin: 0 0 1rem; }
+    
+    .chat-messages { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; padding-right: 0.5rem; }
+    .chat-msg { padding: 0.8rem 1rem; border-radius: 1rem; max-width: 80%; }
+    .chat-msg.admin { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.2); align-self: flex-end; }
+    .chat-msg.user { background: rgba(255,255,255,0.04); }
+    .chat-msg strong { font-size: 0.85rem; }
+    .chat-msg p { margin: 0.3rem 0 0; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+    .chat-msg small { color: rgba(255,255,255,0.3); font-size: 0.7rem; display: block; margin-top: 0.3rem; }
+    
+    .chat-form { display: flex; gap: 0.5rem; }
+    .chat-form input { flex:1; padding:0.8rem 1rem; border-radius:1.2rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:white; }
+    .chat-form button { padding:0.8rem 1.5rem; border-radius:1.2rem; background:#8b5cf6; color:white; border:none; cursor:pointer; font-weight:600; }
+    
+    @media(max-width:768px){.ticket-page{padding:5rem 1rem 2rem}}
+</style>
+
+<section class="ticket-page">
+    <a href="/admin/tickets" class="btn btn-outline btn-sm" style="margin-bottom: 1rem;"><i class="fa-solid fa-arrow-left"></i> Назад к тикетам</a>
+    
+    <div class="ticket-header-card">
+        <div class="ticket-header-top">
+            <div class="ticket-header-info">
+                <h1 class="gradient-text">#{{.Data.Ticket.ID}} — {{.Data.Ticket.Subject}}</h1>
+                <div class="ticket-header-meta">
+                    <span>📂 {{.Data.Ticket.Category}}</span>
+                    <span>📅 {{.Data.Ticket.CreatedAt.Format "02.01.2006 15:04"}}</span>
+                </div>
+                <p style="color:rgba(255,255,255,0.6);margin-top:1rem;">{{.Data.Ticket.Description}}</p>
+            </div>
+            <div>
+                <span style="display:inline-block;padding:0.4rem 1rem;border-radius:1rem;font-weight:600;font-size:0.85rem;
+                    {{if eq .Data.Ticket.Status "open"}}background:rgba(245,158,11,0.15);color:#fbbf24
+                    {{else if eq .Data.Ticket.Status "in_progress"}}background:rgba(59,130,246,0.15);color:#60a5fa
+                    {{else}}background:rgba(16,185,129,0.15);color:#10b981{{end}}">
+                    {{if eq .Data.Ticket.Status "open"}}Открыт{{else if eq .Data.Ticket.Status "in_progress"}}В работе{{else}}Закрыт{{end}}
+                </span>
+                <form method="POST" action="/admin/ticket/{{.Data.Ticket.ID}}/status" class="ticket-status-form" style="margin-top:0.8rem;">
+                    <select name="status">
+                        <option value="open" {{if eq .Data.Ticket.Status "open"}}selected{{end}}>Открыт</option>
+                        <option value="in_progress" {{if eq .Data.Ticket.Status "in_progress"}}selected{{end}}>В работе</option>
+                        <option value="closed" {{if eq .Data.Ticket.Status "closed"}}selected{{end}}>Закрыт</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm" style="background:#8b5cf6;color:white;">Обновить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-card">
+        <h3>💬 Обсуждение</h3>
+        <div class="chat-messages">
+            {{range .Data.Messages}}
+            <div class="chat-msg {{if .is_admin}}admin{{else}}user{{end}}">
+                <strong>{{.username}}{{if .is_admin}} 👑{{end}}</strong>
+                <p>{{.message}}</p>
+                <small>{{.created_at}}</small>
+            </div>
+            {{end}}
+        </div>
+        <form method="POST" action="/admin/ticket/{{.Data.Ticket.ID}}/message" class="chat-form">
+            <input type="text" name="message" placeholder="Ответить..." required>
+            <button type="submit">📤</button>
+        </form>
+    </div>
+</section>
+{{end}}

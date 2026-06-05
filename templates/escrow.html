@@ -1,0 +1,82 @@
+{{define "escrow"}}
+<section style="padding: 8rem 2rem; max-width: 1200px; margin: 0 auto;">
+    <h1 class="gradient-text" style="margin-bottom: 2rem;"><i class="fa-solid fa-shield-halved"></i> Эскроу-система</h1>
+    
+    <!-- Покупки -->
+    <div class="glass" style="padding: 2rem; border-radius: 2rem; margin-bottom: 2rem;">
+        <h3><i class="fa-solid fa-cart-shopping"></i> Мои покупки (замороженные средства)</h3>
+        {{if .Data.Purchases}}
+        {{range .Data.Purchases}}
+        <div class="glass-inner" style="padding: 1.2rem; border-radius: 1rem; margin: 0.8rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <strong>#{{.OrderID}} - {{.Title}}</strong>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">Продавец: {{.Name}}</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-weight: 700;">{{printf "%.0f" .Amount}} ₽</span>
+                <span style="padding: 0.3rem 0.8rem; border-radius: 1rem; font-size: 0.85rem;
+                    {{if eq .Status "frozen"}}background: rgba(59,130,246,0.2); color: #60a5fa;
+                    {{else if eq .Status "released"}}background: rgba(16,185,129,0.2); color: #34d399;
+                    {{else}}background: rgba(239,68,68,0.2); color: #fca5a5;{{end}}">
+                    {{if eq .Status "frozen"}}🔒 Заморожено{{else if eq .Status "released"}}✅ Выплачено{{else}}↩️ Возврат{{end}}
+                </span>
+                {{if eq .Status "frozen"}}
+                <button class="btn btn-success btn-sm" onclick="releaseEscrow({{.OrderID}})" style="background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 1.5rem; cursor: pointer;">
+                    ✅ Подтвердить
+                </button>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+        {{else}}
+        <p style="color: rgba(255,255,255,0.5); text-align: center;">Нет активных покупок</p>
+        {{end}}
+    </div>
+    
+    <!-- Продажи -->
+    <div class="glass" style="padding: 2rem; border-radius: 2rem;">
+        <h3><i class="fa-solid fa-tag"></i> Мои продажи (ожидают подтверждения)</h3>
+        {{if .Data.Sales}}
+        {{range .Data.Sales}}
+        <div class="glass-inner" style="padding: 1.2rem; border-radius: 1rem; margin: 0.8rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <strong>#{{.OrderID}} - {{.Title}}</strong>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">Покупатель: {{.Name}}</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-weight: 700;">{{printf "%.0f" .Amount}} ₽</span>
+                <span style="padding: 0.3rem 0.8rem; border-radius: 1rem; font-size: 0.85rem;
+                    {{if eq .Status "frozen"}}background: rgba(59,130,246,0.2); color: #60a5fa;
+                    {{else if eq .Status "released"}}background: rgba(16,185,129,0.2); color: #34d399;
+                    {{else}}background: rgba(239,68,68,0.2); color: #fca5a5;{{end}}">
+                    {{if eq .Status "frozen"}}🔒 Ожидает{{else if eq .Status "released"}}✅ Получено{{else}}↩️ Возврат{{end}}
+                </span>
+            </div>
+        </div>
+        {{end}}
+        {{else}}
+        <p style="color: rgba(255,255,255,0.5); text-align: center;">Нет продаж</p>
+        {{end}}
+    </div>
+</section>
+
+<script>
+async function releaseEscrow(orderID) {
+    if (!confirm('Подтвердить выполнение заказа? Средства будут переведены продавцу.')) return;
+    
+    try {
+        const response = await fetch('/api/escrow/release/' + orderID, { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch(e) {
+        console.error('Ошибка:', e);
+    }
+}
+</script>
+{{end}}

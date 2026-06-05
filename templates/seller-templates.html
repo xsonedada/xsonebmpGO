@@ -1,0 +1,408 @@
+{{define "seller-templates"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .templates-page {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .templates-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .templates-back:hover { color: var(--accent-light); }
+
+    .templates-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+    .templates-header h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ffffff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.03em;
+    }
+    .pro-badge {
+        font-size: 0.7rem;
+        background: rgba(245,158,11,0.12);
+        border: 1px solid rgba(245,158,11,0.25);
+        color: var(--gold);
+        padding: 0.3rem 0.8rem;
+        border-radius: 100px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    /* Карточка */
+    .templates-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .templates-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .templates-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .templates-card > * { position: relative; z-index: 1; }
+    .templates-card h4 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.02em;
+    }
+
+    .tpl-form-group {
+        margin-bottom: 1.2rem;
+    }
+    .tpl-input {
+        width: 100%;
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        box-sizing: border-box;
+        font-family: inherit;
+        letter-spacing: -0.01em;
+    }
+    .tpl-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .tpl-input::placeholder { color: var(--text-dim); }
+    .tpl-textarea {
+        resize: vertical;
+        min-height: 100px;
+        line-height: 1.6;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+    }
+    .btn-save:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+
+    /* Шаблон */
+    .tpl-item {
+        background: var(--surface);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-item);
+        padding: 1.6rem;
+        transition: all var(--transition);
+        animation: fadeUp 0.4s ease both;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .tpl-item:hover {
+        border-color: rgba(139,92,246,0.2);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.4), 0 0 0 1px rgba(139,92,246,0.06);
+    }
+    .tpl-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .tpl-item-body { flex: 1; min-width: 0; }
+    .tpl-item-title {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+        letter-spacing: -0.01em;
+    }
+    .tpl-item-text {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+    .tpl-item-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .btn-icon {
+        width: 38px; height: 38px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.02);
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition);
+        font-size: 0.85rem;
+        text-decoration: none;
+    }
+    .btn-icon:hover {
+        background: rgba(139,92,246,0.1);
+        color: var(--accent-light);
+        border-color: rgba(139,92,246,0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(139,92,246,0.15);
+    }
+    .btn-icon.danger {
+        color: #f87171;
+        border-color: rgba(239,68,68,0.15);
+        background: rgba(239,68,68,0.04);
+    }
+    .btn-icon.danger:hover {
+        background: rgba(239,68,68,0.12);
+        border-color: rgba(239,68,68,0.3);
+        color: #fca5a5;
+    }
+
+    .tpl-edit-form {
+        display: none;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        animation: fadeSlide 0.25s ease;
+    }
+    .tpl-edit-form .tpl-input {
+        margin-bottom: 0.7rem;
+        font-size: 0.88rem;
+        padding: 0.75rem 1.1rem;
+    }
+    .tpl-edit-form .tpl-textarea { min-height: 70px; }
+    .tpl-edit-actions { display: flex; gap: 0.6rem; }
+    .btn-sm-save {
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        padding: 0.55rem 1.3rem;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .btn-sm-save:hover {
+        background: #7c3aed;
+        transform: translateY(-1px);
+    }
+    .btn-sm-cancel {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 0.55rem 1.3rem;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all var(--transition);
+    }
+    .btn-sm-cancel:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.03);
+    }
+
+    .tpl-empty {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-dim);
+    }
+    .tpl-empty i {
+        font-size: 2.8rem;
+        display: block;
+        margin-bottom: 0.8rem;
+        opacity: 0.2;
+    }
+
+    @media (max-width: 480px) {
+        .templates-card { padding: 2rem 1.5rem; }
+    }
+</style>
+
+<section class="templates-page">
+    <a href="/profile" class="templates-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="templates-header">
+        <h1><i class="fa-solid fa-message"></i> Шаблоны сообщений</h1>
+        <span class="pro-badge"><i class="fa-solid fa-crown"></i> PRO</span>
+    </div>
+
+    <div class="templates-card">
+        <h4><i class="fa-solid fa-circle-plus" style="color:#a78bfa;"></i> Новый шаблон</h4>
+        <form method="POST" action="/seller/templates/save">
+            <div class="tpl-form-group">
+                <input type="text" name="title" placeholder="Название шаблона" required class="tpl-input">
+            </div>
+            <div class="tpl-form-group">
+                <textarea name="content" rows="3" placeholder="Текст сообщения..." required class="tpl-input tpl-textarea"></textarea>
+            </div>
+            <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+        </form>
+    </div>
+
+    {{if .Data.Templates}}
+    {{range .Data.Templates}}
+    <div class="tpl-item" id="tpl-{{.ID}}">
+        <div class="tpl-item-header">
+            <div class="tpl-item-body">
+                <div class="tpl-item-title">{{.Title}}</div>
+                <p class="tpl-item-text">{{.Content}}</p>
+            </div>
+            <div class="tpl-item-actions">
+                <button onclick="editTpl({{.ID}})" class="btn-icon">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <a href="/seller/template/{{.ID}}/delete" class="btn-icon danger" onclick="return confirm('Удалить шаблон?')">
+                    <i class="fa-solid fa-trash"></i>
+                </a>
+            </div>
+        </div>
+
+        <div id="edit-{{.ID}}" class="tpl-edit-form">
+            <form method="POST" action="/seller/template/{{.ID}}/edit">
+                <input type="text" name="title" value="{{.Title}}" class="tpl-input">
+                <textarea name="content" rows="2" class="tpl-input tpl-textarea">{{.Content}}</textarea>
+                <div class="tpl-edit-actions">
+                    <button type="submit" class="btn-sm-save"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+                    <button type="button" class="btn-sm-cancel" onclick="document.getElementById('edit-{{.ID}}').style.display='none'">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{end}}
+    {{else}}
+    <div class="templates-card">
+        <div class="tpl-empty">
+            <i class="fa-solid fa-inbox"></i>
+            Нет сохранённых шаблонов
+        </div>
+    </div>
+    {{end}}
+</section>
+
+<script>
+function editTpl(id) {
+    document.getElementById('edit-' + id).style.display = 'block';
+}
+</script>
+{{end}}

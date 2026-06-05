@@ -1,0 +1,259 @@
+{{define "marketplace.html"}}
+<link rel="stylesheet" href="/static/css/marketplace.css">
+<section class="mp-page">
+    <div class="mp-particles">
+        <div class="mp-particle" style="top:5%;left:10%;--x:30px;--y:-50px;animation-delay:0s;"></div>
+        <div class="mp-particle" style="top:20%;right:15%;--x:-40px;--y:-30px;animation-delay:1s;"></div>
+        <div class="mp-particle" style="top:50%;left:5%;--x:50px;--y:-40px;animation-delay:2s;"></div>
+        <div class="mp-particle" style="top:70%;right:10%;--x:-30px;--y:-50px;animation-delay:3s;"></div>
+        <div class="mp-particle" style="top:30%;left:60%;--x:20px;--y:-60px;animation-delay:4s;"></div>
+        <div class="mp-particle" style="top:80%;left:40%;--x:-50px;--y:-30px;animation-delay:5s;"></div>
+    </div>
+
+    <div class="mp-cosmos">
+        <div class="mp-cosmos-orb"></div>
+        <div class="mp-cosmos-ring2"></div>
+        <div class="mp-cosmos-ring"></div>
+        <div class="mp-cosmos-badge"><span class="dot"></span> <span>Платформа №1</span></div>
+        <h1>Маркетплейс</h1>
+        <p>Здесь вы обязательно найдёте именно то, что искали.</p>
+    </div>
+
+    <div class="mp-filters-wrap">
+        <div class="mp-search-wrapper">
+            <span class="mp-search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" class="mp-search" placeholder="Поиск по игре или названию..." id="mpSearch">
+            <button class="mp-search-clear" id="mpSearchClear" onclick="clearSearch()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <select class="mp-filter-select" id="mpGameFilter">
+            <option value="">Все игры</option>
+        </select>
+        <select class="mp-filter-select" id="mpSortFilter">
+            <option value="">По умолчанию</option>
+            <option value="price-asc">Цена: по возрастанию</option>
+            <option value="price-desc">Цена: по убыванию</option>
+            <option value="rating-desc">Рейтинг: высокий</option>
+        </select>
+        <button class="mp-filter-reset" id="mpFilterReset" onclick="resetFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Сбросить
+        </button>
+    </div>
+
+    <div class="mp-active-filters" id="mpActiveFilters"></div>
+    <div class="mp-results-info" id="mpResultsInfo"></div>
+
+    {{if .Boosts}}
+    <div class="mp-grid" id="mpGrid">
+        {{range .Boosts}}
+        <div class="mp-card" data-game="{{.Game}}" data-title="{{.Title}}" data-price="{{.Price}}" data-rating="{{.Rating}}" data-booster="{{.OwnerName}}" data-id="{{.ID}}">
+            <div class="mp-card-body" onclick="location.href='/booster/{{.ID}}'">
+                <div class="mp-top-row">
+                    <span class="mp-game-badge"><i class="fa-solid fa-gamepad"></i> {{.Game}}</span>
+                    <span class="mp-rate-badge"><i class="fa-solid fa-star"></i> {{printf "%.1f" .Rating}} ({{.Reviews}})</span>
+                </div>
+                <h3 class="mp-title">{{.Title}}</h3>
+                <p class="mp-desc">{{.Description}}</p>
+                <div class="mp-seller-row">
+                    <div class="mp-seller-av-wrap" onclick="event.stopPropagation(); location.href='/seller/{{.BoosterID}}'">
+                        <div class="mp-seller-av" style="background:#0a0a1f;">{{slice .OwnerName 0 2}}</div>
+                    </div>
+                    <div>
+                        <a href="/seller/{{.BoosterID}}" class="mp-seller-name" onclick="event.stopPropagation()">{{.OwnerName}}</a>
+                        <div class="mp-seller-sub">
+                            {{if gt .TotalSellerReviews 0}}
+                                {{.TotalSellerReviews}} 
+                                {{$mod10 := .TotalSellerReviews}}
+                                {{if and (gt $mod10 10) (lt $mod10 20)}}
+                                    отзывов
+                                {{else}}
+                                    {{$lastDigit := .TotalSellerReviews}}
+                                    {{if eq $lastDigit 1}}
+                                        отзыв
+                                    {{else if and (ge $lastDigit 2) (le $lastDigit 4)}}
+                                        отзыва
+                                    {{else}}
+                                        отзывов
+                                    {{end}}
+                                {{end}}
+                            {{else}}
+                                Пока нет отзывов
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mp-card-footer">
+                <span class="mp-price">{{printf "%.0f" .Price}} ₽</span>
+                <button class="mp-cart-btn" onclick="event.stopPropagation(); addToCart({{.ID}}, '{{.Title}}', {{.Price}}, '{{.Game}}', {{.BoosterID}})">
+                    <i class="fa-solid fa-cart-plus"></i>
+                </button>
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="mp-empty">
+        <div class="mp-empty-icon"><i class="fa-solid fa-box-open"></i></div>
+        <h3>Нет товаров</h3>
+    </div>
+    {{end}}
+
+    <div class="mp-no-results" id="mpNoResults">
+        <div class="mp-empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <h3>Ничего не найдено</h3>
+        <p>Попробуйте изменить параметры поиска</p>
+        <button class="mp-filter-reset-inline" onclick="resetFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Сбросить фильтры
+        </button>
+    </div>
+</section>
+
+<script>
+(function() {
+    const grid = document.getElementById('mpGrid');
+    const searchInput = document.getElementById('mpSearch');
+    const gameFilter = document.getElementById('mpGameFilter');
+    const sortFilter = document.getElementById('mpSortFilter');
+    const searchClear = document.getElementById('mpSearchClear');
+    const filterReset = document.getElementById('mpFilterReset');
+    const activeFilters = document.getElementById('mpActiveFilters');
+    const resultsInfo = document.getElementById('mpResultsInfo');
+    const noResults = document.getElementById('mpNoResults');
+    
+    let allCards = [];
+    let debounceTimer;
+
+    function init() {
+        if (!grid) return;
+        
+        allCards = Array.from(grid.querySelectorAll('.mp-card'));
+        
+        const games = new Set();
+        allCards.forEach(card => {
+            const game = card.dataset.game;
+            if (game) games.add(game);
+        });
+        
+        const sortedGames = Array.from(games).sort();
+        sortedGames.forEach(game => {
+            const option = document.createElement('option');
+            option.value = game;
+            option.textContent = game;
+            gameFilter.appendChild(option);
+        });
+        
+        searchInput.addEventListener('input', debounceSearch);
+        gameFilter.addEventListener('change', applyFilters);
+        sortFilter.addEventListener('change', applyFilters);
+        
+        applyFilters();
+    }
+
+    function debounceSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyFilters, 300);
+        updateSearchClear();
+    }
+
+    function updateSearchClear() {
+        searchClear.style.display = searchInput.value ? 'flex' : 'none';
+    }
+
+    window.clearSearch = function() {
+        searchInput.value = '';
+        searchInput.focus();
+        updateSearchClear();
+        applyFilters();
+    };
+
+    window.resetFilters = function() {
+        searchInput.value = '';
+        gameFilter.value = '';
+        sortFilter.value = '';
+        updateSearchClear();
+        applyFilters();
+        searchInput.focus();
+    };
+
+    function applyFilters() {
+        if (!grid || allCards.length === 0) return;
+        
+        const query = searchInput.value.toLowerCase().trim();
+        const gameValue = gameFilter.value;
+        const sortValue = sortFilter.value;
+        
+        let visibleCount = 0;
+        const activeFilterTags = [];
+        
+        allCards.forEach(card => {
+            const game = card.dataset.game.toLowerCase();
+            const title = card.dataset.title.toLowerCase();
+            const booster = card.dataset.booster.toLowerCase();
+            
+            const matchGame = !gameValue || game === gameValue.toLowerCase();
+            const matchSearch = !query || game.includes(query) || title.includes(query) || booster.includes(query);
+            const visible = matchGame && matchSearch;
+            
+            card.style.display = visible ? '' : 'none';
+            card.style.order = '0';
+            
+            if (visible) visibleCount++;
+        });
+        
+        const visibleCards = allCards.filter(c => c.style.display !== 'none');
+        
+        if (sortValue === 'price-asc') {
+            visibleCards.sort((a, b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
+        } else if (sortValue === 'price-desc') {
+            visibleCards.sort((a, b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
+        } else if (sortValue === 'rating-desc') {
+            visibleCards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+        }
+        
+        visibleCards.forEach((card, index) => {
+            card.style.order = index;
+            grid.appendChild(card);
+        });
+        
+        updateSearchClear();
+        
+        const hasFilters = query || gameValue || sortValue;
+        filterReset.style.display = hasFilters ? 'flex' : 'none';
+        
+        if (query) activeFilterTags.push('Поиск: «' + query + '»');
+        if (gameValue) activeFilterTags.push('Игра: ' + gameValue);
+        
+        if (activeFilterTags.length > 0) {
+            activeFilters.style.display = 'flex';
+            activeFilters.innerHTML = activeFilterTags.map(tag => 
+                '<span class="mp-filter-tag">' + tag + '</span>'
+            ).join('');
+        } else {
+            activeFilters.style.display = 'none';
+        }
+        
+        if (hasFilters) {
+            resultsInfo.style.display = 'block';
+            resultsInfo.textContent = 'Найдено: ' + visibleCount + ' из ' + allCards.length;
+        } else {
+            resultsInfo.style.display = 'none';
+        }
+        
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        if (grid) grid.style.display = visibleCount === 0 ? 'none' : '';
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+{{end}}

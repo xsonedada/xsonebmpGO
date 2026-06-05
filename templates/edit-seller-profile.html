@@ -1,0 +1,293 @@
+{{define "edit-seller-profile"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .esp-page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .esp-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .esp-back:hover { color: var(--accent-light); }
+
+    .esp-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 3rem 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .esp-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .esp-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .esp-card > * { position: relative; z-index: 1; }
+
+    .esp-header {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    .esp-icon {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        animation: float 3s ease-in-out infinite;
+    }
+    .esp-icon i { color: var(--accent-light); font-size: 1.3rem; }
+    .esp-header-text h1 {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.3rem;
+        letter-spacing: -0.03em;
+    }
+    .esp-header-text p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .esp-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .esp-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .esp-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-left: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .esp-label i {
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .esp-textarea {
+        padding: 0.95rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        resize: vertical;
+        min-height: 120px;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+        line-height: 1.6;
+    }
+    .esp-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .esp-textarea::placeholder {
+        color: var(--text-dim);
+    }
+
+    .esp-color-row {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+    .esp-color-picker {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        border: 2px solid rgba(255,255,255,0.1);
+        cursor: pointer;
+        padding: 3px;
+        background: transparent;
+        flex-shrink: 0;
+        transition: all var(--transition);
+    }
+    .esp-color-picker:hover {
+        border-color: rgba(139,92,246,0.4);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.08);
+    }
+    .esp-color-input {
+        flex: 1;
+        padding: 0.95rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        letter-spacing: 0.02em;
+    }
+    .esp-color-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+
+    .esp-submit {
+        padding: 0.95rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        margin-top: 0.3rem;
+    }
+    .esp-submit:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+    .esp-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.3);
+    }
+
+    @media (max-width: 480px) {
+        .esp-card { padding: 2rem 1.5rem; }
+        .esp-header-text h1 { font-size: 1.5rem; }
+    }
+</style>
+
+<section class="esp-page">
+    <a href="/seller/{{.User.ID}}" class="esp-back"><i class="fa-solid fa-arrow-left"></i> Назад</a>
+
+    <div class="esp-card">
+        <div class="esp-header">
+            <div class="esp-icon">
+                <i class="fa-solid fa-paint-brush"></i>
+            </div>
+            <div class="esp-header-text">
+                <h1>Оформление профиля</h1>
+                <p>Настройте внешний вид и описание</p>
+            </div>
+        </div>
+
+        <form method="POST" action="/seller/profile/edit" class="esp-form">
+            <div class="esp-group">
+                <label class="esp-label"><i class="fa-solid fa-align-left"></i> О себе (био)</label>
+                <textarea name="bio" rows="4" placeholder="Расскажите о себе и своих услугах..." class="esp-textarea">{{.Data.Bio}}</textarea>
+            </div>
+
+            <div class="esp-group">
+                <label class="esp-label"><i class="fa-solid fa-palette"></i> Цвет акцента</label>
+                <div class="esp-color-row">
+                    <input type="color" name="custom_color_picker" value="{{.Data.CustomColor}}" class="esp-color-picker" onchange="document.querySelector('.esp-color-input').value = this.value">
+                    <input type="text" name="custom_color" value="{{.Data.CustomColor}}" class="esp-color-input" placeholder="#8b5cf6">
+                </div>
+            </div>
+
+            <button type="submit" class="esp-submit"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+        </form>
+    </div>
+</section>
+{{end}}

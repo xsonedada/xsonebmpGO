@@ -1,0 +1,472 @@
+{{define "seller-stats"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+        --info: #60a5fa;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .stats-page {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .stats-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .stats-back:hover { color: var(--accent-light); }
+
+    .stats-header {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    .stats-header-icon {
+        width: 56px; height: 56px;
+        border-radius: 18px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 3s ease-in-out infinite;
+    }
+    .stats-header-icon i { color: var(--accent-light); font-size: 1.4rem; }
+    .stats-header-text h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+        letter-spacing: -0.03em;
+    }
+    .stats-header-text p {
+        color: var(--gold);
+        font-size: 0.85rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 600;
+    }
+
+    /* KPI */
+    .stats-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+    @media (max-width: 768px) {
+        .stats-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stats-kpi {
+        background: var(--surface);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-item);
+        padding: 1.8rem 1.3rem;
+        text-align: center;
+        transition: all var(--transition);
+        animation: fadeUp 0.5s ease both;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    }
+    .stats-kpi::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .stats-kpi > * { position: relative; z-index: 1; }
+    .stats-kpi:hover {
+        border-color: rgba(139,92,246,0.25);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .stats-kpi-icon {
+        width: 48px; height: 48px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.9rem;
+        font-size: 1.1rem;
+    }
+    .stats-kpi-value {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+    }
+    .stats-kpi-label {
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-weight: 600;
+        margin-top: 0.3rem;
+    }
+    .stats-kpi-change {
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-top: 0.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+    }
+    .stats-kpi-change.up { color: #6ee7b7; }
+    .stats-kpi-change.down { color: #fca5a5; }
+
+    .record-badge {
+        position: absolute;
+        top: -8px; right: -8px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #0a0a1a;
+        padding: 0.25rem 0.6rem;
+        border-radius: 100px;
+        font-size: 0.62rem;
+        font-weight: 800;
+        animation: pulse 2.5s infinite;
+        z-index: 2;
+        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    }
+
+    /* Карточки */
+    .stats-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .stats-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .stats-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .stats-card > * { position: relative; z-index: 1; }
+    .stats-card h3 {
+        margin: 0 0 1.5rem;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.02em;
+    }
+
+    .stats-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.4rem;
+    }
+    @media (max-width: 800px) {
+        .stats-grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* Фиксированная высота для контейнеров графиков */
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 280px;
+    }
+    .chart-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* Топ товаров */
+    .stats-top-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        transition: all var(--transition);
+        border-radius: 0.8rem;
+        margin: 0 -0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .stats-top-item:last-child { border-bottom: none; }
+    .stats-top-item:hover {
+        background: rgba(139,92,246,0.04);
+        transform: translateX(6px);
+    }
+    .stats-top-dot {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 14px rgba(245,158,11,0.5);
+        flex-shrink: 0;
+    }
+    .stats-top-info { flex: 1; min-width: 0; }
+    .stats-top-info strong { color: #fff; font-size: 0.9rem; font-weight: 600; }
+    .stats-top-meta { color: var(--text-secondary); font-size: 0.76rem; }
+    .stats-top-revenue {
+        color: #6ee7b7;
+        font-weight: 700;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+</style>
+
+<section class="stats-page">
+    <a href="/profile" class="stats-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="stats-header">
+        <div class="stats-header-icon">
+            <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <div class="stats-header-text">
+            <h1>Расширенная статистика</h1>
+            <p><i class="fa-solid fa-crown"></i> PRO</p>
+        </div>
+    </div>
+
+    <div class="stats-kpi-grid">
+        <div class="stats-kpi">
+            {{if .Data.IsRecordSales}}<span class="record-badge">🏆</span>{{end}}
+            <div class="stats-kpi-icon" style="background:rgba(139,92,246,0.12);"><i class="fa-solid fa-chart-line" style="color:#a78bfa;"></i></div>
+            <div class="stats-kpi-value" style="color:#a78bfa;">{{.Data.TotalSales}}</div>
+            <div class="stats-kpi-label">Всего продаж</div>
+            {{if .Data.SalesChange}}<div class="stats-kpi-change {{if gt .Data.SalesChange 0.0}}up{{else}}down{{end}}">{{if gt .Data.SalesChange 0.0}}<i class="fa-solid fa-arrow-trend-up"></i>{{else}}<i class="fa-solid fa-arrow-trend-down"></i>{{end}} {{printf "%.0f" .Data.SalesChange}}%</div>{{end}}
+        </div>
+        <div class="stats-kpi">
+            {{if .Data.IsRecordEarnings}}<span class="record-badge">💰</span>{{end}}
+            <div class="stats-kpi-icon" style="background:rgba(16,185,129,0.12);"><i class="fa-solid fa-ruble-sign" style="color:#6ee7b7;"></i></div>
+            <div class="stats-kpi-value" style="color:#6ee7b7;">{{printf "%.0f" .Data.TotalEarned}} ₽</div>
+            <div class="stats-kpi-label">Заработано</div>
+            {{if .Data.EarningsChange}}<div class="stats-kpi-change {{if gt .Data.EarningsChange 0.0}}up{{else}}down{{end}}">{{if gt .Data.EarningsChange 0.0}}<i class="fa-solid fa-arrow-trend-up"></i>{{else}}<i class="fa-solid fa-arrow-trend-down"></i>{{end}} {{printf "%.0f" .Data.EarningsChange}}%</div>{{end}}
+        </div>
+        <div class="stats-kpi">
+            <div class="stats-kpi-icon" style="background:rgba(59,130,246,0.12);"><i class="fa-solid fa-calculator" style="color:#93c5fd;"></i></div>
+            <div class="stats-kpi-value" style="color:#93c5fd;">{{printf "%.0f" .Data.AvgOrderValue}} ₽</div>
+            <div class="stats-kpi-label">Средний чек</div>
+        </div>
+        <div class="stats-kpi">
+            <div class="stats-kpi-icon" style="background:rgba(245,158,11,0.12);"><i class="fa-solid fa-circle-check" style="color:#fcd34d;"></i></div>
+            <div class="stats-kpi-value" style="color:#fcd34d;">{{.Data.CompletedOrders}}</div>
+            <div class="stats-kpi-label">Завершено</div>
+        </div>
+    </div>
+
+    <div class="stats-grid-2">
+        <div class="stats-card">
+            <h3><i class="fa-solid fa-chart-pie" style="color:#a78bfa;"></i> Продажи по играм</h3>
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+        <div class="stats-card">
+            <h3><i class="fa-solid fa-chart-line" style="color:#6ee7b7;"></i> Доход по дням</h3>
+            <div class="chart-container">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{if .Data.TopBoosts}}
+    <div class="stats-card">
+        <h3><i class="fa-solid fa-crown" style="color:#fbbf24;"></i> Топ-5 товаров</h3>
+        {{range .Data.TopBoosts}}
+        <div class="stats-top-item">
+            <div class="stats-top-dot"></div>
+            <div class="stats-top-info">
+                <strong>{{.Title}}</strong>
+                <div class="stats-top-meta">{{.Sales}} продаж</div>
+            </div>
+            <span class="stats-top-revenue">{{printf "%.0f" .Revenue}} ₽</span>
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+var pieCtx = document.getElementById('pieChart');
+if (pieCtx) {
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [{{range .Data.GameStats}}"{{.Name}}",{{end}}],
+            datasets: [{
+                data: [{{range .Data.GameStats}}{{.Count}},{{end}}],
+                backgroundColor: [
+                    'rgba(139,92,246,0.8)',
+                    'rgba(16,185,129,0.7)',
+                    'rgba(245,158,11,0.7)',
+                    'rgba(59,130,246,0.7)',
+                    'rgba(239,68,68,0.6)',
+                    'rgba(236,72,153,0.6)',
+                    'rgba(249,115,22,0.6)',
+                    'rgba(132,204,22,0.6)'
+                ],
+                borderColor: [
+                    '#8b5cf6','#10b981','#fbbf24','#60a5fa',
+                    '#ef4444','#ec4899','#f97316','#84cc16'
+                ],
+                borderWidth: 2,
+                borderRadius: 4,
+                hoverBorderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { 
+                        color: 'rgba(255,255,255,0.6)', 
+                        font: { size: 11, family: 'Inter' }, 
+                        padding: 18,
+                        usePointStyle: true,
+                        pointStyleWidth: 8
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+}
+
+var lineCtx = document.getElementById('lineChart');
+if (lineCtx) {
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: [{{range .Data.DailyStats}}"{{.Date}}",{{end}}],
+            datasets: [{
+                data: [{{range .Data.DailyStats}}{{printf "%.0f" .Total}},{{end}}],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16,185,129,0.06)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#10b981',
+                pointBorderWidth: 2,
+                borderWidth: 2.5,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { 
+                    ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 10, family: 'Inter' } }, 
+                    grid: { display: false } 
+                },
+                y: { 
+                    ticks: { 
+                        color: 'rgba(255,255,255,0.35)', 
+                        font: { size: 10, family: 'Inter' },
+                        callback: function(value) { return value + ' ₽'; }
+                    }, 
+                    grid: { color: 'rgba(255,255,255,0.05)' } 
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+</script>
+{{end}}

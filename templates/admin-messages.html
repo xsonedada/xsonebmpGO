@@ -1,0 +1,94 @@
+{{define "admin-messages"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSoneBMP | Сообщения заказа</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #06060f;
+            --card-bg: rgba(12, 12, 28, 0.8);
+            --border: rgba(255, 255, 255, 0.06);
+            --accent: #a78bfa;
+            --text: #f0f0f0;
+            --muted: rgba(255, 255, 255, 0.4);
+            --radius: 1.2rem;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
+        
+        .admin-page { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        
+        .admin-back {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            color: var(--muted); text-decoration: none;
+            font-size: 0.85rem; margin-bottom: 1.5rem; transition: color 0.2s;
+        }
+        .admin-back:hover { color: #fff; }
+        
+        .admin-card {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 2rem; margin-bottom: 1.5rem;
+        }
+        
+        .admin-card h2 {
+            font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        
+        .admin-messages { display: flex; flex-direction: column; gap: 1rem; max-height: 500px; overflow-y: auto; margin-bottom: 1.5rem; }
+        
+        .admin-msg {
+            padding: 0.8rem 1rem; border-radius: 0.8rem;
+            background: rgba(255,255,255,0.03); max-width: 80%;
+        }
+        .admin-msg-header { display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-size: 0.75rem; }
+        .admin-msg-user { font-weight: 600; color: var(--accent); }
+        .admin-msg-time { color: var(--muted); }
+        .admin-msg-text { font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.8); }
+        
+        .admin-empty { text-align: center; padding: 3rem; color: var(--muted); }
+        .admin-empty i { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; opacity: 0.3; }
+        
+        @media (max-width: 768px) {
+            .admin-page { padding: 2rem 1rem; }
+            .admin-msg { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+<section class="admin-page">
+    <a href="/admin/orders" class="admin-back">
+        <i class="fa-solid fa-arrow-left"></i> Назад к заказам
+    </a>
+    
+    <div class="admin-card">
+        <h2><i class="fa-solid fa-comments" style="color:var(--accent);"></i> Сообщения заказа #{{.Data.OrderID}}</h2>
+        
+        {{if .Data.Messages}}
+        <div class="admin-messages">
+            {{range .Data.Messages}}
+            <div class="admin-msg">
+                <div class="admin-msg-header">
+                    <span class="admin-msg-user">{{.Username}}</span>
+                    <span class="admin-msg-time">{{.CreatedAt.Format "02.01.2006 15:04"}}</span>
+                </div>
+                <div class="admin-msg-text">{{.Text}}</div>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <div class="admin-empty">
+            <i class="fa-solid fa-comment-slash"></i>
+            <p>Нет сообщений</p>
+        </div>
+        {{end}}
+    </div>
+</section>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,292 @@
+{{define "edit-boost"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .eb-page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .eb-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .eb-back:hover { color: var(--accent-light); }
+
+    .eb-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 3rem 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .eb-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .eb-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .eb-card > * { position: relative; z-index: 1; }
+
+    .eb-hero {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 2.5rem;
+    }
+    .eb-icon {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        animation: float 3s ease-in-out infinite;
+    }
+    .eb-icon i { color: var(--accent-light); font-size: 1.3rem; }
+    .eb-hero-text h1 {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+        letter-spacing: -0.03em;
+    }
+    .eb-hero-text p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .eb-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .eb-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .eb-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-left: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .eb-label i {
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .eb-input,
+    .eb-textarea,
+    .eb-select {
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+    }
+    .eb-input:focus,
+    .eb-textarea:focus,
+    .eb-select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .eb-input::placeholder,
+    .eb-textarea::placeholder {
+        color: var(--text-dim);
+    }
+    .eb-textarea {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+    .eb-select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.3)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.3rem center;
+        padding-right: 2.8rem;
+    }
+    .eb-select option {
+        background: #1a1a3e;
+        color: #fff;
+    }
+
+    input[type='number'] {
+        -moz-appearance: textfield;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+
+    .eb-submit {
+        padding: 0.95rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        margin-top: 0.3rem;
+    }
+    .eb-submit:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+    .eb-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.3);
+    }
+
+    @media (max-width: 480px) {
+        .eb-card { padding: 2rem 1.5rem; }
+        .eb-hero-text h1 { font-size: 1.5rem; }
+    }
+</style>
+
+<section class="eb-page">
+    <a href="/profile" class="eb-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="eb-card">
+        <div class="eb-hero">
+            <div class="eb-icon">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+            <div class="eb-hero-text">
+                <h1>Редактирование</h1>
+                <p>{{.Data.Boost.Title}}</p>
+            </div>
+        </div>
+
+        <form method="POST" action="/boost/{{.Data.Boost.ID}}/edit" class="eb-form">
+            <div class="eb-group">
+                <label class="eb-label"><i class="fa-solid fa-gamepad"></i> Игра</label>
+                <select name="game" required class="eb-select">
+                    <option value="Dota 2" {{if eq .Data.Boost.Game "Dota 2"}}selected{{end}}>Dota 2</option>
+                    <option value="League of Legends" {{if eq .Data.Boost.Game "League of Legends"}}selected{{end}}>League of Legends</option>
+                    <option value="Valorant" {{if eq .Data.Boost.Game "Valorant"}}selected{{end}}>Valorant</option>
+                    <option value="CS2" {{if eq .Data.Boost.Game "CS2"}}selected{{end}}>CS2</option>
+                    <option value="World of Warcraft" {{if eq .Data.Boost.Game "World of Warcraft"}}selected{{end}}>World of Warcraft</option>
+                    <option value="Apex Legends" {{if eq .Data.Boost.Game "Apex Legends"}}selected{{end}}>Apex Legends</option>
+                </select>
+            </div>
+            <div class="eb-group">
+                <label class="eb-label"><i class="fa-solid fa-tag"></i> Название</label>
+                <input type="text" name="title" value="{{.Data.Boost.Title}}" required class="eb-input">
+            </div>
+            <div class="eb-group">
+                <label class="eb-label"><i class="fa-solid fa-align-left"></i> Описание</label>
+                <textarea name="description" required class="eb-textarea">{{.Data.Boost.Description}}</textarea>
+            </div>
+            <div class="eb-group">
+                <label class="eb-label"><i class="fa-solid fa-ruble-sign"></i> Цена</label>
+                <input type="number" name="price" value="{{printf "%.0f" .Data.Boost.Price}}" required class="eb-input">
+            </div>
+            <button type="submit" class="eb-submit"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
+        </form>
+    </div>
+</section>
+{{end}}

@@ -1,0 +1,224 @@
+{{define "dispute-open"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .dispute-open-page {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .dispute-open-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .dispute-open-back:hover { color: #f87171; }
+
+    .dispute-open-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.8rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .dispute-open-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .dispute-open-card > * { position: relative; z-index: 1; }
+
+    .dispute-open-icon {
+        width: 56px; height: 56px;
+        border-radius: 16px;
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+    .dispute-open-icon i {
+        color: #f87171;
+        font-size: 1.4rem;
+    }
+
+    .dispute-open-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.5rem;
+    }
+
+    .dispute-open-order {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.04);
+        color: rgba(255,255,255,0.45);
+        font-size: 0.88rem;
+        margin-bottom: 2rem;
+    }
+    .dispute-open-order i {
+        color: #f87171;
+        font-size: 0.8rem;
+    }
+
+    .dispute-open-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .dispute-open-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .dispute-open-group label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.3);
+        font-weight: 700;
+        margin-left: 0.3rem;
+    }
+    .dispute-open-group select,
+    .dispute-open-group textarea {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.25s;
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dispute-open-group select:focus,
+    .dispute-open-group textarea:focus {
+        border-color: rgba(239,68,68,0.4);
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+    }
+    .dispute-open-group select option {
+        background: #1a1a3e;
+        color: #fff;
+    }
+    .dispute-open-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    .dispute-open-group select::placeholder,
+    .dispute-open-group textarea::placeholder {
+        color: rgba(255,255,255,0.18);
+    }
+
+    .dispute-open-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .dispute-open-submit {
+        padding: 0.9rem 2.2rem;
+        border-radius: 100px;
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .dispute-open-submit:hover {
+        background: #dc2626;
+        box-shadow: 0 12px 30px rgba(239,68,68,0.3);
+        transform: translateY(-2px);
+    }
+    .dispute-open-cancel {
+        padding: 0.9rem 2.2rem;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.5);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.92rem;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .dispute-open-cancel:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.03);
+    }
+</style>
+
+<section class="dispute-open-page">
+    <a href="/order/{{.Data.Order.ID}}" class="dispute-open-back"><i class="fa-solid fa-arrow-left"></i> Назад к заказу</a>
+
+    <div class="dispute-open-card">
+        <div class="dispute-open-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h1 class="dispute-open-title">Открыть спор</h1>
+        <div class="dispute-open-order">
+            <i class="fa-solid fa-hashtag"></i> Заказ #{{.Data.Order.ID}}: {{.Data.Order.Title}}
+        </div>
+        
+        <form method="POST" action="/order/{{.Data.Order.ID}}/dispute" class="dispute-open-form">
+            <div class="dispute-open-group">
+                <label><i class="fa-solid fa-circle-exclamation"></i> Причина</label>
+                <select name="reason" required>
+                    <option value="Заказ не выполнен">Заказ не выполнен</option>
+                    <option value="Некачественное выполнение">Некачественное выполнение</option>
+                    <option value="Долгое выполнение">Долгое выполнение</option>
+                    <option value="Другое">Другое</option>
+                </select>
+            </div>
+            <div class="dispute-open-group">
+                <label><i class="fa-solid fa-align-left"></i> Описание проблемы</label>
+                <textarea name="description" rows="4" required placeholder="Опишите ситуацию подробно..."></textarea>
+            </div>
+            <div class="dispute-open-actions">
+                <button type="submit" class="dispute-open-submit"><i class="fa-solid fa-flag"></i> Открыть спор</button>
+                <a href="/order/{{.Data.Order.ID}}" class="dispute-open-cancel">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+{{end}}

@@ -1,0 +1,492 @@
+{{define "admin-edit-user"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSoneBMP | Редактирование пользователя</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #06060f;
+            --bg-card: rgba(12, 12, 28, 0.8);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --purple: #8b5cf6;
+            --purple-light: #a78bfa;
+            --green: #10b981;
+            --gold: #fbbf24;
+            --blue: #60a5fa;
+            --red: #ef4444;
+            --text-primary: #f0f0f0;
+            --text-muted: rgba(255, 255, 255, 0.45);
+            --radius-lg: 1.5rem;
+            --radius-md: 1rem;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg-primary); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            color: var(--text-primary); 
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        .admin-layout { display: flex; min-height: 100vh; }
+
+        .admin-sidebar {
+            width: 300px;
+            background: rgba(8, 8, 22, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border-subtle);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .admin-sidebar-brand {
+            display: flex; align-items: center; gap: 1rem;
+            margin-bottom: 2.5rem; padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .admin-sidebar-brand-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--purple), #6366f1);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.3rem; color: #fff;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .admin-sidebar-brand-text {
+            font-size: 1.4rem; font-weight: 800;
+            background: linear-gradient(135deg, #fff, #c4b5fd);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .admin-nav { display: flex; flex-direction: column; gap: 0.4rem; }
+        
+        .admin-nav-link {
+            display: flex; align-items: center; gap: 0.9rem;
+            padding: 0.75rem 1rem; border-radius: 12px;
+            color: rgba(255, 255, 255, 0.5); text-decoration: none;
+            transition: var(--transition); font-size: 0.88rem; font-weight: 500;
+        }
+
+        .admin-nav-link i { width: 22px; font-size: 1rem; text-align: center; }
+        .admin-nav-link:hover { background: rgba(139, 92, 246, 0.1); color: var(--purple-light); }
+        .admin-nav-link.active { 
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
+            color: var(--purple-light); border-left: 3px solid var(--purple); font-weight: 600;
+        }
+
+        .admin-main { flex: 1; margin-left: 300px; padding: 2rem 2.5rem; max-width: 1000px; }
+
+        .admin-topbar { margin-bottom: 2rem; }
+        .admin-back-link {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.85rem; font-weight: 500; transition: color 0.2s;
+        }
+        .admin-back-link:hover { color: var(--purple-light); }
+
+        .admin-card {
+            background: var(--bg-card); backdrop-filter: blur(25px);
+            border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+            padding: 2.5rem;
+        }
+
+        .admin-card-title {
+            font-size: 1.5rem; font-weight: 800; margin-bottom: 0.3rem;
+            background: linear-gradient(135deg, #fff, #c4b5fd);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .admin-card-subtitle {
+            color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;
+        }
+
+        .admin-form { display: flex; flex-direction: column; gap: 1.5rem; }
+
+        .admin-form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        
+        .admin-form-label {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.35); font-weight: 700;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        .admin-form-input {
+            padding: 0.9rem 1.2rem; border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff; font-size: 0.95rem; outline: none;
+            transition: var(--transition); font-family: inherit;
+        }
+
+        .admin-form-input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .admin-form-input::placeholder { color: rgba(255, 255, 255, 0.2); }
+
+        .admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+        .admin-form-actions {
+            display: flex; gap: 1rem; padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .admin-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1.8rem; border-radius: 100px;
+            font-weight: 700; font-size: 0.9rem; cursor: pointer;
+            transition: var(--transition); text-decoration: none; border: none;
+        }
+
+        .admin-btn-primary {
+            background: linear-gradient(135deg, var(--purple), #6366f1);
+            color: #fff; box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .admin-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(139, 92, 246, 0.45); }
+
+        .admin-btn-outline {
+            background: transparent; border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .admin-btn-outline:hover { border-color: rgba(255, 255, 255, 0.3); color: #fff; }
+
+        .admin-user-info {
+            display: flex; align-items: center; gap: 1.5rem;
+            margin-bottom: 2rem; padding: 1.5rem;
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: var(--radius-md);
+        }
+
+        .admin-user-avatar {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(135deg, var(--purple), #6366f1);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.5rem; color: #fff;
+            flex-shrink: 0;
+        }
+
+        .admin-user-meta { flex: 1; }
+        .admin-user-meta h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .admin-user-meta p { color: var(--text-muted); font-size: 0.8rem; }
+
+        .admin-user-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.3rem 0.8rem; border-radius: 100px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+
+        .admin-user-badge.banned { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .admin-user-badge.active { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+
+        @media (max-width: 1200px) {
+            .admin-sidebar { width: 80px; padding: 1.5rem 0.8rem; }
+            .admin-sidebar-brand-text, .admin-nav-link span { display: none; }
+            .admin-sidebar-brand { justify-content: center; }
+            .admin-nav-link { justify-content: center; padding: 0.7rem; }
+            .admin-nav-link i { font-size: 1.1rem; }
+            .admin-main { margin-left: 80px; }
+        }
+
+        @media (max-width: 768px) {
+            .admin-main { padding: 1.2rem; }
+            .admin-form-row { grid-template-columns: 1fr; }
+            .admin-card { padding: 1.5rem; }
+        }
+         /* === SIDEBAR === */
+        .admin-sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: rgba(8, 8, 22, 0.97);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border);
+            z-index: 100;
+            transition: width var(--transition);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar:hover,
+        .admin-sidebar.expanded {
+            width: var(--sidebar-expanded);
+        }
+
+        .admin-sidebar-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--muted);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .admin-sidebar-toggle:hover {
+            color: #fff;
+            background: var(--accent-hover);
+        }
+
+        .admin-sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.4rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: var(--transition);
+            white-space: nowrap;
+            border-left: 3px solid transparent;
+        }
+
+        .admin-nav-item i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            color: var(--accent);
+        }
+
+        .admin-nav-item span {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-sidebar:hover .admin-nav-item span,
+        .admin-sidebar.expanded .admin-nav-item span {
+            opacity: 1;
+        }
+
+        .admin-nav-item:hover {
+            background: var(--accent-hover);
+            color: #fff;
+        }
+
+        .admin-nav-item.active {
+            background: var(--accent-hover);
+            color: var(--accent);
+            border-left-color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .admin-nav-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.5rem 1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-sidebar:hover .admin-nav-divider,
+        .admin-sidebar.expanded .admin-nav-divider {
+            opacity: 1;
+        }
+        .admin-sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.admin-sidebar-nav::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+}
+    </style>
+</head>
+<body>
+<div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-toggle" id="sidebarToggle">
+            <i class="fa-solid fa-chevron-right" id="toggleIcon"></i>
+        </div>
+        <nav class="admin-sidebar-nav">
+    <a href="/admin" class="admin-nav-item active">
+        <i class="fa-solid fa-gauge-high"></i><span>Обзор</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/admin/users" class="admin-nav-item">
+        <i class="fa-solid fa-users"></i><span>Пользователи</span>
+    </a>
+    <a href="/admin/orders" class="admin-nav-item">
+        <i class="fa-solid fa-boxes-stacked"></i><span>Заказы</span>
+    </a>
+    <a href="/admin/boosts" class="admin-nav-item">
+        <i class="fa-solid fa-tags"></i><span>Товары</span>
+    </a>
+    <a href="/admin/reviews" class="admin-nav-item">
+        <i class="fa-solid fa-star"></i><span>Отзывы</span>
+    </a>
+    <a href="/admin/disputes" class="admin-nav-item">
+        <i class="fa-solid fa-scale-balanced"></i><span>Диспуты</span>
+    </a>
+    <a href="/admin/tickets" class="admin-nav-item">
+        <i class="fa-solid fa-ticket"></i><span>Тикеты</span>
+    </a>
+    <a href="/admin/verifications" class="admin-nav-item">
+        <i class="fa-solid fa-certificate"></i><span>Верификация</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/admin/promocodes" class="admin-nav-item">
+        <i class="fa-solid fa-ticket-simple"></i><span>Промокоды</span>
+    </a>
+    <a href="/admin/sales" class="admin-nav-item">
+        <i class="fa-solid fa-percent"></i><span>Акции</span>
+    </a>
+    <a href="/admin/notify" class="admin-nav-item">
+        <i class="fa-solid fa-bell"></i><span>Рассылка</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/admin/stats" class="admin-nav-item">
+        <i class="fa-solid fa-chart-pie"></i><span>Статистика</span>
+    </a>
+    <a href="/admin/charts" class="admin-nav-item">
+        <i class="fa-solid fa-chart-line"></i><span>Графики</span>
+    </a>
+    <a href="/admin/logs" class="admin-nav-item">
+        <i class="fa-solid fa-clock-rotate-left"></i><span>Логи</span>
+    </a>
+    <a href="/admin/transactions" class="admin-nav-item">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i><span>Транзакции</span>
+    </a>
+    <a href="/admin/settings" class="admin-nav-item">
+        <i class="fa-solid fa-sliders-h"></i><span>Настройки</span>
+    </a>
+    
+    <div class="admin-nav-divider"></div>
+    
+    <a href="/" class="admin-nav-item" target="_blank">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i><span>На сайт</span>
+    </a>
+    <a href="/admin/logout" class="admin-nav-item" style="color:#f87171;">
+        <i class="fa-solid fa-right-from-bracket"></i><span>Выйти</span>
+    </a>
+</nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-topbar">
+            <a href="/admin/users" class="admin-back-link">
+                <i class="fa-solid fa-arrow-left"></i> Назад к пользователям
+            </a>
+        </div>
+
+        {{if .Data.EditUser}}
+        <div class="admin-card">
+            <h2 class="admin-card-title">Редактирование пользователя</h2>
+            <p class="admin-card-subtitle">Измените данные пользователя #{{.Data.EditUser.ID}}</p>
+
+            <div class="admin-user-info">
+                <div class="admin-user-avatar">{{slice .Data.EditUser.Username 0 2}}</div>
+                <div class="admin-user-meta">
+                    <h3>{{.Data.EditUser.Username}}</h3>
+                    <p>{{.Data.EditUser.Email}} • Уровень {{.Data.EditUser.Level}}</p>
+                </div>
+                <span class="admin-user-badge {{if .Data.IsBanned}}banned{{else}}active{{end}}">
+                    <i class="fa-solid {{if .Data.IsBanned}}fa-ban{{else}}fa-circle-check{{end}}"></i>
+                    {{if .Data.IsBanned}}Забанен{{else}}Активен{{end}}
+                </span>
+            </div>
+
+            <form method="POST" action="/admin/user/{{.Data.EditUser.ID}}" class="admin-form">
+                <div class="admin-form-row">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label"><i class="fa-solid fa-user"></i> Имя пользователя</label>
+                        <input type="text" name="username" class="admin-form-input" value="{{.Data.EditUser.Username}}" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-form-label"><i class="fa-solid fa-envelope"></i> Email</label>
+                        <input type="email" name="email" class="admin-form-input" value="{{.Data.EditUser.Email}}" required>
+                    </div>
+                </div>
+                <div class="admin-form-row">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label"><i class="fa-solid fa-ruble-sign"></i> Баланс</label>
+                        <input type="number" name="balance" class="admin-form-input" value="{{printf "%.0f" .Data.EditUser.Balance}}" step="1" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-form-label"><i class="fa-solid fa-arrow-up-9-1"></i> Уровень</label>
+                        <input type="number" name="level" class="admin-form-input" value="{{.Data.EditUser.Level}}" min="1" max="100">
+                    </div>
+                </div>
+                <div class="admin-form-actions">
+                    <button type="submit" class="admin-btn admin-btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Сохранить
+                    </button>
+                    <a href="/admin/users" class="admin-btn admin-btn-outline">Отмена</a>
+                </div>
+            </form>
+        </div>
+        {{else}}
+        <div class="admin-card">
+            <p style="color:var(--text-muted); text-align:center; padding:3rem;">Пользователь не найден</p>
+        </div>
+        {{end}}
+    </main>
+</div>
+<script>
+(function() {
+    var sidebar = document.getElementById('adminSidebar');
+    var toggle = document.getElementById('sidebarToggle');
+    var icon = document.getElementById('toggleIcon');
+    var expanded = false;
+
+    toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        expanded = !expanded;
+        if (expanded) {
+            sidebar.classList.add('expanded');
+            icon.className = 'fa-solid fa-chevron-left';
+        } else {
+            sidebar.classList.remove('expanded');
+            icon.className = 'fa-solid fa-chevron-right';
+        }
+    });
+
+    // Закрытие по клику вне сайдбара
+    document.addEventListener('click', function(e) {
+        if (expanded && !sidebar.contains(e.target)) {
+            expanded = false;
+            sidebar.classList.remove('expanded');
+            icon.className = 'fa-solid fa-chevron-right';
+        }
+    });
+})();
+</script>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,264 @@
+{{define "register.html"}}
+<style>
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .register-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6rem 1.5rem 3rem;
+    }
+
+    .register-card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2.5rem;
+        padding: 3rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeSlide 0.55s cubic-bezier(0.16,1,0.3,1);
+    }
+    .register-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.02), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .register-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-title {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #a78bfa 100%);
+        background-size: 300% 300%;
+        animation: gradientShift 6s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.5rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .register-title i {
+        font-size: 1.6rem;
+        -webkit-text-fill-color: #a78bfa;
+    }
+
+    .register-subtitle {
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+        font-size: 0.9rem;
+        margin: 0 0 2rem;
+        line-height: 1.5;
+    }
+    .register-subtitle strong {
+        color: #10b981;
+        font-weight: 700;
+    }
+
+    .register-alert {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .register-alert.error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.2);
+        color: #fca5a5;
+    }
+
+    .register-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .register-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .register-form-group label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.35);
+        font-weight: 600;
+        margin-left: 0.3rem;
+    }
+    .register-input {
+        padding: 0.85rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .register-input::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+    .register-input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .register-btn {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        color: #fff;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .register-btn:hover {
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(139,92,246,0.35);
+    }
+    .register-btn:active {
+        transform: translateY(0);
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+    }
+    .register-link a {
+        color: #a78bfa;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .register-link a:hover {
+        color: #c4b5fd;
+    }
+
+    .register-bonus {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(16,185,129,0.06);
+        border: 1px solid rgba(16,185,129,0.12);
+        margin-bottom: 1.5rem;
+    }
+    .register-bonus-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(16,185,129,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    .register-bonus-text {
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.6);
+        line-height: 1.4;
+    }
+    .register-bonus-text strong {
+        color: #10b981;
+    }
+</style>
+
+
+<section class="register-page">
+    <div class="register-card">
+        <h1 class="register-title">
+            <i class="fa-solid fa-user-plus"></i> Регистрация
+        </h1>
+        <p class="register-subtitle">Создайте аккаунт и получите <strong>10 000 ₽</strong> на баланс!</p>
+        
+        {{if .Error}}
+            <div class="register-alert error">
+                <i class="fa-solid fa-circle-exclamation"></i> {{.Error}}
+            </div>
+        {{end}}
+
+        <div class="register-bonus">
+            <div class="register-bonus-icon">
+                <i class="fa-solid fa-gift" style="color:#10b981;"></i>
+            </div>
+            <div class="register-bonus-text">
+                <strong>Приветственный бонус</strong><br>
+                10 000 ₽ зачислятся сразу после регистрации
+            </div>
+        </div>
+        
+        <form method="POST" action="/register" class="register-form">
+            <!-- CSRF токен -->
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
+            <!-- Honeypot поле -->
+            <input type="text" name="website" style="display:none;" tabindex="-1" autocomplete="off">
+            
+            <div class="register-form-group">
+                <label><i class="fa-solid fa-user" style="font-size:0.65rem;"></i> Имя пользователя</label>
+                <input type="text" name="username" class="register-input" required placeholder="xsone?" maxlength="30" minlength="3">
+            </div>
+            <div class="register-form-group">
+                <label><i class="fa-solid fa-envelope" style="font-size:0.65rem;"></i> Email</label>
+                <input type="email" name="email" class="register-input" required placeholder="player@XSoneBMP.com">
+            </div>
+            <div class="register-form-group">
+                <label><i class="fa-solid fa-lock" style="font-size:0.65rem;"></i> Пароль</label>
+                <input type="password" name="password" class="register-input" required placeholder="Минимум 8 символов, буквы и цифры" minlength="8">
+            </div>
+            <button type="submit" class="register-btn">
+                <i class="fa-solid fa-rocket"></i> Создать аккаунт
+            </button>
+        </form>
+        
+        <p class="register-link">
+            Уже есть аккаунт? <a href="/login">Войдите <i class="fa-solid fa-arrow-right"></i></a>
+        </p>
+    </div>
+</section>
+{{end}}

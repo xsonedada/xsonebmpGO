@@ -1,0 +1,294 @@
+{{define "admin-promocodes"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .promo-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .promo-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .promo-back:hover { color: #f87171; }
+
+    .promo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .promo-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .promo-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+    .promo-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    /* Создание */
+    .promo-create {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .promo-create::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .promo-create > * { position: relative; z-index: 1; }
+
+    .promo-create h3 {
+        margin: 0 0 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .promo-form {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .promo-form input {
+        padding: 0.75rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.88rem;
+        outline: none;
+        transition: all 0.25s;
+    }
+    .promo-form input:focus {
+        border-color: rgba(239,68,68,0.4);
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+    }
+    .promo-form input::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+    .promo-submit {
+        padding: 0.75rem 1.8rem;
+        border-radius: 100px;
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .promo-submit:hover {
+        background: #dc2626;
+        box-shadow: 0 10px 25px rgba(239,68,68,0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Список */
+    .promo-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .promo-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.4rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .promo-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .promo-card > * { position: relative; z-index: 1; }
+    .promo-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+    }
+    .promo-card.disabled {
+        opacity: 0.5;
+    }
+
+    .promo-card-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+    @media (max-width: 700px) {
+        .promo-card-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    .promo-code {
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: 3px;
+        font-family: 'Courier New', monospace;
+    }
+    .promo-code.active { color: #fff; }
+    .promo-code.inactive { color: rgba(255,255,255,0.3); }
+
+    .promo-disabled-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        font-size: 0.68rem;
+        font-weight: 700;
+    }
+
+    .promo-discount {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #10b981;
+    }
+    .promo-uses {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .promo-date {
+        color: rgba(255,255,255,0.28);
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .promo-actions {
+        display: flex;
+        gap: 0.4rem;
+    }
+    .promo-btn {
+        padding: 0.45rem 0.8rem;
+        border-radius: 0.8rem;
+        text-decoration: none;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .promo-btn.toggle {
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.12);
+        color: #fbbf24;
+    }
+    .promo-btn.toggle:hover {
+        background: rgba(245,158,11,0.18);
+    }
+    .promo-btn.delete {
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .promo-btn.delete:hover {
+        background: rgba(239,68,68,0.18);
+    }
+</style>
+
+<section class="promo-page">
+    <a href="/admin" class="promo-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="promo-header">
+        <h1><i class="fa-solid fa-ticket"></i> Промокоды</h1>
+        <span class="promo-count">{{len .Data.Promos}} промокодов</span>
+    </div>
+
+    <div class="promo-create">
+        <h3><i class="fa-solid fa-plus-circle" style="color:#f87171;"></i> Создать промокод</h3>
+        <form method="POST" action="/admin/promocode/create" class="promo-form">
+            <input type="text" name="code" placeholder="Код (WELCOME)" required style="width:160px;">
+            <input type="number" name="discount" placeholder="Скидка %" required style="width:110px;">
+            <input type="number" name="max_uses" placeholder="Лимит использований" value="100" style="width:160px;">
+            <button type="submit" class="promo-submit"><i class="fa-solid fa-plus"></i> Создать</button>
+        </form>
+    </div>
+
+    <div class="promo-grid">
+        {{range .Data.Promos}}
+        <div class="promo-card {{if not .IsActive}}disabled{{end}}">
+            <div class="promo-card-inner">
+                <div>
+                    <span class="promo-code {{if .IsActive}}active{{else}}inactive{{end}}">{{.Code}}</span>
+                    {{if not .IsActive}}<span class="promo-disabled-badge"><i class="fa-solid fa-ban"></i> Отключён</span>{{end}}
+                </div>
+                <span class="promo-discount">{{.DiscountPercent}}%</span>
+                <span class="promo-uses"><i class="fa-solid fa-users"></i> {{.UsedCount}} / {{.MaxUses}}</span>
+                <span class="promo-date"><i class="fa-regular fa-calendar"></i> {{.CreatedAt.Format "02.01.2006"}}</span>
+                <div class="promo-actions">
+                    <a href="/admin/promocode/{{.ID}}/toggle" class="promo-btn toggle"><i class="fa-solid fa-rotate"></i></a>
+                    <a href="/admin/promocode/{{.ID}}/delete" class="promo-btn delete" onclick="return confirm('Удалить промокод?')"><i class="fa-solid fa-trash-can"></i></a>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}

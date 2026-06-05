@@ -1,0 +1,288 @@
+{{define "support-create"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .sc-page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sc-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .sc-back:hover { color: var(--accent-light); }
+
+    .sc-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 3rem 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .sc-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .sc-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .sc-card > * { position: relative; z-index: 1; }
+
+    .sc-header {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 2.5rem;
+    }
+    .sc-icon {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        animation: float 3s ease-in-out infinite;
+    }
+    .sc-icon i { color: var(--accent-light); font-size: 1.3rem; }
+    .sc-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+        letter-spacing: -0.03em;
+    }
+    .sc-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .sc-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+
+    .sc-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .sc-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-left: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .sc-label i {
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .sc-input,
+    .sc-select,
+    .sc-textarea {
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+    }
+    .sc-input:focus,
+    .sc-select:focus,
+    .sc-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .sc-input::placeholder,
+    .sc-textarea::placeholder {
+        color: var(--text-dim);
+    }
+    .sc-select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.3)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.3rem center;
+        padding-right: 2.8rem;
+    }
+    .sc-select option {
+        background: #1a1a3e;
+        color: #fff;
+    }
+    .sc-textarea {
+        resize: vertical;
+        min-height: 150px;
+        line-height: 1.6;
+    }
+
+    .sc-submit {
+        padding: 0.95rem 2rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all var(--transition);
+        width: fit-content;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        margin-top: 0.3rem;
+        letter-spacing: -0.01em;
+    }
+    .sc-submit:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+    .sc-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.3);
+    }
+
+    @media (max-width: 480px) {
+        .sc-card { padding: 2rem 1.5rem; }
+        .sc-title { font-size: 1.5rem; }
+    }
+</style>
+
+<section class="sc-page">
+    <a href="/support" class="sc-back"><i class="fa-solid fa-arrow-left"></i> Назад к тикетам</a>
+
+    <div class="sc-card">
+        <div class="sc-header">
+            <div class="sc-icon">
+                <i class="fa-solid fa-plus-circle"></i>
+            </div>
+            <div>
+                <h1 class="sc-title">Создать тикет</h1>
+                <p class="sc-subtitle">Опишите вашу проблему или предложение</p>
+            </div>
+        </div>
+
+        <form method="POST" action="/support/create" class="sc-form">
+            <div class="sc-group">
+                <label class="sc-label"><i class="fa-solid fa-layer-group"></i> Категория</label>
+                <select name="category" required class="sc-select">
+                    <option value="" disabled selected>Выберите категорию</option>
+                    <option value="bug">🐛 Баг / Ошибка</option>
+                    <option value="suggestion">💡 Предложение</option>
+                    <option value="complaint">⚠️ Жалоба</option>
+                    <option value="question">❓ Вопрос</option>
+                    <option value="other">📌 Другое</option>
+                </select>
+            </div>
+
+            <div class="sc-group">
+                <label class="sc-label"><i class="fa-solid fa-heading"></i> Тема</label>
+                <input type="text" name="subject" placeholder="Кратко опишите проблему" required class="sc-input">
+            </div>
+
+            <div class="sc-group">
+                <label class="sc-label"><i class="fa-solid fa-align-left"></i> Описание</label>
+                <textarea name="description" rows="5" placeholder="Подробно опишите ситуацию..." required class="sc-textarea"></textarea>
+            </div>
+
+            <button type="submit" class="sc-submit">
+                <i class="fa-solid fa-paper-plane"></i> Отправить тикет
+            </button>
+        </form>
+    </div>
+</section>
+{{end}}

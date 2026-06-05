@@ -1,0 +1,79 @@
+{{define "admin"}}
+<section class="admin-page">
+    <div class="admin-header">
+        <h1 class="gradient-text"><i class="fa-solid fa-gauge"></i> Дашборд</h1>
+        <a href="/admin/logout" class="btn btn-outline"><i class="fa-solid fa-right-from-bracket"></i> Выйти</a>
+    </div>
+
+    <div class="admin-stats">
+        <div class="stat-card glass">
+            <div class="stat-icon">👥</div>
+            <div class="stat-num">{{.Data.UsersCount}}</div>
+            <div class="stat-label">Пользователей</div>
+        </div>
+        <div class="stat-card glass">
+            <div class="stat-icon">📦</div>
+            <div class="stat-num">{{.Data.OrdersCount}}</div>
+            <div class="stat-label">Заказов</div>
+        </div>
+        <div class="stat-card glass">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-num">{{.Data.BoostsCount}}</div>
+            <div class="stat-label">Товаров</div>
+        </div>
+        <div class="stat-card glass">
+            <div class="stat-icon">💰</div>
+            <div class="stat-num">{{printf "%.0f" .Data.TotalEarnings}} ₽</div>
+            <div class="stat-label">Заработано</div>
+        </div>
+    </div>
+
+    <div class="admin-menu">
+        <a href="/admin/users" class="btn btn-outline"><i class="fa-solid fa-users"></i> Пользователи</a>
+        <a href="/admin/orders" class="btn btn-outline"><i class="fa-solid fa-boxes-stacked"></i> Заказы</a>
+        <a href="/admin/boosts" class="btn btn-outline"><i class="fa-solid fa-tag"></i> Товары</a>
+    </div>
+
+    <div class="glass admin-table-wrap">
+        <h3>📋 Последние заказы</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Пользователь</th><th>Услуга</th><th>Сумма</th><th>Статус</th><th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data.RecentOrders}}
+                <tr>
+                    <td>#{{.ID}}</td>
+                    <td>{{.Username}}</td>
+                    <td>{{.Title}}</td>
+                    <td>{{printf "%.0f" .Total}} ₽</td>
+                    <td><span class="status {{.Status}}">{{.Status}}</span></td>
+                    <td>{{.CreatedAt.Format "02.01 15:04"}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<style>
+.admin-page { padding: 8rem 2rem 4rem; max-width: 1400px; margin: 0 auto; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { padding: 1.5rem; border-radius: 1.5rem; text-align: center; }
+.stat-icon { font-size: 2rem; }
+.stat-num { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #c084fc, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-label { color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+.admin-menu { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.admin-table-wrap { padding: 2rem; border-radius: 2rem; overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th { text-align: left; padding: 1rem; border-bottom: 2px solid rgba(255,255,255,0.2); }
+.admin-table td { padding: 0.8rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.status { padding: 0.2rem 0.7rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; }
+.status.processing { background: rgba(245,158,11,0.2); color: #fbbf24; }
+.status.completed { background: rgba(16,185,129,0.2); color: #34d399; }
+.status.pending { background: rgba(139,92,246,0.2); color: #a78bfa; }
+</style>
+{{end}}

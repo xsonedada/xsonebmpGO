@@ -1,0 +1,251 @@
+{{define "admin-tickets"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .tickets-page {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .tickets-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .tickets-back:hover { color: #f87171; }
+
+    .tickets-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .tickets-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tickets-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+
+    .tickets-tabs {
+        display: flex;
+        gap: 0.3rem;
+        background: rgba(255,255,255,0.03);
+        padding: 4px;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .tickets-tab {
+        padding: 0.55rem 1.2rem;
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.82rem;
+        transition: all 0.25s;
+        background: transparent;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+    }
+    .tickets-tab.active {
+        background: rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .tickets-tab:hover:not(.active) {
+        color: #fff;
+        background: rgba(255,255,255,0.03);
+    }
+
+    .tickets-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .tickets-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .ticket-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.4rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+        text-decoration: none;
+        color: #fff;
+        display: block;
+    }
+    .ticket-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .ticket-card > * { position: relative; z-index: 1; }
+    .ticket-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+        color: #fff;
+    }
+
+    .ticket-card-inner {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 650px) {
+        .ticket-card-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    .ticket-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .ticket-info {
+        flex: 1;
+        min-width: 200px;
+    }
+    .ticket-info h4 {
+        margin: 0 0 0.3rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .ticket-id {
+        color: #f87171;
+        font-weight: 800;
+    }
+    .ticket-meta {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.78rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .ticket-category {
+        padding: 0.15rem 0.6rem;
+        border-radius: 100px;
+        background: rgba(139,92,246,0.08);
+        color: #a78bfa;
+        font-size: 0.68rem;
+        font-weight: 600;
+    }
+
+    .ticket-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .ticket-status.open {
+        background: rgba(245,158,11,0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(245,158,11,0.15);
+    }
+    .ticket-status.progress {
+        background: rgba(59,130,246,0.1);
+        color: #60a5fa;
+        border: 1px solid rgba(59,130,246,0.15);
+    }
+    .ticket-status.closed {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+</style>
+
+<section class="tickets-page">
+    <a href="/admin" class="tickets-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="tickets-header">
+        <h1><i class="fa-solid fa-ticket"></i> Тикеты поддержки</h1>
+        <div class="tickets-tabs">
+            <a href="/admin/tickets" class="tickets-tab {{if not .Data.Filter}}active{{end}}">Все</a>
+            <a href="/admin/tickets?status=open" class="tickets-tab {{if eq .Data.Filter "open"}}active{{end}}">Открытые</a>
+            <a href="/admin/tickets?status=in_progress" class="tickets-tab {{if eq .Data.Filter "in_progress"}}active{{end}}">В работе</a>
+            <a href="/admin/tickets?status=closed" class="tickets-tab {{if eq .Data.Filter "closed"}}active{{end}}">Закрытые</a>
+        </div>
+    </div>
+
+    <div class="tickets-list">
+        {{range .Data.Tickets}}
+        <a href="/admin/ticket/{{.ID}}" class="ticket-card">
+            <div class="ticket-card-inner">
+                <div class="ticket-icon" style="background: {{if eq .Priority "urgent"}}rgba(239,68,68,0.12){{else if eq .Priority "high"}}rgba(245,158,11,0.12){{else}}rgba(139,92,246,0.12){{end}};">
+                    {{if eq .Priority "urgent"}}<i class="fa-solid fa-circle-exclamation" style="color:#ef4444;"></i>
+                    {{else if eq .Priority "high"}}<i class="fa-solid fa-circle" style="color:#fbbf24;"></i>
+                    {{else}}<i class="fa-solid fa-circle" style="color:#a78bfa;"></i>{{end}}
+                </div>
+                <div class="ticket-info">
+                    <h4><span class="ticket-id">#{{.ID}}</span> — {{.Subject}}</h4>
+                    <div class="ticket-meta">
+                        <span class="ticket-category">{{.Category}}</span>
+                        <span><i class="fa-regular fa-calendar"></i> {{.CreatedAt.Format "02.01 15:04"}}</span>
+                    </div>
+                </div>
+                <span class="ticket-status {{if eq .Status "open"}}open{{else if eq .Status "in_progress"}}progress{{else}}closed{{end}}">
+                    {{if eq .Status "open"}}<i class="fa-solid fa-clock"></i> Открыт
+                    {{else if eq .Status "in_progress"}}<i class="fa-solid fa-spinner"></i> В работе
+                    {{else}}<i class="fa-solid fa-circle-check"></i> Закрыт{{end}}
+                </span>
+            </div>
+        </a>
+        {{end}}
+    </div>
+</section>
+{{end}}

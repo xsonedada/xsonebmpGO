@@ -1,0 +1,341 @@
+{{define "edit-profile"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes avatarGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.35), 0 0 0 1px rgba(139,92,246,0.2); }
+        50% { box-shadow: 0 0 0 18px rgba(139,92,246,0), 0 0 0 1px rgba(192,132,252,0.6); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .ep-page {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .ep-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .ep-back:hover { color: var(--accent-light); }
+
+    .ep-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 3rem 2.5rem;
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .ep-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ep-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ep-card > * { position: relative; z-index: 1; }
+
+    .ep-hero {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    .ep-avatar {
+        width: 88px; height: 88px;
+        border-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        color: #fff;
+        background: linear-gradient(135deg, #8b5cf6, #c084fc, #8b5cf6);
+        background-size: 200% 200%;
+        animation: avatarGlow 6s ease-in-out infinite, gradientFlow 8s ease infinite, float 3s ease-in-out infinite;
+        text-transform: uppercase;
+        overflow: hidden;
+    }
+    .ep-avatar img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        border-radius: 28px;
+    }
+    .ep-hero h1 {
+        font-size: 1.9rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.3rem;
+        letter-spacing: -0.03em;
+    }
+    .ep-hero p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .ep-section {
+        margin-bottom: 2rem;
+    }
+    .ep-section-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .ep-section-title i {
+        color: var(--accent-light);
+    }
+
+    .ep-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .ep-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .ep-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-left: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .ep-label i {
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .ep-input {
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+    }
+    .ep-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .ep-input::placeholder {
+        color: var(--text-dim);
+    }
+    textarea.ep-input {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .ep-submit {
+        padding: 0.9rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+        margin-top: 0.5rem;
+    }
+    .ep-submit:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+    .ep-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.3);
+    }
+
+    .ep-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 2rem 0 1.5rem;
+    }
+
+    .ep-alert {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .ep-alert.success {
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.2);
+        color: #10b981;
+    }
+    .ep-alert.error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.2);
+        color: #ef4444;
+    }
+
+    @media (max-width: 480px) {
+        .ep-card { padding: 2rem 1.5rem; }
+        .ep-hero h1 { font-size: 1.6rem; }
+    }
+</style>
+
+<section class="ep-page">
+    <a href="/profile" class="ep-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="ep-card">
+        <div class="ep-hero">
+            <div class="ep-avatar">
+                {{if .AvatarURL}}
+                <img src="{{.AvatarURL}}" alt="Аватар">
+                {{else}}
+                {{slice .User.Username 0 2}}
+                {{end}}
+            </div>
+            <h1>{{.User.Username}}</h1>
+            <p>Редактирование профиля</p>
+        </div>
+
+        {{if .Success}}
+        <div class="ep-alert success"><i class="fa-solid fa-circle-check"></i> {{.Success}}</div>
+        {{end}}
+        {{if .Error}}
+        <div class="ep-alert error"><i class="fa-solid fa-circle-exclamation"></i> {{.Error}}</div>
+        {{end}}
+
+        <!-- Личная информация -->
+        <div class="ep-section">
+            <h2 class="ep-section-title"><i class="fa-solid fa-user-pen"></i> Личная информация</h2>
+            <form method="POST" action="/profile/edit" class="ep-form">
+                <div class="ep-group">
+                    <label class="ep-label"><i class="fa-solid fa-user"></i> Имя пользователя</label>
+                    <input type="text" name="username" value="{{.User.Username}}" required class="ep-input" placeholder="Введите имя">
+                </div>
+                <div class="ep-group">
+                    <label class="ep-label"><i class="fa-solid fa-envelope"></i> Email</label>
+                    <input type="email" name="email" value="{{.User.Email}}" required class="ep-input" placeholder="Введите email">
+                </div>
+                <button type="submit" class="ep-submit"><i class="fa-solid fa-floppy-disk"></i> Сохранить изменения</button>
+            </form>
+        </div>
+
+        <div class="ep-divider"></div>
+
+        <!-- Смена пароля -->
+        <div class="ep-section">
+            <h2 class="ep-section-title"><i class="fa-solid fa-lock"></i> Сменить пароль</h2>
+            <form method="POST" action="/profile/change-password" class="ep-form">
+                <div class="ep-group">
+                    <label class="ep-label"><i class="fa-solid fa-key"></i> Текущий пароль</label>
+                    <input type="password" name="current_password" required class="ep-input" placeholder="Введите текущий пароль">
+                </div>
+                <div class="ep-group">
+                    <label class="ep-label"><i class="fa-solid fa-lock"></i> Новый пароль</label>
+                    <input type="password" name="new_password" required class="ep-input" placeholder="Минимум 8 символов">
+                </div>
+                <div class="ep-group">
+                    <label class="ep-label"><i class="fa-solid fa-lock"></i> Подтвердите пароль</label>
+                    <input type="password" name="confirm_password" required class="ep-input" placeholder="Повторите новый пароль">
+                </div>
+                <button type="submit" class="ep-submit"><i class="fa-solid fa-shield-halved"></i> Обновить пароль</button>
+            </form>
+        </div>
+    </div>
+</section>
+{{end}}

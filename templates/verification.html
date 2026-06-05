@@ -1,0 +1,251 @@
+{{define "verification"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+        50% { box-shadow: 0 0 0 15px rgba(16,185,129,0); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .ver-page {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .ver-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .ver-back:hover { color: #10b981; }
+
+    .ver-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.8rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .ver-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .ver-card > * { position: relative; z-index: 1; }
+
+    /* Статус ожидания */
+    .ver-status {
+        text-align: center;
+        padding: 1rem 0;
+    }
+    .ver-status-icon {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        animation: pulseGlow 3s infinite;
+    }
+    .ver-status h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    .ver-status p {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    .ver-status-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        padding: 0.7rem 1.5rem;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.5);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.25s;
+    }
+    .ver-status-btn:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.03);
+    }
+
+    /* Заголовок формы */
+    .ver-hero {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .ver-hero-icon {
+        width: 50px; height: 50px;
+        border-radius: 15px;
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .ver-hero-icon i { color: #10b981; font-size: 1.2rem; }
+    .ver-hero h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #6ee7b7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.2rem;
+    }
+    .ver-hero p {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* Форма */
+    .ver-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .ver-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .ver-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.3);
+        font-weight: 700;
+        margin-left: 0.3rem;
+    }
+    .ver-input,
+    .ver-textarea {
+        padding: 0.85rem 1.2rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.25s;
+        font-family: inherit;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .ver-input:focus,
+    .ver-textarea:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+    }
+    .ver-input::placeholder,
+    .ver-textarea::placeholder {
+        color: rgba(255,255,255,0.18);
+    }
+    .ver-textarea {
+        resize: vertical;
+        min-height: 110px;
+    }
+
+    .ver-submit {
+        padding: 0.85rem;
+        border-radius: 100px;
+        background: #10b981;
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.92rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .ver-submit:hover {
+        background: #059669;
+        box-shadow: 0 12px 30px rgba(16,185,129,0.35);
+        transform: translateY(-2px);
+    }
+</style>
+
+<section class="ver-page">
+    <a href="/profile" class="ver-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="ver-card">
+        {{if .Data.HasPending}}
+        <div class="ver-status">
+            <div class="ver-status-icon" style="background:rgba(245,158,11,0.1);">
+                <i class="fa-solid fa-clock" style="color:#fbbf24;"></i>
+            </div>
+            <h2 style="color:#fbbf24;">Заявка на рассмотрении</h2>
+            <p>Ожидайте решения администратора</p>
+            <a href="/profile" class="ver-status-btn"><i class="fa-solid fa-arrow-left"></i> Вернуться в профиль</a>
+        </div>
+        {{else}}
+        <div class="ver-hero">
+            <div class="ver-hero-icon">
+                <i class="fa-solid fa-certificate"></i>
+            </div>
+            <div>
+                <h1>Верификация</h1>
+                <p>Станьте проверенным продавцом</p>
+            </div>
+        </div>
+        
+        <form method="POST" action="/verification/apply" class="ver-form">
+            <div class="ver-group">
+                <label class="ver-label"><i class="fa-solid fa-user"></i> Полное имя</label>
+                <input type="text" name="full_name" placeholder="Иванов Иван Иванович" required class="ver-input">
+            </div>
+            <div class="ver-group">
+                <label class="ver-label"><i class="fa-solid fa-align-left"></i> О себе</label>
+                <textarea name="description" placeholder="Расскажите о своём опыте, играх, достижениях..." required class="ver-textarea"></textarea>
+            </div>
+            <div class="ver-group">
+                <label class="ver-label"><i class="fa-solid fa-address-book"></i> Контакт для связи</label>
+                <input type="text" name="contact" placeholder="Discord: user#1234 или Telegram: @nickname" required class="ver-input">
+            </div>
+            <button type="submit" class="ver-submit"><i class="fa-solid fa-paper-plane"></i> Отправить заявку</button>
+        </form>
+        {{end}}
+    </div>
+</section>
+{{end}}

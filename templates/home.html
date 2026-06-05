@@ -1,0 +1,275 @@
+{{define "home.html"}}
+<link rel="stylesheet" href="/static/css/home.css">
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg hero-bg-1"></div>
+    <div class="hero-bg hero-bg-2"></div>
+    <div class="container">
+        <div class="hero-grid">
+            <div class="hero-content animate-fade">
+                <div class="badge badge-hero">
+                    <span class="badge-dot"></span> Платформа №1
+                </div>
+                <h1 class="hero-title">
+                    <span class="gradient-text">Игровой маркетплейс</span><br>
+                    <span class="text-white">для геймеров</span>
+                </h1>
+                <p class="hero-desc">
+                    Единая вселенная, где игроки покупают, продают и обменивают всё: от скинов до услуг.
+                </p>
+                <div class="hero-actions">
+                    <a href="/marketplace" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Найти услугу</a>
+                    <a href="#" onclick="becomeSeller(event)" class="btn btn-white-outline"><i class="fa-solid fa-coins"></i> Стать продавцом</a>
+                </div>
+                <div class="hero-stats mobile-only">
+                    <div class="stat-item">
+                        <span class="stat-value gradient-text">{{.Stats.Бустеров}}</span>
+                        <span class="stat-label">Пользователей</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value gradient-text">{{.Stats.Заказов}}</span>
+                        <span class="stat-label">Заказов</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value stat-green">99.7%</span>
+                        <span class="stat-label">Успешных</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual animate-scale">
+                <div class="hero-orb">
+                    <i class="fa-solid fa-gamepad hero-orb-icon"></i>
+                </div>
+                <div class="hero-plate glass hero-plate-1">
+                    <i class="fa-solid fa-users icon-purple"></i>
+                    <span>{{.Stats.Бустеров}}+ пользователей</span>
+                </div>
+                <div class="hero-plate glass hero-plate-2">
+                    <i class="fa-solid fa-check-circle icon-green"></i>
+                    <span>99.7% успешных сделок</span>
+                </div>
+                <div class="hero-plate glass hero-plate-3">
+                    <i class="fa-solid fa-star icon-gold"></i>
+                    <span>Рейтинг {{.Stats.Рейтинг}}</span>
+                </div>
+                <div class="hero-plate glass hero-plate-4">
+                    <i class="fa-solid fa-shield-halved icon-blue"></i>
+                    <span>Защита сделок</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GAMES -->
+<section class="games">
+    <div class="container">
+        <div class="section-header">
+            <span class="badge badge-games"><i class="fa-solid fa-gamepad"></i> Игры</span>
+            <h2 class="section-title">Популярные игры</h2>
+            <p class="section-desc">Выберите игру и найдите подходящую услугу</p>
+        </div>
+        <div class="games-grid">
+            {{$games := list "Dota 2" "League of Legends" "Valorant" "CS2" "World of Warcraft"}}
+            {{$icons := list "fa-solid fa-shield-halved" "fa-solid fa-wand-sparkles" "fa-solid fa-crosshairs" "fa-solid fa-gun" "fa-solid fa-dragon"}}
+            {{$colors := list "#e74c3c" "#3498db" "#ff4155" "#f39c12" "#2ecc71"}}
+            {{range $i, $game := $games}}
+            <a href="/marketplace" class="game-card">
+                <div class="game-card-icon" style="--game-color: {{index $colors $i}};">
+                    <i class="{{index $icons $i}}"></i>
+                </div>
+                <h3 class="game-card-title">{{$game}}</h3>
+                <p class="game-card-price">
+                    {{if index $.GamePrices $game}}от {{printf "%.0f" (index $.GamePrices $game)}} ₽{{else}}Нет предложений{{end}}
+                </p>
+            </a>
+            {{end}}
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+    <div class="container">
+        <div class="section-header">
+            <span class="badge badge-how"><i class="fa-solid fa-bolt"></i> Процесс</span>
+            <h2 class="section-title">Как это работает</h2>
+            <p class="section-desc">Три простых шага до вашей цели</p>
+        </div>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="how-step-num">01</div>
+                <div class="how-step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <h3 class="how-step-title">Выберите услугу</h3>
+                <p class="how-step-text">Найдите подходящее предложение на маркетплейсе от проверенных продавцов</p>
+            </div>
+            <div class="how-step">
+                <div class="how-step-num">02</div>
+                <div class="how-step-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3 class="how-step-title">Оплатите безопасно</h3>
+                <p class="how-step-text">Средства замораживаются до выполнения заказа, гарантия возврата</p>
+            </div>
+            <div class="how-step">
+                <div class="how-step-num">03</div>
+                <div class="how-step-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h3 class="how-step-title">Получите результат</h3>
+                <p class="how-step-text">Продавец выполняет заказ, вы подтверждаете и оцениваете работу</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{if .ProBoosts}}
+<!-- PRO -->
+<section class="pro">
+    <div class="container">
+        <div class="section-header">
+            <span class="badge badge-premium"><i class="fa-solid fa-crown"></i> Premium</span>
+            <h2 class="section-title gold">PRO Предложения</h2>
+            <p class="section-desc">Эксклюзивные товары от продавцов с <b>PRO</b></p>
+        </div>
+        <div class="pro-grid">
+            {{range .ProBoosts}}
+            <div class="pro-card">
+                <span class="pro-badge">👑 PRO</span>
+                <span class="game-tag"><i class="fa-solid fa-gamepad"></i> {{.Game}}</span>
+                <h3 class="pro-title">{{.Title}}</h3>
+                <p class="pro-desc">{{.Description}}</p>
+                <div class="pro-footer">
+                    <span class="pro-price">{{printf "%.0f" .Price}} ₽</span>
+                    <a href="/booster/{{.ID}}" class="btn btn-primary btn-sm">Купить</a>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+{{end}}
+
+{{if .TopBoosts}}
+<!-- TOP -->
+<section class="top">
+    <div class="container">
+        <div class="section-header">
+            <span class="badge badge-top"><i class="fa-solid fa-fire"></i> Популярное</span>
+            <h2 class="section-title">Топ предложений</h2>
+            <p class="section-desc">Лучшие товары и услуги от проверенных продавцов</p>
+            <a href="/marketplace" class="top-all">Все предложения <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="top-grid">
+            {{range .TopBoosts}}
+            <div class="top-card glass">
+                <div class="top-card-header">
+                    <span class="top-card-game"><i class="fa-solid fa-gamepad"></i> {{.Game}}</span>
+                    <span class="top-card-rating"><i class="fa-solid fa-star"></i> {{printf "%.1f" .Rating}}</span>
+                </div>
+                <h3 class="top-card-title">{{.Title}}</h3>
+                <div class="top-card-seller">
+                    <div class="top-card-avatar">{{slice .OwnerName 0 2}}</div>
+                    <div>
+                        <div class="top-card-name">{{.OwnerName}}</div>
+                        <div class="top-card-reviews">{{.Reviews}} отзывов</div>
+                    </div>
+                </div>
+                <div class="top-card-footer">
+                    <span class="top-card-price">{{printf "%.0f" .Price}} ₽</span>
+                    <a href="/booster/{{.ID}}" class="btn btn-primary btn-sm">Купить</a>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+{{end}}
+
+{{if .LatestReviews}}
+<!-- REVIEWS -->
+<section class="reviews">
+    <div class="container">
+        <div class="section-header">
+            <span class="badge badge-reviews"><i class="fa-solid fa-star"></i> Отзывы</span>
+            <h2 class="section-title">Что говорят клиенты</h2>
+        </div>
+        <div class="reviews-carousel">
+            <div id="reviewsTrack" class="reviews-track">
+                {{range .LatestReviews}}
+                <div class="review-card glass">
+                    <div class="review-stars">
+                        {{if eq .Rating 5}}⭐⭐⭐⭐⭐{{else if eq .Rating 4}}⭐⭐⭐⭐{{else if eq .Rating 3}}⭐⭐⭐{{else if eq .Rating 2}}⭐⭐{{else}}⭐{{end}}
+                    </div>
+                    <p class="review-text">«{{.Text}}»</p>
+                    <div class="review-avatar-wrapper">
+                        <div class="review-avatar">{{slice .Username 0 2}}</div>
+                    </div>
+                    <strong class="review-name">{{.Username}}</strong>
+                    <p class="review-meta">{{.OrderTitle}} • {{.CreatedAt.Format "02.01.2006"}}</p>
+                </div>
+                {{end}}
+            </div>
+            <button onclick="moveReview(-1)" class="review-btn review-btn-prev"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="moveReview(1)" class="review-btn review-btn-next"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="review-dots" id="reviewDots">
+                {{range $i, $r := .LatestReviews}}
+                <span class="review-dot {{if eq $i 0}}active{{end}}" onclick="goToSlide({{$i}})"></span>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</section>
+{{end}}
+
+<!-- CTA -->
+<section class="cta">
+    <div class="container">
+        <div class="cta-card">
+            <span class="badge badge-cta"><i class="fa-solid fa-bolt"></i> Начни сейчас</span>
+            <h2 class="cta-title gradient-text">Готовы начать?</h2>
+            <p class="cta-text">Присоединяйтесь к единой вселенной где игроки покупают, продают и обменивают всё: от скинов до услуг с XSoneBMP</p>
+            <div class="cta-actions">
+                <a href="/marketplace" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> Купить услугу</a>
+                <a href="#" onclick="becomeSeller(event)" class="btn btn-white-outline"><i class="fa-solid fa-store"></i> Стать продавцом</a>
+            </div>
+            <div class="cta-stats">
+                <div class="cta-stat">
+                    <span class="cta-stat-value">{{.Stats.Заказов}}</span>
+                    <span class="cta-stat-label">Заказов</span>
+                </div>
+                <div class="cta-stat">
+                    <span class="cta-stat-value">{{.Stats.Рейтинг}}</span>
+                    <span class="cta-stat-label">Рейтинг</span>
+                </div>
+                <div class="cta-stat">
+                    <span class="cta-stat-value">{{.Stats.Бустеров}}</span>
+                    <span class="cta-stat-label">Пользователей</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function() {
+    var current = 0;
+    var total = {{len .LatestReviews}};
+    if (!total) return;
+    var track = document.getElementById('reviewsTrack');
+    var dots = document.querySelectorAll('.review-dot');
+    function moveReview(dir) {
+        current = (current + dir + total) % total;
+        update();
+    }
+    function goToSlide(n) {
+        current = n;
+        update();
+    }
+    function update() {
+        if (track) track.style.transform = 'translateX(-' + (current * 100) + '%)';
+        dots.forEach(function(d, i) { d.classList.toggle('active', i === current); });
+    }
+    window.moveReview = moveReview;
+    window.goToSlide = goToSlide;
+    setInterval(function() { moveReview(1); }, 5000);
+})();
+</script>
+{{end}}

@@ -1,0 +1,374 @@
+{{define "admin-users"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .admin-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .admin-back:hover { color: #f87171; }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .admin-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .admin-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+    .admin-header-right {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .admin-search {
+        display: flex;
+        align-items: center;
+    }
+    .admin-search input {
+        padding: 0.7rem 1.2rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        width: 260px;
+        font-size: 0.85rem;
+        outline: none;
+        transition: all 0.25s;
+    }
+    .admin-search input:focus {
+        border-color: rgba(239,68,68,0.4);
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+    }
+    .admin-search input::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+    .admin-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .users-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .user-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 2rem;
+        padding: 1.5rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .user-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .user-card > * { position: relative; z-index: 1; }
+    .user-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 25px rgba(139,92,246,0.06);
+    }
+    .user-card.banned {
+        opacity: 0.55;
+    }
+
+    .user-card-inner {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 800px) {
+        .user-card-inner {
+            flex-direction: column;
+            text-align: center;
+        }
+        .user-stats { justify-content: center; }
+        .user-actions { justify-content: center; }
+    }
+
+    .user-avatar {
+        width: 50px; height: 50px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        color: #fff;
+    }
+
+    .user-info {
+        flex: 1;
+        min-width: 180px;
+    }
+    .user-info h4 {
+        margin: 0 0 0.2rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .user-email {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.78rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .user-stats {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .user-stat {
+        text-align: center;
+    }
+    .user-stat-val {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+    .user-stat-lbl {
+        color: rgba(255,255,255,0.28);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 600;
+        margin-top: 0.15rem;
+    }
+
+    .user-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .user-actions form {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+    }
+    .user-actions input {
+        width: 75px;
+        padding: 0.45rem 0.5rem;
+        border-radius: 0.7rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.78rem;
+        text-align: center;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .user-actions input:focus {
+        border-color: rgba(139,92,246,0.4);
+    }
+    .user-actions select {
+        padding: 0.45rem;
+        border-radius: 0.7rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.78rem;
+        cursor: pointer;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 100px;
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+    .badge-pro { background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.15); }
+    .badge-admin { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.15); }
+    .badge-verified { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.15); }
+    .badge-banned { background: rgba(107,114,128,0.1); color: #9ca3af; border: 1px solid rgba(107,114,128,0.15); }
+
+    .btn-icon-sm {
+        padding: 0.45rem 0.75rem;
+        border-radius: 0.7rem;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.03);
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        font-size: 0.78rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: all 0.2s;
+        font-weight: 600;
+    }
+    .btn-icon-sm:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.06);
+    }
+    .btn-icon-sm.primary {
+        background: rgba(139,92,246,0.1);
+        border-color: rgba(139,92,246,0.15);
+        color: #a78bfa;
+    }
+    .btn-icon-sm.primary:hover {
+        background: rgba(139,92,246,0.2);
+    }
+    .btn-icon-sm.success {
+        background: rgba(16,185,129,0.1);
+        border-color: rgba(16,185,129,0.15);
+        color: #10b981;
+    }
+    .btn-icon-sm.success:hover {
+        background: rgba(16,185,129,0.2);
+    }
+    .btn-icon-sm.danger {
+        background: rgba(239,68,68,0.08);
+        border-color: rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .btn-icon-sm.danger:hover {
+        background: rgba(239,68,68,0.15);
+    }
+</style>
+
+<section class="admin-page">
+    <a href="/admin" class="admin-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="admin-header">
+        <h1><i class="fa-solid fa-users"></i> Пользователи</h1>
+        <div class="admin-header-right">
+            <span class="admin-count">{{len .Data.Users}} пользователей</span>
+            <div class="admin-search">
+                <input type="text" id="userSearch" placeholder="Поиск по имени или email..." oninput="filterUsers()">
+            </div>
+        </div>
+    </div>
+
+    <div class="users-grid" id="usersList">
+        {{range .Data.Users}}
+        <div class="user-card {{if .Banned}}banned{{end}}" data-username="{{.Username}}" data-email="{{.Email}}">
+            <div class="user-card-inner">
+                <div class="user-avatar" style="background: linear-gradient(135deg, {{if .Banned}}#6b7280{{else}}#8b5cf6{{end}}, {{if .Banned}}#4b5563{{else}}#c084fc{{end}});">
+                    {{slice .Username 0 1}}
+                </div>
+                <div class="user-info">
+                    <h4>
+                        {{.Username}}
+                        {{if .Banned}}<span class="badge badge-banned"><i class="fa-solid fa-ban"></i> Бан</span>{{end}}
+                    </h4>
+                    <div class="user-email"><i class="fa-solid fa-envelope"></i> {{.Email}}</div>
+                </div>
+                <div class="user-stats">
+                    <div class="user-stat">
+                        <div class="user-stat-val" style="color:#a78bfa;">{{printf "%.0f" .Balance}} ₽</div>
+                        <div class="user-stat-lbl">Баланс</div>
+                    </div>
+                    <div class="user-stat">
+                        <div class="user-stat-val" style="color:#fff;">{{.Orders}}</div>
+                        <div class="user-stat-lbl">Заказов</div>
+                    </div>
+                    <div class="user-stat">
+                        <div class="user-stat-val" style="color:#fbbf24;">{{printf "%.1f" .Rating}}</div>
+                        <div class="user-stat-lbl">Рейтинг</div>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <form method="POST" action="/admin/user/{{.ID}}/balance">
+                        <input type="number" name="amount" value="0" step="100">
+                        <select name="operation">
+                            <option value="add">+</option>
+                            <option value="set">=</option>
+                        </select>
+                        <button type="submit" class="btn-icon-sm primary"><i class="fa-solid fa-ruble-sign"></i></button>
+                    </form>
+                    <form method="POST" action="/admin/user/{{.ID}}/role">
+                        <select name="role">
+                            <option value="moderator">Модер</option>
+                            <option value="support">Поддержка</option>
+                            <option value="vip">VIP</option>
+                        </select>
+                        <button type="submit" class="btn-icon-sm"><i class="fa-solid fa-plus"></i></button>
+                    </form>
+                    {{if .Banned}}
+                    <a href="/admin/user/{{.ID}}/unban" class="btn-icon-sm success"><i class="fa-solid fa-unlock"></i></a>
+                    {{else}}
+                    <a href="/admin/user/{{.ID}}/ban" class="btn-icon-sm danger"><i class="fa-solid fa-ban"></i></a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+
+<script>
+function filterUsers() {
+    var q = document.getElementById('userSearch').value.toLowerCase();
+    document.querySelectorAll('#usersList .user-card').forEach(function(card) {
+        var name = card.dataset.username.toLowerCase();
+        var email = card.dataset.email.toLowerCase();
+        card.style.display = name.includes(q) || email.includes(q) ? '' : 'none';
+    });
+}
+</script>
+{{end}}

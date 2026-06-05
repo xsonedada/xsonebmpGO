@@ -1,0 +1,366 @@
+{{define "achievements"}}
+<style>
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --gold: #fbbf24;
+        --radius-card: 2.25rem;
+        --radius-item: 1.5rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
+    }
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes floatIcon {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    @keyframes unlockPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+        100% { transform: scale(1); }
+    }
+    @keyframes trophyGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.3); }
+        50% { box-shadow: 0 0 0 18px rgba(245,158,11,0); }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+    }
+
+    .ach-page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .ach-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .ach-back:hover { color: var(--accent-light); }
+
+    /* Карточка уровня */
+    .ach-level-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .ach-level-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ach-level-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ach-level-card::before {
+        content: '';
+        position: absolute;
+        top: -20%; right: -10%;
+        width: 350px; height: 350px;
+        background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%);
+        pointer-events: none;
+        animation: floatIcon 6s ease-in-out infinite;
+    }
+    .ach-level-card > * { position: relative; z-index: 1; }
+
+    .ach-level-inner {
+        display: flex;
+        align-items: center;
+        gap: 2.2rem;
+    }
+    @media (max-width: 550px) {
+        .ach-level-inner {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    .ach-level-icon-wrap {
+        width: 100px; height: 100px;
+        border-radius: 28px;
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 3rem;
+        animation: trophyGlow 4s ease-in-out infinite, floatIcon 4s ease-in-out infinite;
+    }
+    .ach-level-info { flex: 1; }
+    .ach-level-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+    .ach-level-name {
+        font-size: 2.2rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        margin: 0 0 0.5rem;
+        background: linear-gradient(135deg, #fff 0%, #fde68a 50%, #f59e0b 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 6s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .ach-level-next {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 1.1rem;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .ach-level-next i { color: var(--gold); }
+    .ach-level-next.max {
+        color: #6ee7b7;
+        border-color: rgba(16,185,129,0.2);
+        background: rgba(16,185,129,0.06);
+    }
+    .ach-level-next.max i { color: #6ee7b7; }
+
+    /* Карточка достижений */
+    .ach-achievements-card {
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease 0.1s both;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .ach-achievements-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
+    }
+    .ach-achievements-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
+        pointer-events: none;
+    }
+    .ach-achievements-card > * { position: relative; z-index: 1; }
+
+    .ach-section-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 1.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        letter-spacing: -0.02em;
+    }
+
+    .ach-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.9rem;
+    }
+    @media (max-width: 500px) {
+        .ach-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .ach-item {
+        padding: 1.6rem 1.3rem;
+        border-radius: var(--radius-item);
+        text-align: center;
+        transition: all var(--transition);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .ach-item.unlocked {
+        background: rgba(16,185,129,0.04);
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+    .ach-item.unlocked:hover {
+        background: rgba(16,185,129,0.1);
+        border-color: rgba(16,185,129,0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 16px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.08);
+        animation: unlockPop 0.4s ease;
+    }
+    .ach-item.locked {
+        background: rgba(255,255,255,0.015);
+        border: 1px solid rgba(255,255,255,0.04);
+        opacity: 0.5;
+    }
+    .ach-item.locked:hover {
+        opacity: 0.65;
+        transform: translateY(-3px);
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    .ach-icon {
+        font-size: 2.4rem;
+        margin-bottom: 0.7rem;
+        display: block;
+    }
+    .ach-name {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #fff;
+        margin-bottom: 0.3rem;
+        letter-spacing: -0.01em;
+    }
+    .ach-desc {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        margin-bottom: 0.7rem;
+        line-height: 1.4;
+    }
+    .ach-status {
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.8rem;
+        border-radius: 100px;
+    }
+    .ach-status.done {
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.15);
+        color: #6ee7b7;
+    }
+    .ach-status.lock {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+        color: var(--text-dim);
+    }
+
+    .ach-progress-bar-wrap {
+        margin-top: 1rem;
+    }
+    .ach-progress-bar {
+        height: 5px;
+        border-radius: 5px;
+        background: rgba(255,255,255,0.05);
+        overflow: hidden;
+    }
+    .ach-progress-fill {
+        height: 5px;
+        border-radius: 5px;
+        background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        transition: width 1.2s ease;
+        box-shadow: 0 0 14px rgba(245,158,11,0.3);
+    }
+</style>
+
+<section class="ach-page">
+    <a href="/profile" class="ach-back"><i class="fa-solid fa-arrow-left"></i> Назад в профиль</a>
+
+    <div class="ach-level-card">
+        <div class="ach-level-inner">
+            <div class="ach-level-icon-wrap">🏆</div>
+            <div class="ach-level-info">
+                <div class="ach-level-label">Уровень продавца</div>
+                <div class="ach-level-name" style="color:{{.Data.LevelColor}};">{{.Data.LevelName}}</div>
+                {{if .Data.NextLevel}}
+                <div class="ach-level-next">
+                    <i class="fa-solid fa-arrow-up"></i> До «{{.Data.NextLevel}}» осталось {{.Data.OrdersNeeded}} заказов
+                </div>
+                {{else}}
+                <div class="ach-level-next max">
+                    <i class="fa-solid fa-crown"></i> Максимальный уровень
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <div class="ach-achievements-card">
+        <h3 class="ach-section-title"><i class="fa-solid fa-medal" style="color:#a78bfa;"></i> Достижения</h3>
+        <div class="ach-grid">
+            {{range .Data.Achievements}}
+            <div class="ach-item {{if .Achieved}}unlocked{{else}}locked{{end}}">
+                <span class="ach-icon">{{.Icon}}</span>
+                <div class="ach-name">{{.Name}}</div>
+                <div class="ach-desc">{{.Description}}</div>
+                <div class="ach-status {{if .Achieved}}done{{else}}lock{{end}}">
+                    {{if .Achieved}}
+                        <i class="fa-solid fa-circle-check"></i> Получено
+                    {{else}}
+                        <i class="fa-solid fa-lock"></i> Не получено
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+{{end}}

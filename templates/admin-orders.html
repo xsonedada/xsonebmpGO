@@ -1,0 +1,346 @@
+{{define "admin-orders"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .orders-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .orders-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .orders-back:hover { color: #f87171; }
+
+    .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .orders-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .orders-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+    .orders-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .orders-filters {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .orders-filter {
+        padding: 0.5rem 1.2rem;
+        border-radius: 100px;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.02);
+        color: rgba(255,255,255,0.4);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.82rem;
+        transition: all 0.25s;
+    }
+    .orders-filter.active,
+    .orders-filter:hover {
+        background: rgba(239,68,68,0.12);
+        border-color: rgba(239,68,68,0.25);
+        color: #f87171;
+    }
+
+    .orders-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .order-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.3rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .order-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .order-card > * { position: relative; z-index: 1; }
+    .order-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+    }
+
+    .order-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    @media (max-width: 800px) {
+        .order-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    .order-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 200px;
+    }
+    .order-id {
+        font-weight: 800;
+        color: #f87171;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    .order-title {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.92rem;
+    }
+    .order-game {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.3);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .order-right {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+    .order-user {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .order-price {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #fff;
+    }
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .order-status.processing {
+        background: rgba(59,130,246,0.1);
+        color: #60a5fa;
+        border: 1px solid rgba(59,130,246,0.15);
+    }
+    .order-status.ready {
+        background: rgba(245,158,11,0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(245,158,11,0.15);
+    }
+    .order-status.completed {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+    .order-status.disputed {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+    .order-date {
+        color: rgba(255,255,255,0.25);
+        font-size: 0.72rem;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+    }
+    .order-actions form {
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+    }
+    .order-actions select {
+        padding: 0.4rem 0.7rem;
+        border-radius: 0.7rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.75rem;
+        cursor: pointer;
+        outline: none;
+    }
+    .order-actions select:focus {
+        border-color: rgba(139,92,246,0.4);
+    }
+    .btn-action {
+        padding: 0.4rem 0.7rem;
+        border-radius: 0.7rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .btn-action.save {
+        background: rgba(139,92,246,0.12);
+        border: 1px solid rgba(139,92,246,0.15);
+        color: #a78bfa;
+    }
+    .btn-action.save:hover {
+        background: rgba(139,92,246,0.22);
+    }
+    .btn-action.delete {
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .btn-action.delete:hover {
+        background: rgba(239,68,68,0.18);
+    }
+</style>
+
+<section class="orders-page">
+    <a href="/admin" class="orders-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="orders-header">
+        <h1><i class="fa-solid fa-boxes-stacked"></i> Заказы</h1>
+        <span class="orders-count" id="ordersCount">{{len .Data.Orders}} заказов</span>
+    </div>
+
+    <div class="orders-filters">
+        <button class="orders-filter active" onclick="filterOrders('all', this)">Все</button>
+        <button class="orders-filter" onclick="filterOrders('processing', this)">В работе</button>
+        <button class="orders-filter" onclick="filterOrders('ready', this)">Готово</button>
+        <button class="orders-filter" onclick="filterOrders('completed', this)">Завершён</button>
+        <button class="orders-filter" onclick="filterOrders('disputed', this)">Диспуты</button>
+    </div>
+
+    <div class="orders-grid" id="ordersList">
+        {{range .Data.Orders}}
+        <div class="order-card" data-status="{{.Status}}">
+            <div class="order-inner">
+                <div class="order-left">
+                    <span class="order-id">#{{.ID}}</span>
+                    <div>
+                        <div class="order-title">{{.Title}}</div>
+                        <div class="order-game"><i class="fa-solid fa-gamepad"></i> {{.Game}}</div>
+                    </div>
+                </div>
+                <div class="order-right">
+                    <span class="order-user"><i class="fa-solid fa-user"></i> {{.Username}}</span>
+                    <span class="order-price">{{printf "%.0f" .Total}} ₽</span>
+                    <span class="order-status {{.Status}}">
+                        {{if eq .Status "processing"}}<i class="fa-solid fa-spinner"></i> В работе
+                        {{else if eq .Status "ready"}}<i class="fa-solid fa-clock"></i> Готово
+                        {{else if eq .Status "completed"}}<i class="fa-solid fa-circle-check"></i> Завершён
+                        {{else}}<i class="fa-solid fa-flag"></i> {{.Status}}{{end}}
+                    </span>
+                    <span class="order-date">{{.CreatedAt.Format "02.01 15:04"}}</span>
+                    <div class="order-actions">
+                        <form method="POST" action="/admin/order/{{.ID}}/status">
+                            <select name="status">
+    <option value="processing" {{if eq .Status "processing"}}selected{{end}}>В работе</option>
+    <option value="ready" {{if eq .Status "ready"}}selected{{end}}>Готово</option>
+    <option value="completed" {{if eq .Status "completed"}}selected{{end}}>Завершён</option>
+    <option value="disputed" {{if eq .Status "disputed"}}selected{{end}}>Диспут</option>
+</select>
+                            <button type="submit" class="btn-action save"><i class="fa-solid fa-check"></i></button>
+                        </form>
+                        <a href="/admin/order/{{.ID}}/delete" class="btn-action delete" onclick="return confirm('Удалить заказ?')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+
+<script>
+function filterOrders(status, btn) {
+    // Обновляем активную кнопку
+    document.querySelectorAll('.orders-filter').forEach(function(b) {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    
+    // Фильтруем карточки
+    var cards = document.querySelectorAll('#ordersList .order-card');
+    var visibleCount = 0;
+    
+    cards.forEach(function(card) {
+        if (status === 'all' || card.dataset.status === status) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Обновляем счётчик
+    document.getElementById('ordersCount').textContent = visibleCount + ' заказов';
+}
+</script>
+{{end}}

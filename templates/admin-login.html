@@ -1,0 +1,222 @@
+{{define "admin-login"}}
+<style>
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .admin-login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .admin-login-card {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 3rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeSlide 0.55s ease;
+    }
+    .admin-login-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.015), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .admin-login-card > * { position: relative; z-index: 1; }
+
+    .admin-login-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    .admin-login-icon i {
+        font-size: 1.5rem;
+        color: #f87171;
+    }
+
+    .admin-login-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ffffff 0%, #fca5a5 50%, #f87171 100%);
+        background-size: 300% 300%;
+        animation: gradientShift 6s ease infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.5rem;
+        text-align: center;
+    }
+
+    .admin-login-subtitle {
+        text-align: center;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.85rem;
+        margin: 0 0 2rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+
+    .admin-login-alert {
+        padding: 0.9rem 1.2rem;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.15);
+        color: #fca5a5;
+    }
+
+    .admin-login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .admin-login-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+    .admin-login-group label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.3);
+        font-weight: 600;
+        margin-left: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .admin-login-group label i {
+        font-size: 0.6rem;
+    }
+    .admin-login-input {
+        padding: 0.85rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.25s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .admin-login-input::placeholder {
+        color: rgba(255,255,255,0.18);
+    }
+    .admin-login-input:focus {
+        border-color: rgba(239,68,68,0.4);
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .admin-login-btn {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .admin-login-btn:hover {
+        background: linear-gradient(135deg, #f87171, #ef4444);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(239,68,68,0.3);
+    }
+    .admin-login-btn:active {
+        transform: translateY(0);
+    }
+
+    .admin-login-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    .admin-login-footer a {
+        color: rgba(255,255,255,0.3);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    .admin-login-footer a:hover {
+        color: #f87171;
+    }
+</style>
+
+<section class="admin-login-page">
+    <div class="admin-login-card">
+        <div class="admin-login-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h1 class="admin-login-title">Админ-панель</h1>
+        <p class="admin-login-subtitle">XSoneBMP • Доступ ограничен</p>
+        
+        {{if .Error}}
+            <div class="admin-login-alert">
+                <i class="fa-solid fa-circle-exclamation"></i> {{.Error}}
+            </div>
+        {{end}}
+        
+        <form method="POST" action="/admin/login" class="admin-login-form">
+            <div class="admin-login-group">
+                <label><i class="fa-solid fa-user"></i> Логин</label>
+                <input type="text" name="username" required placeholder="admin" class="admin-login-input" autocomplete="username">
+            </div>
+            <div class="admin-login-group">
+                <label><i class="fa-solid fa-lock"></i> Пароль</label>
+                <input type="password" name="password" required placeholder="••••••" class="admin-login-input" autocomplete="current-password">
+            </div>
+            <button type="submit" class="admin-login-btn">
+                <i class="fa-solid fa-right-to-bracket"></i> Войти
+            </button>
+        </form>
+        
+        <div class="admin-login-footer">
+            <a href="/"><i class="fa-solid fa-arrow-left"></i> Вернуться на сайт</a>
+        </div>
+    </div>
+</section>
+{{end}}

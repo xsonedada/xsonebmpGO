@@ -1,0 +1,39 @@
+# Секреты и конфиденциальные данные
+.env
+*.env
+credentials.json
+secrets/
+*.pem
+*.key
+
+# БД
+*.db
+*.sqlite
+*.sqlite3
+
+# Бинарники
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Временные файлы
+tmp/
+temp/
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Зависимости (если используете go modules, они не нужны в репозитории)
+vendor/
+
+# Статические файлы, сгенерированные автоматически (если есть)
+static/css/home.css  # если генерируется из SCSS

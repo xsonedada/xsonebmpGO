@@ -1,0 +1,333 @@
+{{define "admin-sales"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .sales-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sales-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .sales-back:hover { color: #f87171; }
+
+    .sales-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .sales-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sales-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+    .sales-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    /* Карточка формы */
+    .sales-card {
+        background: rgba(14,14,38,0.85);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 2.5rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease;
+    }
+    .sales-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.012), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .sales-card > * { position: relative; z-index: 1; }
+
+    .sales-card h3 {
+        margin: 0 0 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sales-form {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+    .sales-form input,
+    .sales-form select {
+        padding: 0.75rem 1.2rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: #fff;
+        font-size: 0.88rem;
+        outline: none;
+        transition: all 0.25s;
+    }
+    .sales-form input:focus,
+    .sales-form select:focus {
+        border-color: rgba(239,68,68,0.4);
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+    }
+    .sales-form input::placeholder {
+        color: rgba(255,255,255,0.2);
+    }
+    .sales-form select option {
+        background: #1a1a3e;
+        color: #fff;
+    }
+    .sales-form label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.6);
+        font-size: 0.88rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .sales-form label input[type="checkbox"] {
+        accent-color: #ef4444;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+    .sales-form .percent-sign {
+        color: rgba(255,255,255,0.4);
+        font-weight: 600;
+    }
+
+    .sales-submit {
+        padding: 0.75rem 1.8rem;
+        border-radius: 100px;
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sales-submit:hover {
+        background: #dc2626;
+        box-shadow: 0 10px 25px rgba(239,68,68,0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Список акций */
+    .sales-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .sale-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.4rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .sale-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .sale-card > * { position: relative; z-index: 1; }
+    .sale-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+    }
+
+    .sale-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+    @media (max-width: 700px) {
+        .sale-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    .sale-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .sale-name {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.95rem;
+    }
+    .sale-discount {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #10b981;
+    }
+    .sale-dates {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .sale-status {
+        padding: 0.25rem 0.8rem;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .sale-status.active {
+        background: rgba(16,185,129,0.1);
+        color: #10b981;
+        border: 1px solid rgba(16,185,129,0.15);
+    }
+    .sale-status.inactive {
+        background: rgba(239,68,68,0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+
+    .sale-actions {
+        display: flex;
+        gap: 0.4rem;
+    }
+    .sale-btn {
+        padding: 0.45rem 0.8rem;
+        border-radius: 0.8rem;
+        text-decoration: none;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .sale-btn.toggle {
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.12);
+        color: #fbbf24;
+    }
+    .sale-btn.toggle:hover {
+        background: rgba(245,158,11,0.18);
+    }
+    .sale-btn.delete {
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+    }
+    .sale-btn.delete:hover {
+        background: rgba(239,68,68,0.18);
+    }
+</style>
+
+<section class="sales-page">
+    <a href="/admin" class="sales-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="sales-header">
+        <h1><i class="fa-solid fa-percent"></i> Акции и скидки</h1>
+        <span class="sales-count">{{len .Data.Sales}} акций</span>
+    </div>
+
+    <div class="sales-card">
+        <h3><i class="fa-solid fa-gift" style="color:#fbbf24;"></i> Скидка на первый заказ</h3>
+        <form method="POST" action="/admin/first-discount/update" class="sales-form">
+            <input type="number" name="discount" value="{{.Data.FirstDiscount}}" style="width:80px;">
+            <span class="percent-sign">%</span>
+            <label>
+                <input type="checkbox" name="is_active" {{if .Data.FirstActive}}checked{{end}}> Активна
+            </label>
+            <button type="submit" class="sales-submit"><i class="fa-solid fa-save"></i> Сохранить</button>
+        </form>
+    </div>
+
+    <div class="sales-card">
+        <h3><i class="fa-solid fa-plus-circle" style="color:#f87171;"></i> Новая акция</h3>
+        <form method="POST" action="/admin/sale/create" class="sales-form">
+            <input type="text" name="name" placeholder="Название акции" required style="width:220px;">
+            <input type="number" name="discount" placeholder="Скидка %" required style="width:110px;">
+            <input type="date" name="start_date" required>
+            <input type="date" name="end_date" required>
+            <button type="submit" class="sales-submit"><i class="fa-solid fa-plus"></i> Создать</button>
+        </form>
+    </div>
+
+    <div class="sales-grid">
+        {{range .Data.Sales}}
+        <div class="sale-card">
+            <div class="sale-inner">
+                <div class="sale-info">
+                    <span class="sale-name">{{.Name}}</span>
+                    <span class="sale-discount">{{.Discount}}%</span>
+                </div>
+                <span class="sale-dates"><i class="fa-regular fa-calendar"></i> {{.StartDate.Format "02.01"}} — {{.EndDate.Format "02.01.2006"}}</span>
+                <span class="sale-status {{if .IsActive}}active{{else}}inactive{{end}}">
+                    {{if .IsActive}}<i class="fa-solid fa-circle-check"></i> Активна{{else}}<i class="fa-solid fa-ban"></i> Отключена{{end}}
+                </span>
+                <div class="sale-actions">
+                    <a href="/admin/sale/{{.ID}}/toggle" class="sale-btn toggle"><i class="fa-solid fa-rotate"></i></a>
+                    <a href="/admin/sale/{{.ID}}/delete" class="sale-btn delete" onclick="return confirm('Удалить акцию?')"><i class="fa-solid fa-trash-can"></i></a>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}

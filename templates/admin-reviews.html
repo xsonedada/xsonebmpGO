@@ -1,0 +1,216 @@
+{{define "admin-reviews"}}
+<style>
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+
+    .reviews-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 5rem 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .reviews-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: color 0.2s;
+        width: fit-content;
+    }
+    .reviews-back:hover { color: #f87171; }
+
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .reviews-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #fca5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .reviews-header h1 i {
+        -webkit-text-fill-color: #f87171;
+    }
+    .reviews-count {
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .reviews-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+
+    .review-card {
+        background: rgba(14,14,38,0.8);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 1.8rem;
+        padding: 1.5rem 1.8rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+    }
+    .review-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.01), transparent);
+        animation: shimmer 5s infinite;
+        pointer-events: none;
+    }
+    .review-card > * { position: relative; z-index: 1; }
+    .review-card:hover {
+        border-color: rgba(139,92,246,0.15);
+        box-shadow: 0 0 20px rgba(139,92,246,0.06);
+    }
+
+    .review-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    @media (max-width: 600px) {
+        .review-inner { flex-direction: column; }
+    }
+
+    .review-content { flex: 1; min-width: 250px; }
+
+    .review-user {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
+    .review-avatar {
+        width: 36px; height: 36px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .review-username {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+    .review-stars {
+        color: #fbbf24;
+        font-size: 0.78rem;
+        letter-spacing: 1px;
+    }
+
+    .review-text {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0 0 0.5rem;
+    }
+
+    .review-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        color: rgba(255,255,255,0.28);
+        font-size: 0.75rem;
+    }
+    .review-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .review-delete {
+        padding: 0.5rem 0.9rem;
+        border-radius: 0.8rem;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.12);
+        color: #f87171;
+        text-decoration: none;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+    .review-delete:hover {
+        background: rgba(239,68,68,0.18);
+        border-color: rgba(239,68,68,0.3);
+    }
+</style>
+
+<section class="reviews-page">
+    <a href="/admin" class="reviews-back"><i class="fa-solid fa-arrow-left"></i> Назад в админ-панель</a>
+    
+    <div class="reviews-header">
+        <h1><i class="fa-solid fa-star"></i> Отзывы</h1>
+        <span class="reviews-count">{{len .Data.Reviews}} отзывов</span>
+    </div>
+
+    <div class="reviews-grid">
+        {{range .Data.Reviews}}
+        <div class="review-card">
+            <div class="review-inner">
+                <div class="review-content">
+                    <div class="review-user">
+                        <div class="review-avatar" style="background: linear-gradient(135deg, #8b5cf6, #c084fc);">
+                            {{slice .Username 0 1}}
+                        </div>
+                        <span class="review-username">{{.Username}}</span>
+                        <span class="review-stars">
+                            {{if eq .Rating 5}}★★★★★{{else if eq .Rating 4}}★★★★☆{{else if eq .Rating 3}}★★★☆☆{{else if eq .Rating 2}}★★☆☆☆{{else}}★☆☆☆☆{{end}}
+                        </span>
+                    </div>
+                    <p class="review-text">{{.Text}}</p>
+                    <div class="review-meta">
+                        <span><i class="fa-solid fa-tag"></i> {{.Title}}</span>
+                        <span><i class="fa-regular fa-calendar"></i> {{.CreatedAt.Format "02.01.2006"}}</span>
+                    </div>
+                </div>
+                <a href="/admin/review/{{.ID}}/delete" class="review-delete" onclick="return confirm('Удалить отзыв?')">
+                    <i class="fa-solid fa-trash-can"></i> Удалить
+                </a>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</section>
+{{end}}
