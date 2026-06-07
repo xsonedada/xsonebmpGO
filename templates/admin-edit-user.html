@@ -392,9 +392,12 @@
     <a href="/" class="admin-nav-item" target="_blank">
         <i class="fa-solid fa-arrow-up-right-from-square"></i><span>На сайт</span>
     </a>
-    <a href="/admin/logout" class="admin-nav-item" style="color:#f87171;">
-        <i class="fa-solid fa-right-from-bracket"></i><span>Выйти</span>
-    </a>
+    <form method="POST" action="/admin/logout" style="display:contents">
+        <input type="hidden" name="csrf_token" value="{{.csrf}}">
+        <button type="submit" class="admin-nav-item" style="color:#f87171;background:none;border:none;width:100%;text-align:left;cursor:pointer;font:inherit;">
+            <i class="fa-solid fa-right-from-bracket"></i><span>Выйти</span>
+        </button>
+    </form>
 </nav>
     </aside>
 
@@ -423,6 +426,7 @@
             </div>
 
             <form method="POST" action="/admin/user/{{.Data.EditUser.ID}}" class="admin-form">
+                <input type="hidden" name="csrf_token" value="{{.csrf}}">
                 <div class="admin-form-row">
                     <div class="admin-form-group">
                         <label class="admin-form-label"><i class="fa-solid fa-user"></i> Имя пользователя</label>

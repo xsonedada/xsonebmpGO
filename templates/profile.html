@@ -307,6 +307,7 @@
         var amount = document.getElementById('balanceAmount').value;
         if (!confirm('Вы уверены, что хотите вывести ' + amount + ' ₽?')) return;
         var form = document.createElement('form'); form.method = 'POST'; form.action = '/profile/withdraw';
+        var csrf = document.createElement('input'); csrf.type = 'hidden'; csrf.name = 'csrf_token'; csrf.value = '{{.csrf}}'; form.appendChild(csrf);
         var i1 = document.createElement('input'); i1.type = 'hidden'; i1.name = 'amount'; i1.value = amount; form.appendChild(i1);
         var i2 = document.createElement('input'); i2.type = 'hidden'; i2.name = 'method'; i2.value = method; form.appendChild(i2);
         document.body.appendChild(form); form.submit();

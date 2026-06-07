@@ -188,14 +188,18 @@
 
         <div class="admin-actions">
             <form method="POST" action="/admin/order/{{.Data.Order.ID}}/status" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <input type="hidden" name="csrf_token" value="{{.csrf}}">
                 <input type="hidden" name="status" value="completed">
                 <button type="submit" class="admin-btn admin-btn-primary">
                     <i class="fa-solid fa-check"></i> Завершить
                 </button>
             </form>
-            <a href="/admin/order/{{.Data.Order.ID}}/delete" class="admin-btn admin-btn-danger" onclick="return confirm('Удалить заказ?')">
-                <i class="fa-solid fa-trash"></i> Удалить
-            </a>
+            <form method="POST" action="/admin/order/{{.Data.Order.ID}}/delete" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{.csrf}}">
+                <button type="submit" class="admin-btn admin-btn-danger" onclick="return confirm('Удалить заказ?')">
+                    <i class="fa-solid fa-trash"></i> Удалить
+                </button>
+            </form>
             <a href="/admin/refund/{{.Data.Order.ID}}" class="admin-btn admin-btn-outline">
                 <i class="fa-solid fa-rotate-left"></i> Возврат
             </a>

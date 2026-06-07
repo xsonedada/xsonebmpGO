@@ -529,7 +529,7 @@ async function applyPromo() {
     try {
         const r = await fetch('/api/promo/check', {
             method: 'POST',
-            headers: {'Content-Type':'application/json'},
+            headers: typeof csrfHeaders === 'function' ? csrfHeaders({'Content-Type':'application/json'}) : {'Content-Type':'application/json','X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''},
             body: JSON.stringify({code:code, amount:total})
         });
         const d = await r.json();
@@ -548,7 +548,7 @@ async function applyPromo() {
 document.addEventListener('DOMContentLoaded', function() { loadCartPage(); });
 
 async function removeFromCart(id) {
-    await fetch('/api/cart/remove/' + id, { method: 'DELETE' });
+    await fetch('/api/cart/remove/' + id, { method: 'DELETE', headers: typeof csrfHeaders === 'function' ? csrfHeaders() : { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
     loadCartPage();
     loadCart();
 }

@@ -205,9 +205,12 @@
                         <span><i class="fa-regular fa-calendar"></i> {{.CreatedAt.Format "02.01.2006"}}</span>
                     </div>
                 </div>
-                <a href="/admin/review/{{.ID}}/delete" class="review-delete" onclick="return confirm('Удалить отзыв?')">
-                    <i class="fa-solid fa-trash-can"></i> Удалить
-                </a>
+                <form method="POST" action="/admin/review/{{.ID}}/delete" style="display:inline">
+                    <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                    <button type="submit" class="review-delete" onclick="return confirm('Удалить отзыв?')">
+                        <i class="fa-solid fa-trash-can"></i> Удалить
+                    </button>
+                </form>
             </div>
         </div>
         {{end}}

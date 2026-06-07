@@ -299,6 +299,7 @@
                     <span class="order-date">{{.CreatedAt.Format "02.01 15:04"}}</span>
                     <div class="order-actions">
                         <form method="POST" action="/admin/order/{{.ID}}/status">
+                            <input type="hidden" name="csrf_token" value="{{$.csrf}}">
                             <select name="status">
     <option value="processing" {{if eq .Status "processing"}}selected{{end}}>В работе</option>
     <option value="ready" {{if eq .Status "ready"}}selected{{end}}>Готово</option>
@@ -307,9 +308,10 @@
 </select>
                             <button type="submit" class="btn-action save"><i class="fa-solid fa-check"></i></button>
                         </form>
-                        <a href="/admin/order/{{.ID}}/delete" class="btn-action delete" onclick="return confirm('Удалить заказ?')">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </a>
+                        <form method="POST" action="/admin/order/{{.ID}}/delete" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                            <button type="submit" class="btn-action delete" onclick="return confirm('Удалить заказ?')"><i class="fa-solid fa-trash-can"></i></button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -50,6 +50,7 @@
                     {{if eq .Data.Ticket.Status "open"}}Открыт{{else if eq .Data.Ticket.Status "in_progress"}}В работе{{else}}Закрыт{{end}}
                 </span>
                 <form method="POST" action="/admin/ticket/{{.Data.Ticket.ID}}/status" class="ticket-status-form" style="margin-top:0.8rem;">
+                    <input type="hidden" name="csrf_token" value="{{.csrf}}">
                     <select name="status">
                         <option value="open" {{if eq .Data.Ticket.Status "open"}}selected{{end}}>Открыт</option>
                         <option value="in_progress" {{if eq .Data.Ticket.Status "in_progress"}}selected{{end}}>В работе</option>
@@ -73,6 +74,7 @@
             {{end}}
         </div>
         <form method="POST" action="/admin/ticket/{{.Data.Ticket.ID}}/message" class="chat-form">
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
             <input type="text" name="message" placeholder="Ответить..." required>
             <button type="submit">📤</button>
         </form>

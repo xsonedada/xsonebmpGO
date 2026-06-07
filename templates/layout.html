@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="XSoneBMP">
+    {{if .csrf}}<meta name="csrf-token" content="{{.csrf}}">{{end}}
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     <title>XSoneBMP - Буст аккаунтов</title>
     <link rel="stylesheet" href="/static/css/ai-assistant.css">
@@ -208,7 +209,7 @@
                 </div>
                 <div class="footer-bottom">
                     <p class="footer-copy">© 2026 XSoneBMP. Все права защищены 🌌</p>
-                    <p class="footer-dev">Разработано <b>xsone</b> aka <b>Pavlov Alexey</b></p>
+                    <p class="footer-dev">Разработано <a href="https://t.me/@xsonedev"><b>xsone</b></a></p>
                 </div>
             </div>
         </footer>
@@ -394,7 +395,7 @@
                     var authKey = sub.getKey('auth');
                     await fetch('/api/push/subscribe', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
                         body: JSON.stringify({
                             endpoint: sub.endpoint,
                             auth: btoa(String.fromCharCode.apply(null, new Uint8Array(authKey))),
@@ -410,10 +411,10 @@
                     var reg = await navigator.serviceWorker.ready;
                     var sub = await reg.pushManager.getSubscription();
                     if (sub) {
-                        await fetch('/api/push/unsubscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: sub.endpoint }) });
+                        await fetch('/api/push/unsubscribe', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' }, body: JSON.stringify({ endpoint: sub.endpoint }) });
                         try { await sub.unsubscribe(); } catch(e) {}
                     } else {
-                        await fetch('/api/push/unsubscribe-all', { method: 'POST' });
+                        await fetch('/api/push/unsubscribe-all', { method: 'POST', headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
                     }
                 } catch(e) {}
                 refreshPushButton();
@@ -435,6 +436,20 @@
                 for (var i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
                 return outputArray;
             }
+
+            (function injectCSRFTokens() {
+                var token = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (!token) return;
+                document.querySelectorAll('form').forEach(function(form) {
+                    if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return;
+                    if (form.querySelector('input[name="csrf_token"]')) return;
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = token;
+                    form.appendChild(input);
+                });
+            })();
         </script>
         <style>
             @keyframes welcomeIn { from { opacity:0; transform:scale(0.9) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }

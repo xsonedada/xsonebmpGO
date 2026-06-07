@@ -308,9 +308,9 @@
         {{range .Data.Users}}
         <div class="user-card {{if .Banned}}banned{{end}}" data-username="{{.Username}}" data-email="{{.Email}}">
             <div class="user-card-inner">
-                <div class="user-avatar" style="background: linear-gradient(135deg, {{if .Banned}}#6b7280{{else}}#8b5cf6{{end}}, {{if .Banned}}#4b5563{{else}}#c084fc{{end}});">
+                <a href="user/{{.ID}}"><div class="user-avatar" style="background: linear-gradient(135deg, {{if .Banned}}#6b7280{{else}}#8b5cf6{{end}}, {{if .Banned}}#4b5563{{else}}#c084fc{{end}});">
                     {{slice .Username 0 1}}
-                </div>
+                </div></a>
                 <div class="user-info">
                     <h4>
                         {{.Username}}
@@ -334,6 +334,7 @@
                 </div>
                 <div class="user-actions">
                     <form method="POST" action="/admin/user/{{.ID}}/balance">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
                         <input type="number" name="amount" value="0" step="100">
                         <select name="operation">
                             <option value="add">+</option>
@@ -342,6 +343,7 @@
                         <button type="submit" class="btn-icon-sm primary"><i class="fa-solid fa-ruble-sign"></i></button>
                     </form>
                     <form method="POST" action="/admin/user/{{.ID}}/role">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
                         <select name="role">
                             <option value="moderator">Модер</option>
                             <option value="support">Поддержка</option>
@@ -350,9 +352,15 @@
                         <button type="submit" class="btn-icon-sm"><i class="fa-solid fa-plus"></i></button>
                     </form>
                     {{if .Banned}}
-                    <a href="/admin/user/{{.ID}}/unban" class="btn-icon-sm success"><i class="fa-solid fa-unlock"></i></a>
+                    <form method="POST" action="/admin/user/{{.ID}}/unban" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                        <button type="submit" class="btn-icon-sm success"><i class="fa-solid fa-unlock"></i></button>
+                    </form>
                     {{else}}
-                    <a href="/admin/user/{{.ID}}/ban" class="btn-icon-sm danger"><i class="fa-solid fa-ban"></i></a>
+                    <form method="POST" action="/admin/user/{{.ID}}/ban" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                        <button type="submit" class="btn-icon-sm danger" onclick="return confirm('Забанить пользователя?')"><i class="fa-solid fa-ban"></i></button>
+                    </form>
                     {{end}}
                 </div>
             </div>

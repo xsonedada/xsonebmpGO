@@ -372,9 +372,11 @@
                 <button onclick="editTpl({{.ID}})" class="btn-icon">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <a href="/seller/template/{{.ID}}/delete" class="btn-icon danger" onclick="return confirm('Удалить шаблон?')">
-                    <i class="fa-solid fa-trash"></i>
-                </a>
+                <form method="POST" action="/seller/template/{{.ID}}/delete" style="display:inline;" onsubmit="return confirm('Удалить шаблон?')">
+                    <button type="submit" class="btn-icon danger">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
             </div>
         </div>
 

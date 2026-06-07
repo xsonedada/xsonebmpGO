@@ -171,6 +171,7 @@
         </div>
         
         <form method="POST" action="/admin/notify/send" class="notify-form">
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
             <textarea name="message" id="notifyMsg" placeholder="Введите текст уведомления..." class="notify-textarea"></textarea>
             
             <div class="notify-quick">

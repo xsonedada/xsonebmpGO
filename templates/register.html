@@ -344,7 +344,6 @@
                 <i class="fa-solid fa-user-plus"></i>
             </div>
             <h1 class="register-title">Регистрация</h1>
-            <p class="register-subtitle">Создайте аккаунт и получите <strong>10 000 ₽</strong> на баланс!</p>
         </div>
 
         {{if .Error}}
@@ -353,15 +352,6 @@
             </div>
         {{end}}
 
-        <div class="register-bonus">
-            <div class="register-bonus-icon">
-                <i class="fa-solid fa-gift" style="color:#10b981;"></i>
-            </div>
-            <div class="register-bonus-text">
-                <strong>Приветственный бонус</strong><br>
-                10 000 ₽ зачислятся сразу после регистрации
-            </div>
-        </div>
 
         <form method="POST" action="/register" class="register-form" id="registerForm" onsubmit="return validateForm()">
             <!-- Защита -->

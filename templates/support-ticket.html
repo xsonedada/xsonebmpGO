@@ -368,9 +368,11 @@
         <p class="ticket-desc">{{.Data.Ticket.Description}}</p>
 
         {{if ne .Data.Ticket.Status "closed"}}
-        <a href="/support/ticket/{{.Data.Ticket.ID}}/close" class="ticket-close-btn" onclick="return confirm('Закрыть тикет?')">
-            <i class="fa-solid fa-xmark"></i> Закрыть тикет
-        </a>
+        <form method="POST" action="/support/ticket/{{.Data.Ticket.ID}}/close" style="display:inline;" onsubmit="return confirm('Закрыть тикет?')">
+            <button type="submit" class="ticket-close-btn">
+                <i class="fa-solid fa-xmark"></i> Закрыть тикет
+            </button>
+        </form>
         {{end}}
     </div>
 

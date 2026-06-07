@@ -254,9 +254,12 @@
                     <span class="boost-price">{{printf "%.0f" .Price}} ₽</span>
                     <span class="boost-rating"><i class="fa-solid fa-star"></i> {{printf "%.1f" .Rating}}</span>
                     <span class="boost-reviews">({{.Reviews}} отзывов)</span>
-                    <a href="/admin/boost/{{.ID}}/delete" class="boost-delete" onclick="return confirm('Удалить товар?')">
-                        <i class="fa-solid fa-trash-can"></i> Удалить
-                    </a>
+                    <form method="POST" action="/admin/boost/{{.ID}}/delete" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                        <button type="submit" class="boost-delete" onclick="return confirm('Удалить товар?')">
+                            <i class="fa-solid fa-trash-can"></i> Удалить
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

@@ -289,6 +289,7 @@
     <div class="sales-card">
         <h3><i class="fa-solid fa-gift" style="color:#fbbf24;"></i> Скидка на первый заказ</h3>
         <form method="POST" action="/admin/first-discount/update" class="sales-form">
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
             <input type="number" name="discount" value="{{.Data.FirstDiscount}}" style="width:80px;">
             <span class="percent-sign">%</span>
             <label>
@@ -301,6 +302,7 @@
     <div class="sales-card">
         <h3><i class="fa-solid fa-plus-circle" style="color:#f87171;"></i> Новая акция</h3>
         <form method="POST" action="/admin/sale/create" class="sales-form">
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
             <input type="text" name="name" placeholder="Название акции" required style="width:220px;">
             <input type="number" name="discount" placeholder="Скидка %" required style="width:110px;">
             <input type="date" name="start_date" required>
@@ -322,8 +324,14 @@
                     {{if .IsActive}}<i class="fa-solid fa-circle-check"></i> Активна{{else}}<i class="fa-solid fa-ban"></i> Отключена{{end}}
                 </span>
                 <div class="sale-actions">
-                    <a href="/admin/sale/{{.ID}}/toggle" class="sale-btn toggle"><i class="fa-solid fa-rotate"></i></a>
-                    <a href="/admin/sale/{{.ID}}/delete" class="sale-btn delete" onclick="return confirm('Удалить акцию?')"><i class="fa-solid fa-trash-can"></i></a>
+                    <form method="POST" action="/admin/sale/{{.ID}}/toggle" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                        <button type="submit" class="sale-btn toggle"><i class="fa-solid fa-rotate"></i></button>
+                    </form>
+                    <form method="POST" action="/admin/sale/{{.ID}}/delete" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{$.csrf}}">
+                        <button type="submit" class="sale-btn delete" onclick="return confirm('Удалить акцию?')"><i class="fa-solid fa-trash-can"></i></button>
+                    </form>
                 </div>
             </div>
         </div>

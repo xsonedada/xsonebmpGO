@@ -11,6 +11,17 @@ function escapeHTML(str) {
   return div.innerHTML;
 }
 
+function getCSRFToken() {
+  return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
+function csrfHeaders(extra = {}) {
+  const headers = { ...extra };
+  const token = getCSRFToken();
+  if (token) headers['X-CSRF-Token'] = token;
+  return headers;
+}
+
 function timeAgo(date) {
   const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
   if (diff < 60) return 'только что';
@@ -160,11 +171,16 @@ async function addToCart(boostId, title, price, game, boosterId) {
   try {
     const res = await fetch('/api/cart/add', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: csrfHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ boost_id: +boostId, title, price: +price, game, booster_id: +boosterId || 0 })
     });
-    const data = await res.json();
-    showNotification(data.message, data.success ? (data.message.includes('уже в корзине') ? 'warning' : 'success') : 'error');
+    const data = await res.json().catch(() => ({}));
+    const msg = data.message || data.error || (res.ok ? 'Товар добавлен' : 'Ошибка при добавлении в корзину');
+    if (!res.ok && res.status === 403 && !data.message && !data.error) {
+      showNotification('Обновите страницу и попробуйте снова', 'error');
+      return;
+    }
+    showNotification(msg, data.success ? (msg.includes('уже в корзине') ? 'warning' : 'success') : 'error');
     if (data.cartCount != null) updateCartBadge(data.cartCount);
   } catch (e) {
     showNotification('Ошибка сервера', 'error');
@@ -183,7 +199,7 @@ function updateCartBadge(count) {
 }
 
 async function removeFromCart(id) {
-  await fetch('/api/cart/remove/' + id, { method: 'DELETE' });
+  await fetch('/api/cart/remove/' + id, { method: 'DELETE', headers: csrfHeaders() });
   if (window.location.pathname === '/cart') loadCartPage();
   loadCartCount();
   loadMiniCart();
@@ -191,13 +207,13 @@ async function removeFromCart(id) {
 
 async function clearCart() {
   if (!confirm('Очистить корзину?')) return;
-  await fetch('/api/cart/clear', { method: 'DELETE' });
+  await fetch('/api/cart/clear', { method: 'DELETE', headers: csrfHeaders() });
   location.reload();
 }
 
 async function checkout() {
   try {
-    const res = await fetch('/api/cart/checkout', { method: 'POST' });
+    const res = await fetch('/api/cart/checkout', { method: 'POST', headers: csrfHeaders() });
     const data = await res.json();
     showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) {
@@ -214,7 +230,7 @@ async function checkout() {
 
 async function deleteBoost(id) {
   if (!confirm('Удалить предложение?')) return;
-  await fetch('/api/boost/' + id + '/delete', { method: 'DELETE' });
+  await fetch('/api/boost/' + id + '/delete', { method: 'DELETE', headers: csrfHeaders() });
   location.reload();
 }
 
@@ -264,7 +280,7 @@ async function loadMiniCart() {
 async function removeMiniCartItem(id, event) {
   event?.preventDefault();
   event?.stopPropagation();
-  await fetch('/api/cart/remove/' + id, { method: 'DELETE' });
+  await fetch('/api/cart/remove/' + id, { method: 'DELETE', headers: csrfHeaders() });
   loadMiniCart();
   loadCartCount();
   return false;
@@ -330,7 +346,7 @@ function getNotificationType(text) {
 }
 
 async function markAllRead() {
-  await fetch('/api/notifications/read-all', { method: 'POST' });
+  await fetch('/api/notifications/read-all', { method: 'POST', headers: csrfHeaders() });
   $('#notifList').innerHTML = `<div class="notif-empty">
     <div class="notif-empty-icon"><i class="fa-solid fa-check-circle" style="font-size:2rem;color:rgba(16,185,129,0.3);"></i></div>
     <p style="font-size:1rem;font-weight:600;color:rgba(255,255,255,0.5);margin:0 0 4px;">Всё прочитано!</p></div>`;
@@ -338,7 +354,7 @@ async function markAllRead() {
 }
 
 async function markOneRead(id) {
-  await fetch('/api/notifications/read/' + id, { method: 'POST' });
+  await fetch('/api/notifications/read/' + id, { method: 'POST', headers: csrfHeaders() });
   loadNotifications();
   loadNotifCount();
 }
@@ -361,7 +377,7 @@ async function loadNotifCount() {
 // ---------- Лайки ----------
 async function toggleLike(reviewID) {
   try {
-    const res = await fetch('/api/review/' + reviewID + '/like', { method: 'POST' });
+    const res = await fetch('/api/review/' + reviewID + '/like', { method: 'POST', headers: csrfHeaders() });
     const data = await res.json();
     const btn = $('#like-' + reviewID);
     const count = $('#like-count-' + reviewID);
@@ -395,7 +411,7 @@ async function loadLikes() {
 async function releaseEscrow(orderID) {
   if (!confirm('Подтвердить выполнение заказа? Средства будут переведены продавцу.')) return;
   try {
-    const res = await fetch('/api/escrow/release/' + orderID, { method: 'POST' });
+    const res = await fetch('/api/escrow/release/' + orderID, { method: 'POST', headers: csrfHeaders() });
     const data = await res.json();
     showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) setTimeout(() => location.reload(), 1000);
@@ -520,7 +536,7 @@ async function applyPromo() {
   try {
     const res = await fetch('/api/promo/check', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: csrfHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ code, amount: total })
     });
     const data = await res.json();

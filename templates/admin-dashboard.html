@@ -548,9 +548,12 @@
     <a href="/" class="admin-nav-item" target="_blank">
         <i class="fa-solid fa-arrow-up-right-from-square"></i><span>На сайт</span>
     </a>
-    <a href="/admin/logout" class="admin-nav-item" style="color:#f87171;">
-        <i class="fa-solid fa-right-from-bracket"></i><span>Выйти</span>
-    </a>
+    <form method="POST" action="/admin/logout" style="display:contents">
+        <input type="hidden" name="csrf_token" value="{{.csrf}}">
+        <button type="submit" class="admin-nav-item" style="color:#f87171;background:none;border:none;width:100%;text-align:left;cursor:pointer;font:inherit;">
+            <i class="fa-solid fa-right-from-bracket"></i><span>Выйти</span>
+        </button>
+    </form>
 </nav>
     </aside>
 
@@ -567,9 +570,12 @@
                     <a href="/" class="admin-btn admin-btn-outline" target="_blank">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> На сайт
                     </a>
-                    <a href="/admin/logout" class="admin-btn admin-btn-danger">
-                        <i class="fa-solid fa-right-from-bracket"></i> Выйти
-                    </a>
+                    <form method="POST" action="/admin/logout" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{.csrf}}">
+                        <button type="submit" class="admin-btn admin-btn-danger">
+                            <i class="fa-solid fa-right-from-bracket"></i> Выйти
+                        </button>
+                    </form>
                 </div>
             </div>
 

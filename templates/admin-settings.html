@@ -376,7 +376,12 @@
     </div>
     <div class="admin-hero-actions">
         <a href="/admin"><i class="fa-solid fa-arrow-left"></i> Назад</a>
-        <a href="/admin/logout"><i class="fa-solid fa-right-from-bracket"></i> Выйти</a>
+        <form method="POST" action="/admin/logout" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
+            <button type="submit" style="background:none;border:none;color:#f87171;cursor:pointer;font:inherit;">
+                <i class="fa-solid fa-right-from-bracket"></i> Выйти
+            </button>
+        </form>
     </div>
 </div>
 
@@ -510,6 +515,7 @@
 </section>
 
 <script>
+    const adminCSRF = '{{.csrf}}';
     // Переключение вкладок
     document.querySelectorAll('.settings-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -530,7 +536,7 @@
             const formData = new FormData();
             formData.append('logo', file);
             showToast('Загрузка...', 'info', 0);
-            fetch('/admin/upload-logo', { method: 'POST', body: formData })
+            fetch('/admin/upload-logo', { method: 'POST', headers: { 'X-CSRF-Token': adminCSRF }, body: formData })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
@@ -551,7 +557,7 @@
             const formData = new FormData();
             formData.append('favicon', file);
             showToast('Загрузка...', 'info', 0);
-            fetch('/admin/upload-favicon', { method: 'POST', body: formData })
+            fetch('/admin/upload-favicon', { method: 'POST', headers: { 'X-CSRF-Token': adminCSRF }, body: formData })
                 .then(res => res.json())
                 .then(data => { 
                     if(data.success) showToast('Favicon обновлён', 'success'); 
@@ -581,7 +587,7 @@
         try {
             const res = await fetch('/admin/settings', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': adminCSRF },
                 body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -596,7 +602,7 @@
     document.getElementById('resetDefaultsBtn').addEventListener('click', () => {
         if (confirm('Сбросить ВСЕ настройки к значениям по умолчанию? Это действие нельзя отменить.')) {
             showToast('Сброс настроек...', 'info', 0);
-            fetch('/admin/settings/reset', { method: 'POST' })
+            fetch('/admin/settings/reset', { method: 'POST', headers: { 'X-CSRF-Token': adminCSRF } })
                 .then(res => res.json())
                 .then(data => { 
                     if(data.success) location.reload(); 

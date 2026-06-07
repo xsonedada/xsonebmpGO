@@ -15,12 +15,16 @@ import (
 var DB *sql.DB
 
 func InitDB() {
+	dbPassword := os.Getenv("DB_PASSWORD")
+	if dbPassword == "" {
+		log.Fatal("обязательная переменная окружения не задана: DB_PASSWORD")
+	}
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		getEnv("DB_HOST", "localhost"),
 		getEnv("DB_PORT", "5432"),
 		getEnv("DB_USER", "postgres"),
-		getEnv("DB_PASSWORD", "1111"),
+		dbPassword,
 		getEnv("DB_NAME", "xsonebmp"),
 		getEnv("DB_SSLMODE", "disable"),
 	)
@@ -42,6 +46,7 @@ func InitDB() {
 	}
 
 	createTables()
+	migrateColumns()
 	createIndexes()
 	insertDefaultData()
 	startCleanupRoutine()
@@ -131,7 +136,9 @@ func createTables() {
     	ip TEXT,
     	user_agent TEXT,
     	location TEXT,
+    	device TEXT DEFAULT '',
     	is_active BOOLEAN DEFAULT true,
+    	revoked BOOLEAN DEFAULT false,
     	created_at TIMESTAMP DEFAULT NOW(),
     	last_seen TIMESTAMP DEFAULT NOW()
 		)`,
@@ -456,11 +463,24 @@ func createTables() {
 	log.Println("✅ Таблицы созданы")
 }
 
+func migrateColumns() {
+	migrations := []string{
+		`ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS device TEXT DEFAULT ''`,
+		`ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS revoked BOOLEAN DEFAULT false`,
+	}
+	for _, q := range migrations {
+		if _, err := DB.Exec(q); err != nil {
+			log.Printf("⚠️ Миграция: %v", err)
+		}
+	}
+}
+
 func createIndexes() {
 	indexes := []string{
 		`CREATE INDEX IF NOT EXISTS idx_users_referral ON users(referral_code)`,
 		`CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_orders_booster ON orders(booster_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_orders_boost ON orders(boost_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`,
 		`CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at DESC)`,
 		`CREATE INDEX IF NOT EXISTS idx_boosts_user ON boosts(user_id)`,
@@ -510,14 +530,6 @@ func startCleanupRoutine() {
 			DB.Exec("DELETE FROM notifications WHERE is_read = true AND created_at < NOW() - INTERVAL '30 days'")
 			DB.Exec("DELETE FROM user_sessions WHERE last_seen < NOW() - INTERVAL '30 days'")
 			log.Println("🧹 Очистка старых данных выполнена")
-		}
-	}()
-
-	go func() {
-		for {
-			time.Sleep(24 * time.Hour)
-			DB.Exec("VACUUM ANALYZE")
-			log.Println("📊 VACUUM ANALYZE выполнен")
 		}
 	}()
 }

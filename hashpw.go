@@ -1,3 +1,5 @@
+//go:build ignore
+
 package main
 
 import (
@@ -6,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func hasiruem() {
-	hash, _ := bcrypt.GenerateFromPassword([]byte("ЛЮБОЙ НОВЫЙ ПАРОЛЬ"), 12)
+func main() {
+	hash, _ := bcrypt.GenerateFromPassword([]byte("YOUR_PASSWORD_HERE"), 12)
 	fmt.Println(string(hash))
 }

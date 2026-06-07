@@ -2,7 +2,10 @@
 <section class="admin-page">
     <div class="admin-header">
         <h1 class="gradient-text"><i class="fa-solid fa-gauge"></i> Дашборд</h1>
-        <a href="/admin/logout" class="btn btn-outline"><i class="fa-solid fa-right-from-bracket"></i> Выйти</a>
+        <form method="POST" action="/admin/logout" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{.csrf}}">
+            <button type="submit" class="btn btn-outline"><i class="fa-solid fa-right-from-bracket"></i> Выйти</button>
+        </form>
     </div>
 
     <div class="admin-stats">

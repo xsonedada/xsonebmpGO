@@ -614,7 +614,7 @@ function setRating(r) {
 
 async function confirmOrder(id) {
     if (!confirm('Вы уверены, что хотите подтвердить выполнение заказа?')) return;
-    const res = await fetch('/api/escrow/release/' + id, { method: 'POST' });
+    const res = await fetch('/api/escrow/release/' + id, { method: 'POST', headers: typeof csrfHeaders === 'function' ? csrfHeaders() : { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' } });
     const data = await res.json();
     if (data.success) {
         showNotification(data.message, 'success');

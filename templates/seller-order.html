@@ -592,9 +592,12 @@
                 <a href="/order/{{$o.ID}}/dispute" class="btn-sp">
                     <i class="fa-solid fa-flag"></i> Открыть спор
                 </a>
-                <a href="/api/escrow/refund/{{$o.ID}}" class="btn-ref" onclick="return confirm('Вернуть деньги покупателю?')">
-                    <i class="fa-solid fa-rotate-left"></i> Вернуть деньги
-                </a>
+                <form method="POST" action="/api/escrow/refund/{{$o.ID}}" style="display:inline" onsubmit="return confirm('Вернуть деньги покупателю?')">
+                    <input type="hidden" name="csrf_token" value="{{.csrf}}">
+                    <button type="submit" class="btn-ref">
+                        <i class="fa-solid fa-rotate-left"></i> Вернуть деньги
+                    </button>
+                </form>
                 {{end}}
 
                 {{if eq $o.Status "ready"}}
