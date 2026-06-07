@@ -16,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"nexus-boost/database"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -27,15 +28,47 @@ import (
 	webpush "github.com/SherClockHolmes/webpush-go"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	vapidPublicKey  = "BK0pjXGGHJJ_XyuPOs_P3Pcgx3khyBPqNt1G1tcY3qAaTcqKKE4-eQRyILD_TB-kpLF5fhOtpA_Oqg1yJwHX8tY"
-	vapidPrivateKey = "jhOQW8JD8ay6VvSGpI-uShCcr1Y72tPsXtFOpDRVeto"
+// Секреты — загружаются из .env при старте, не хранятся в коде
+var (
+	vapidPublicKey  string
+	vapidPrivateKey string
+	adminUsername   string
+	adminPassHash   string
+	sessionSecret   string
 )
 
+func mustEnv(key string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		log.Fatalf("обязательная переменная окружения не задана: %s", key)
+	}
+	return v
+}
+
 func main() {
+	// Загружаем .env (в production переменные задаются через systemd/docker, ошибка игнорируется)
+	_ = godotenv.Load()
+
+	vapidPublicKey = mustEnv("VAPID_PUBLIC_KEY")
+	vapidPrivateKey = mustEnv("VAPID_PRIVATE_KEY")
+	adminUsername = mustEnv("ADMIN_USERNAME")
+	adminPassHash = mustEnv("ADMIN_PASSWORD_HASH")
+	sessionSecret = mustEnv("SESSION_SECRET")
+
+	// Инициализируем store здесь, после загрузки секрета
+	store = sessions.NewCookieStore([]byte(sessionSecret))
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
 	database.InitDB()
 	initPreparedStatements()
 
@@ -72,7 +105,6 @@ func main() {
 	r.Use(func(c *gin.Context) {
 		c.Set("user", getUser(c))
 		c.Next()
-
 	})
 
 	r.Use(maintenanceMiddleware)
@@ -150,13 +182,13 @@ func main() {
 	r.POST("/sessions/revoke/:id", revokeSession)
 
 	r.Use(func(c *gin.Context) {
-		// Сохраняем реферальный код в куки
 		if ref := c.Query("ref"); ref != "" {
 			c.SetCookie("ref", ref, 86400*30, "/", "", false, true)
 		}
 		c.Next()
 	})
-	/// Аккаунт
+
+	// Аккаунт
 	r.GET("/forgot-password", forgotPasswordPage)
 	r.POST("/forgot-password", sendResetCode)
 	r.GET("/reset-password", resetPasswordPage)
@@ -196,24 +228,14 @@ func main() {
 	r.POST("/boost/:id/edit", editBoost)
 	r.GET("/verification", verificationPage)
 	r.POST("/verification/apply", applyVerification)
-	r.GET("/admin/verifications", adminVerificationsPage)
-	r.POST("/admin/verification/:id/approve", adminApproveVerification)
-	r.POST("/admin/verification/:id/reject", adminRejectVerification)
 
 	// Диспуты
 	r.GET("/order/:id/dispute", openDisputePage)
 	r.POST("/order/:id/dispute", createDispute)
 	r.GET("/dispute/:id", disputeDetailPage)
 	r.POST("/dispute/:id/message", disputeSendMessage)
-	r.POST("/dispute/:id/resolve", adminResolveDispute)
 
-	r.POST("/api/admin/verify/:id", func(c *gin.Context) {
-		userID, _ := strconv.Atoi(c.Param("id"))
-		giveBadge(userID, "verified", "Верифицированный Продавец", "✅", "#12da97")
-		c.JSON(200, gin.H{"success": true})
-	})
-
-	//PRO
+	// PRO
 	r.GET("/seller/boost/:id", boostItem)
 	r.POST("/seller/bulk-create", bulkCreateBoosts)
 	r.GET("/seller/insights", sellerInsights)
@@ -262,12 +284,7 @@ func main() {
 			Token string `json:"token"`
 		}
 		c.BindJSON(&req)
-
-		database.DB.Exec(
-			"UPDATE qr_sessions SET scanned = true WHERE token = $1",
-			req.Token,
-		)
-
+		database.DB.Exec("UPDATE qr_sessions SET scanned = true WHERE token = $1", req.Token)
 		c.JSON(200, gin.H{"success": true})
 	})
 
@@ -295,19 +312,15 @@ func main() {
 	r.GET("/api/push/key", func(c *gin.Context) {
 		c.JSON(200, gin.H{"key": vapidPublicKey})
 	})
-
 	r.POST("/api/push/subscribe", pushSubscribe)
-
 	r.POST("/api/push/unsubscribe", func(c *gin.Context) {
 		var req struct {
 			Endpoint string `json:"endpoint"`
 		}
 		c.BindJSON(&req)
-
 		if req.Endpoint != "" {
 			database.DB.Exec("DELETE FROM push_subscriptions WHERE endpoint = $1", req.Endpoint)
 		}
-
 		c.JSON(200, gin.H{"success": true})
 	})
 	r.POST("/api/push/unsubscribe-all", func(c *gin.Context) {
@@ -317,11 +330,9 @@ func main() {
 			c.JSON(403, gin.H{"error": "auth required"})
 			return
 		}
-
 		database.DB.Exec("DELETE FROM push_subscriptions WHERE user_id = $1", userID)
 		c.JSON(200, gin.H{"success": true})
 	})
-
 	r.GET("/api/check-pro", func(c *gin.Context) {
 		session, _ := store.Get(c.Request, "xsonebmp-session")
 		userID, _ := session.Values["user_id"]
@@ -331,7 +342,6 @@ func main() {
 		}
 		c.JSON(200, gin.H{"is_pro": isPro})
 	})
-
 	r.GET("/api/dispute/:id/messages", func(c *gin.Context) {
 		rows, _ := database.DB.Query(
 			"SELECT id, user_id, username, message, is_admin, created_at FROM dispute_messages WHERE dispute_id = $1 ORDER BY created_at ASC",
@@ -340,7 +350,6 @@ func main() {
 		if rows != nil {
 			defer rows.Close()
 		}
-
 		var msgs []gin.H
 		if rows != nil {
 			for rows.Next() {
@@ -357,31 +366,22 @@ func main() {
 		}
 		c.JSON(200, msgs)
 	})
-
-	///Возврат средств
 	r.GET("/api/escrow/refund/:orderId", func(c *gin.Context) {
 		session, _ := store.Get(c.Request, "xsonebmp-session")
 		userID, _ := session.Values["user_id"]
-
 		orderID := c.Param("orderId")
-
 		var buyerID, sellerID int
 		var amount float64
 		database.DB.QueryRow("SELECT buyer_id, seller_id, amount FROM escrow_transactions WHERE order_id = $1 AND status = 'frozen'", orderID).Scan(&buyerID, &sellerID, &amount)
-
 		if sellerID != userID {
 			c.Redirect(302, "/seller/orders")
 			return
 		}
-
-		// Возврат денег покупателю
 		database.DB.Exec("UPDATE escrow_transactions SET status = 'refunded', refunded_at = NOW() WHERE order_id = $1", orderID)
 		database.DB.Exec("UPDATE users SET balance = balance + $1 WHERE id = $2", amount, buyerID)
 		database.DB.Exec("UPDATE orders SET status = 'refunded' WHERE id = $1", orderID)
-
 		c.Redirect(302, "/seller/order/"+orderID)
 	})
-
 	r.GET("/api/ping", func(c *gin.Context) {
 		session, _ := store.Get(c.Request, "xsonebmp-session")
 		if userID, ok := session.Values["user_id"]; ok {
@@ -392,84 +392,8 @@ func main() {
 		c.JSON(200, gin.H{"ok": false})
 	})
 
-	r.GET("/admin/user/:id/make-pro", func(c *gin.Context) {
-		userID, _ := strconv.Atoi(c.Param("id"))
-
-		// Делаем PRO
-		database.DB.Exec("INSERT INTO seller_profiles (user_id, is_pro) VALUES ($1, true) ON CONFLICT (user_id) DO UPDATE SET is_pro = true", userID)
-
-		// Выдаем бейдж
-		giveBadge(userID, "pro", "PRO продавец", "👑", "#fbbf24")
-
-		c.Redirect(302, "/admin/users")
-	})
-
-	// Проверка на админа
-	r.GET("/api/admin/check", func(c *gin.Context) {
-		session, _ := store.Get(c.Request, "xsonebmp-session")
-		_, isAdmin := session.Values["admin_id"]
-		c.JSON(200, gin.H{"is_admin": isAdmin})
-	})
-
-	// Лайки на отзывы
 	r.GET("/api/review/:id/likes", getReviewLikes)
 	r.POST("/api/review/:id/like", toggleReviewLike)
-
-	// Админка
-	r.GET("/admin/login", AdminLoginPage)
-	r.POST("/admin/login", AdminLogin)
-	r.GET("/admin/logout", AdminLogout)
-	r.GET("/admin", AdminDashboard)
-	r.GET("/admin/users", AdminUsersPage)
-	r.GET("/admin/orders", AdminOrdersPage)
-	r.POST("/admin/order/:id/status", AdminUpdateOrderStatus)
-	r.GET("/admin/order/:id/delete", AdminDeleteOrder)
-	r.GET("/admin/boosts", AdminBoostsPage)
-	r.GET("/admin/boost/:id/delete", AdminDeleteBoost)
-	r.GET("/admin/reviews", adminReviewsPage)
-	r.GET("/admin/review/:id/delete", adminDeleteReview)
-	r.GET("/admin/notify", adminNotifyPage)
-	r.POST("/admin/notify/send", adminSendNotify)
-	r.POST("/admin/user/:id/balance", adminUpdateBalance)
-	r.GET("/admin/user/:id", adminEditUserPage)     // GET страница редактирования
-	r.POST("/admin/user/:id", AdminEditUser)        // POST обновление
-	r.GET("/admin/messages/:id", adminViewMessages) // просмотр сообщений
-	r.GET("/admin/user/:id/ban", adminBanUser)      // бан
-	r.GET("/admin/user/:id/unban", adminUnbanUser)
-	r.GET("/admin/search", adminSearch)
-	r.GET("/admin/order/:id", adminOrderDetail)
-	r.GET("/admin/add-boost", adminAddBoostPage)
-	r.POST("/admin/add-boost", adminAddBoost)
-	r.GET("/admin/export/users", adminExportUsers)
-	r.GET("/admin/stats", adminStatsPage)
-	r.GET("/admin/charts", adminChartsPage)
-	r.GET("/admin/transactions", adminTransactionsPage)
-	r.POST("/admin/refund/:id", adminRefundOrder)
-	r.GET("/admin/boost/:id/edit", adminEditBoostPage)
-	r.POST("/admin/boost/:id/edit", adminEditBoost)
-	r.POST("/admin/user/create", adminCreateUser)
-	r.GET("/admin/logs", adminViewLogs)
-	r.GET("/admin/verify/:id", adminVerifySeller)
-	r.GET("/admin/feature/:id", adminFeatureBoost)
-	r.GET("/admin/promocodes", adminPromocodesPage)
-	r.POST("/admin/promocode/create", adminCreatePromocode)
-	r.GET("/admin/promocode/:id/delete", adminDeletePromocode)
-	r.GET("/admin/promocode/:id/toggle", adminTogglePromocode)
-	r.POST("/admin/user/:id/role", adminAssignRole)
-	r.GET("/admin/user/:id/role/remove", adminRemoveRole)
-	// Админка - управление акциями
-	r.GET("/admin/sales", adminSalesPage)
-	r.POST("/admin/sale/create", adminCreateSale)
-	r.GET("/admin/sale/:id/toggle", adminToggleSale)
-	r.GET("/admin/sale/:id/delete", adminDeleteSale)
-	r.POST("/admin/first-discount/update", adminUpdateFirstDiscount)
-	// Админка - диспуты
-	r.GET("/admin/disputes", adminDisputesPage)
-	r.GET("/admin/settings", adminSettingsPage)
-	r.POST("/admin/settings", adminUpdateSettings)
-	r.POST("/admin/upload-logo", adminUploadLogo)
-	r.POST("/admin/upload-favicon", adminUploadFavicon)
-	r.POST("/admin/settings/reset", adminResetSettings)
 
 	// Тикеты поддержки
 	r.GET("/support", supportPage)
@@ -479,14 +403,96 @@ func main() {
 	r.POST("/support/ticket/:id/message", ticketSendMessage)
 	r.GET("/support/ticket/:id/close", closeTicket)
 
-	// Админка - тикеты
-	r.GET("/admin/tickets", adminTicketsPage)
-	r.GET("/admin/ticket/:id", adminTicketDetail)
-	r.POST("/admin/ticket/:id/message", adminTicketMessage)
-	r.POST("/admin/ticket/:id/status", adminTicketStatus)
+	// ----------------------------------------------------------------
+	// Админка — публичные маршруты (без авторизации)
+	// ----------------------------------------------------------------
+	r.GET("/admin/login", AdminLoginPage)
+	r.POST("/admin/login", AdminLogin)
+	r.GET("/admin/logout", AdminLogout)
+
+	// ----------------------------------------------------------------
+	// Админка — все защищённые маршруты под middleware
+	// ----------------------------------------------------------------
+	admin := r.Group("/admin", adminRequired)
+	{
+		admin.GET("", AdminDashboard)
+		admin.GET("/users", AdminUsersPage)
+		admin.GET("/orders", AdminOrdersPage)
+		admin.POST("/order/:id/status", AdminUpdateOrderStatus)
+		admin.GET("/order/:id/delete", AdminDeleteOrder)
+		admin.GET("/order/:id", adminOrderDetail)
+		admin.GET("/boosts", AdminBoostsPage)
+		admin.GET("/boost/:id/delete", AdminDeleteBoost)
+		admin.GET("/boost/:id/edit", adminEditBoostPage)
+		admin.POST("/boost/:id/edit", adminEditBoost)
+		admin.GET("/reviews", adminReviewsPage)
+		admin.GET("/review/:id/delete", adminDeleteReview)
+		admin.GET("/notify", adminNotifyPage)
+		admin.POST("/notify/send", adminSendNotify)
+		admin.POST("/user/:id/balance", adminUpdateBalance)
+		admin.GET("/user/:id", adminEditUserPage)
+		admin.POST("/user/:id", AdminEditUser)
+		admin.GET("/messages/:id", adminViewMessages)
+		admin.GET("/user/:id/ban", adminBanUser)
+		admin.GET("/user/:id/unban", adminUnbanUser)
+		admin.GET("/user/:id/make-pro", func(c *gin.Context) {
+			userID, _ := strconv.Atoi(c.Param("id"))
+			database.DB.Exec("INSERT INTO seller_profiles (user_id, is_pro) VALUES ($1, true) ON CONFLICT (user_id) DO UPDATE SET is_pro = true", userID)
+			giveBadge(userID, "pro", "PRO продавец", "👑", "#fbbf24")
+			c.Redirect(302, "/admin/users")
+		})
+		admin.POST("/user/:id/role", adminAssignRole)
+		admin.GET("/user/:id/role/remove", adminRemoveRole)
+		admin.POST("/user/create", adminCreateUser)
+		admin.GET("/search", adminSearch)
+		admin.GET("/add-boost", adminAddBoostPage)
+		admin.POST("/add-boost", adminAddBoost)
+		admin.GET("/export/users", adminExportUsers)
+		admin.GET("/stats", adminStatsPage)
+		admin.GET("/charts", adminChartsPage)
+		admin.GET("/transactions", adminTransactionsPage)
+		admin.POST("/refund/:id", adminRefundOrder)
+		admin.GET("/logs", adminViewLogs)
+		admin.GET("/verify/:id", adminVerifySeller)
+		admin.GET("/feature/:id", adminFeatureBoost)
+		admin.GET("/promocodes", adminPromocodesPage)
+		admin.POST("/promocode/create", adminCreatePromocode)
+		admin.GET("/promocode/:id/delete", adminDeletePromocode)
+		admin.GET("/promocode/:id/toggle", adminTogglePromocode)
+		admin.GET("/sales", adminSalesPage)
+		admin.POST("/sale/create", adminCreateSale)
+		admin.GET("/sale/:id/toggle", adminToggleSale)
+		admin.GET("/sale/:id/delete", adminDeleteSale)
+		admin.POST("/first-discount/update", adminUpdateFirstDiscount)
+		admin.GET("/disputes", adminDisputesPage)
+		admin.GET("/settings", adminSettingsPage)
+		admin.POST("/settings", adminUpdateSettings)
+		admin.POST("/upload-logo", adminUploadLogo)
+		admin.POST("/upload-favicon", adminUploadFavicon)
+		admin.POST("/settings/reset", adminResetSettings)
+		admin.GET("/verifications", adminVerificationsPage)
+		admin.POST("/verification/:id/approve", adminApproveVerification)
+		admin.POST("/verification/:id/reject", adminRejectVerification)
+		admin.POST("/verification/:id/resolve", adminResolveDispute)
+		admin.GET("/tickets", adminTicketsPage)
+		admin.GET("/ticket/:id", adminTicketDetail)
+		admin.POST("/ticket/:id/message", adminTicketMessage)
+		admin.POST("/ticket/:id/status", adminTicketStatus)
+	}
+
+	// API для проверки admin (теперь просто возвращает true — middleware уже проверил)
+	r.GET("/api/admin/check", adminRequired, func(c *gin.Context) {
+		c.JSON(200, gin.H{"is_admin": true})
+	})
+
+	// API для верификации продавца
+	r.POST("/api/admin/verify/:id", adminRequired, func(c *gin.Context) {
+		userID, _ := strconv.Atoi(c.Param("id"))
+		giveBadge(userID, "verified", "Верифицированный Продавец", "✅", "#12da97")
+		c.JSON(200, gin.H{"success": true})
+	})
 
 	r.NoRoute(func(c *gin.Context) {
-		// Получаем пользователя так же как в других маршрутах
 		user, _ := c.Get("user")
 		c.HTML(http.StatusNotFound, "layout.html", gin.H{
 			"Active": "404",
@@ -501,7 +507,6 @@ func main() {
 		})
 	})
 
-	// Favicon
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.Status(204)
 	})
@@ -572,17 +577,8 @@ type Message struct {
 	CreatedAt time.Time
 }
 
-var store = sessions.NewCookieStore([]byte("xsonebmp-secret-key-2024"))
-
-func init() {
-	store.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7, // 30 дней
-		HttpOnly: true,      // Недоступно для JavaScript
-		Secure:   true,      // true на HTTPS
-		SameSite: http.SameSiteStrictMode,
-	}
-}
+// store инициализируется в main() после загрузки SESSION_SECRET из .env
+var store *sessions.CookieStore
 
 var stmtGetUser *sql.Stmt
 
@@ -1837,14 +1833,40 @@ func AdminLoginPage(c *gin.Context) {
 }
 
 func AdminLogin(c *gin.Context) {
-	if c.PostForm("username") == "admin" && c.PostForm("password") == "admin123" {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	// Сравниваем username через hmac.Equal — защита от timing attack
+	usernameOK := hmac.Equal([]byte(username), []byte(adminUsername))
+	// Сравниваем пароль через bcrypt
+	passOK := bcrypt.CompareHashAndPassword([]byte(adminPassHash), []byte(password)) == nil
+
+	if usernameOK && passOK {
 		session, _ := store.Get(c.Request, "xsonebmp-session")
 		session.Values["admin_id"] = 1
 		session.Save(c.Request, c.Writer)
 		c.Redirect(302, "/admin")
 		return
 	}
-	c.HTML(http.StatusOK, "layout.html", gin.H{"Title": "XSoneBMP Админ", "Active": "admin-login", "Error": "Неверный логин или пароль"})
+
+	// Фиксированная задержка при ошибке — усложняет брутфорс
+	time.Sleep(300 * time.Millisecond)
+	c.HTML(http.StatusOK, "layout.html", gin.H{
+		"Title":  "XSoneBMP Админ",
+		"Active": "admin-login",
+		"Error":  "Неверный логин или пароль",
+	})
+}
+
+// adminRequired — middleware, проверяет наличие admin сессии
+func adminRequired(c *gin.Context) {
+	session, _ := store.Get(c.Request, "xsonebmp-session")
+	if _, ok := session.Values["admin_id"]; !ok {
+		c.Redirect(http.StatusFound, "/admin/login")
+		c.Abort()
+		return
+	}
+	c.Next()
 }
 
 func AdminDashboard(c *gin.Context) {
@@ -6131,8 +6153,8 @@ func adminUploadLogo(c *gin.Context) {
 
 	// Проверка расширения
 	ext := strings.ToLower(filepath.Ext(file.Filename))
-	if ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".svg" {
-		c.JSON(400, gin.H{"error": "Разрешены только PNG, JPG, JPEG, SVG"})
+	if ext != ".png" && ext != ".jpg" && ext != ".jpeg" {
+		c.JSON(400, gin.H{"error": "Разрешены только PNG, JPG, JPEG"})
 		return
 	}
 

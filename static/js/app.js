@@ -434,6 +434,12 @@ function updateSoundDropdownUI(muted) {
     item.classList.remove('muted');
   }
 }
+//------------ Чек-тест проверка пароля при регистрации--------------------
+
+
+
+
+
 
 // ---------- 3D фон ----------
 function initThreeJS() {
@@ -566,3 +572,223 @@ Object.assign(window, {
   applyPromo, showMiniCart, startHideTimer, cancelHideTimer, removeMiniCartItem,
   toggleDropdownSound, playNotifySound
 });
+
+
+// Проверка пароля
+function checkPasswordStrength() {
+    const password = document.getElementById('password').value;
+    const bars = document.querySelectorAll('#strengthBars .password-strength-bar');
+    const text = document.getElementById('strengthText');
+    const input = document.getElementById('password');
+    
+    // Сброс
+    bars.forEach(bar => {
+        bar.classList.remove('active', 'weak', 'medium', 'strong');
+    });
+    input.classList.remove('error', 'valid');
+    
+    if (!password) {
+        text.textContent = '';
+        return;
+    }
+    
+    let strength = 0;
+    
+    // Длина
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    
+    // Символы
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+    
+    // Подсветка
+    const activeBars = Math.min(4, Math.max(1, Math.floor(strength * 0.8)));
+    
+    for (let i = 0; i < activeBars; i++) {
+        bars[i].classList.add('active');
+        if (activeBars <= 2) {
+            bars[i].classList.add('weak');
+        } else if (activeBars === 3) {
+            bars[i].classList.add('medium');
+        } else {
+            bars[i].classList.add('strong');
+        }
+    }
+    
+    if (activeBars <= 2) {
+        text.textContent = 'Слабый пароль';
+        text.style.color = '#f87171';
+    } else if (activeBars === 3) {
+        text.textContent = 'Средний пароль';
+        text.style.color = '#fbbf24';
+    } else {
+        text.textContent = 'Надёжный пароль';
+        text.style.color = '#6ee7b7';
+        input.classList.add('valid');
+    }
+}
+
+// Валидация формы
+function validateForm() {
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    let valid = true;
+    
+    // Сброс ошибок
+    [username, email, password].forEach(el => el.classList.remove('error'));
+    
+    // Проверка имени
+    if (username.value.trim().length < 3) {
+        username.classList.add('error');
+        valid = false;
+    }
+    
+    // Проверка email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.value)) {
+        email.classList.add('error');
+        valid = false;
+    }
+    
+    // Проверка пароля
+    if (password.value.length < 8) {
+        password.classList.add('error');
+        valid = false;
+    }
+    
+    if (!valid) {
+        return false;
+    }
+    
+    // Блокировка кнопки от двойной отправки
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Создаём...';
+    
+    setTimeout(() => {
+        if (submitBtn.disabled) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Создать аккаунт';
+        }
+    }, 10000);
+    
+    return true;
+}
+
+// Автофокус на первое поле
+document.getElementById('username').focus();
+
+//--------- Проверка на странице логина(входа в аккаунт) ---------
+function handleLogin() {
+    const username = document.getElementById('username');
+    const password = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    let valid = true;
+
+    // Сброс ошибок
+    [username, password].forEach(el => el.classList.remove('error'));
+
+    // Проверка на пустоту
+    if (!username.value.trim()) {
+        username.classList.add('error');
+        valid = false;
+    }
+    if (!password.value) {
+        password.classList.add('error');
+        valid = false;
+    }
+
+    if (!valid) return false;
+
+    // Блокировка от двойной отправки
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Входим...';
+
+    // Разблокировка через 10 секунд на случай ошибки сети
+    setTimeout(() => {
+        if (submitBtn.disabled) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Войти';
+        }
+    }, 10000);
+
+    return true;
+}
+
+// Автофокус на поле ввода
+document.getElementById('username').focus();
+
+
+//--------- Проверка на странице forgot-password(восстановление пароля) ---------
+
+function handleForgot() {
+    const email = document.getElementById('email');
+    const submitBtn = document.getElementById('submitBtn');
+    let valid = true;
+
+    email.classList.remove('error');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.value)) {
+        email.classList.add('error');
+        valid = false;
+    }
+
+    if (!valid) return false;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Отправляем...';
+
+    setTimeout(() => {
+        if (submitBtn.disabled) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Отправить код';
+        }
+    }, 10000);
+
+    return true;
+}
+
+document.getElementById('email')?.focus();
+
+
+
+//---------- Проверка на странице dispute-open(Открытие спора) ---------
+function handleDisputeSubmit() {
+    const reason = document.getElementById('reason');
+    const description = document.getElementById('description');
+    const submitBtn = document.getElementById('submitBtn');
+    let valid = true;
+
+    // Сброс ошибок
+    [reason, description].forEach(el => el.classList.remove('error'));
+
+    if (!reason.value) {
+        reason.classList.add('error');
+        valid = false;
+    }
+    if (!description.value.trim()) {
+        description.classList.add('error');
+        valid = false;
+    }
+
+    if (!valid) return false;
+
+    // Блокировка от двойной отправки
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Открываем...';
+
+    setTimeout(() => {
+        if (submitBtn.disabled) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-flag"></i> Открыть спор';
+        }
+    }, 10000);
+
+    return true;
+}
+
+

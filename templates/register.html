@@ -1,17 +1,64 @@
 {{define "register.html"}}
 <style>
-    @keyframes fadeSlide {
-        from { opacity: 0; transform: translateY(25px); }
+    :root {
+        --bg-deep: #08081c;
+        --surface: rgba(18,18,44,0.75);
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(255,255,255,0.12);
+        --text-primary: #f1f1f9;
+        --text-secondary: rgba(255,255,255,0.45);
+        --text-dim: rgba(255,255,255,0.25);
+        --accent: #8b5cf6;
+        --accent-light: #c084fc;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --radius-card: 2.25rem;
+        --radius-item: 1.25rem;
+        --transition: 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(28px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(200%); }
+    @keyframes subtleShimmer {
+        0% { background-position: -200% 50%; }
+        100% { background-position: 200% 50%; }
     }
-    @keyframes gradientShift {
+    @keyframes gradientFlow {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes pulseGreen {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+        50% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
+    @keyframes progressPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    body {
+        background: radial-gradient(ellipse at 50% 0%, #15153a 0%, #08081c 70%);
+        background-attachment: fixed;
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+        min-height: 100vh;
     }
 
     .register-page {
@@ -19,69 +66,87 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 6rem 1.5rem 3rem;
+        padding: 5rem 1.5rem 3rem;
     }
 
     .register-card {
         width: 100%;
-        max-width: 440px;
-        background: rgba(14,14,38,0.8);
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        border: 1px solid rgba(255,255,255,0.04);
-        border-radius: 2.5rem;
+        max-width: 460px;
+        background: var(--surface);
+        backdrop-filter: blur(45px) saturate(140%);
+        -webkit-backdrop-filter: blur(45px) saturate(140%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
         padding: 3rem 2.5rem;
         position: relative;
         overflow: hidden;
-        animation: fadeSlide 0.55s cubic-bezier(0.16,1,0.3,1);
+        animation: fadeUp 0.5s ease;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+    .register-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.08);
     }
     .register-card::after {
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.02), transparent);
-        animation: shimmer 5s infinite;
+        background: linear-gradient(105deg, 
+            transparent 45%, 
+            rgba(255,255,255,0.02) 50%, 
+            transparent 55%);
+        background-size: 200% 100%;
+        animation: subtleShimmer 20s infinite;
         pointer-events: none;
     }
-    .register-card > * {
-        position: relative;
-        z-index: 1;
-    }
+    .register-card > * { position: relative; z-index: 1; }
 
-    .register-title {
-        font-size: 2rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #a78bfa 100%);
-        background-size: 300% 300%;
-        animation: gradientShift 6s ease infinite;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin: 0 0 0.5rem;
+    /* Header */
+    .register-header {
         text-align: center;
+        margin-bottom: 2rem;
+    }
+    .register-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.15);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        margin: 0 auto 1.2rem;
+        animation: float 3s ease-in-out infinite;
     }
-    .register-title i {
+    .register-icon i {
         font-size: 1.6rem;
-        -webkit-text-fill-color: #a78bfa;
+        color: var(--accent-light);
     }
-
+    .register-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fff 0%, #d8c9ff 50%, #a78bfa 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 8s ease infinite;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.03em;
+    }
     .register-subtitle {
-        text-align: center;
-        color: rgba(255,255,255,0.4);
+        color: var(--text-secondary);
         font-size: 0.9rem;
-        margin: 0 0 2rem;
-        line-height: 1.5;
+        margin: 0;
+        font-weight: 500;
     }
     .register-subtitle strong {
-        color: #10b981;
+        color: #6ee7b7;
         font-weight: 700;
     }
 
+    /* Alert */
     .register-alert {
         padding: 0.9rem 1.2rem;
         border-radius: 1rem;
@@ -91,108 +156,36 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        animation: shake 0.5s ease;
     }
     .register-alert.error {
-        background: rgba(239,68,68,0.1);
+        background: rgba(239,68,68,0.08);
         border: 1px solid rgba(239,68,68,0.2);
         color: #fca5a5;
     }
-
-    .register-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.2rem;
+    .register-alert.success {
+        background: rgba(16,185,129,0.08);
+        border: 1px solid rgba(16,185,129,0.2);
+        color: #6ee7b7;
     }
 
-    .register-form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-    }
-    .register-form-group label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: rgba(255,255,255,0.35);
-        font-weight: 600;
-        margin-left: 0.3rem;
-    }
-    .register-input {
-        padding: 0.85rem 1.2rem;
-        border-radius: 1rem;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
-        color: #fff;
-        font-size: 0.9rem;
-        outline: none;
-        transition: all 0.2s;
-    }
-    .register-input::placeholder {
-        color: rgba(255,255,255,0.2);
-    }
-    .register-input:focus {
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
-        background: rgba(255,255,255,0.05);
-    }
-
-    .register-btn {
-        width: 100%;
-        padding: 0.9rem;
-        border-radius: 100px;
-        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-        color: #fff;
-        border: none;
-        font-size: 0.95rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-    .register-btn:hover {
-        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-        transform: translateY(-2px);
-        box-shadow: 0 12px 30px rgba(139,92,246,0.35);
-    }
-    .register-btn:active {
-        transform: translateY(0);
-    }
-
-    .register-link {
-        text-align: center;
-        margin-top: 1.5rem;
-        font-size: 0.85rem;
-        color: rgba(255,255,255,0.4);
-    }
-    .register-link a {
-        color: #a78bfa;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.2s;
-    }
-    .register-link a:hover {
-        color: #c4b5fd;
-    }
-
+    /* Bonus */
     .register-bonus {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.8rem;
         padding: 1rem 1.2rem;
-        border-radius: 1rem;
-        background: rgba(16,185,129,0.06);
+        border-radius: var(--radius-item);
+        background: rgba(16,185,129,0.05);
         border: 1px solid rgba(16,185,129,0.12);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.8rem;
+        animation: pulseGreen 3s ease-in-out infinite;
     }
     .register-bonus-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: rgba(16,185,129,0.12);
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: rgba(16,185,129,0.1);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -200,23 +193,160 @@
         font-size: 1.1rem;
     }
     .register-bonus-text {
-        font-size: 0.82rem;
-        color: rgba(255,255,255,0.6);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
         line-height: 1.4;
     }
     .register-bonus-text strong {
-        color: #10b981;
+        color: #6ee7b7;
+    }
+
+    /* Form */
+    .register-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.3rem;
+    }
+    .register-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .register-form-group label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-dim);
+        font-weight: 700;
+        margin-left: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .register-form-group label i {
+        font-size: 0.7rem;
+        color: var(--accent-light);
+    }
+    .register-input {
+        padding: 0.9rem 1.3rem;
+        border-radius: 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        font-size: 0.92rem;
+        outline: none;
+        transition: all var(--transition);
+        font-family: inherit;
+        letter-spacing: -0.01em;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .register-input::placeholder {
+        color: var(--text-dim);
+    }
+    .register-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139,92,246,0.1);
+        background: rgba(139,92,246,0.04);
+    }
+    .register-input.error {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 4px rgba(239,68,68,0.08);
+    }
+    .register-input.valid {
+        border-color: var(--success);
+    }
+
+    /* Password strength */
+    .password-strength {
+        display: flex;
+        gap: 4px;
+        margin-top: 0.3rem;
+    }
+    .password-strength-bar {
+        flex: 1;
+        height: 4px;
+        border-radius: 4px;
+        background: rgba(255,255,255,0.06);
+        transition: background var(--transition);
+    }
+    .password-strength-bar.active.weak { background: #ef4444; }
+    .password-strength-bar.active.medium { background: #f59e0b; }
+    .password-strength-bar.active.strong { background: #10b981; }
+    .password-strength-text {
+        font-size: 0.68rem;
+        color: var(--text-dim);
+        margin-top: 0.2rem;
+        font-weight: 500;
+    }
+
+    /* Submit */
+    .register-btn {
+        width: 100%;
+        padding: 0.95rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: #fff;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 8px 20px rgba(139,92,246,0.25);
+    }
+    .register-btn:hover {
+        background: #7c3aed;
+        box-shadow: 0 14px 30px rgba(139,92,246,0.4);
+        transform: translateY(-2px);
+    }
+    .register-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 16px rgba(139,92,246,0.3);
+    }
+    .register-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Link */
+    .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .register-link a {
+        color: var(--accent-light);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .register-link a:hover { color: #fff; }
+
+    @media (max-width: 500px) {
+        .register-card { padding: 2.5rem 1.5rem; border-radius: 2rem; }
+        .register-title { font-size: 1.5rem; }
     }
 </style>
 
-
 <section class="register-page">
     <div class="register-card">
-        <h1 class="register-title">
-            <i class="fa-solid fa-user-plus"></i> Регистрация
-        </h1>
-        <p class="register-subtitle">Создайте аккаунт и получите <strong>10 000 ₽</strong> на баланс!</p>
-        
+        <div class="register-header">
+            <div class="register-icon">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h1 class="register-title">Регистрация</h1>
+            <p class="register-subtitle">Создайте аккаунт и получите <strong>10 000 ₽</strong> на баланс!</p>
+        </div>
+
         {{if .Error}}
             <div class="register-alert error">
                 <i class="fa-solid fa-circle-exclamation"></i> {{.Error}}
@@ -232,33 +362,75 @@
                 10 000 ₽ зачислятся сразу после регистрации
             </div>
         </div>
-        
-        <form method="POST" action="/register" class="register-form">
-            <!-- CSRF токен -->
+
+        <form method="POST" action="/register" class="register-form" id="registerForm" onsubmit="return validateForm()">
+            <!-- Защита -->
             <input type="hidden" name="csrf_token" value="{{.csrf}}">
-            <!-- Honeypot поле -->
-            <input type="text" name="website" style="display:none;" tabindex="-1" autocomplete="off">
-            
-            <div class="register-form-group">
-                <label><i class="fa-solid fa-user" style="font-size:0.65rem;"></i> Имя пользователя</label>
-                <input type="text" name="username" class="register-input" required placeholder="xsone?" maxlength="30" minlength="3">
+            <input type="text" name="website" style="display:none;position:absolute;left:-9999px;" tabindex="-1" autocomplete="off">
+            <input type="text" name="name" style="display:none;position:absolute;left:-9999px;" tabindex="-1" autocomplete="off">
+            <div style="display:none;position:absolute;left:-9999px;">
+                <input type="text" name="email_confirm" tabindex="-1" autocomplete="off">
             </div>
+
             <div class="register-form-group">
-                <label><i class="fa-solid fa-envelope" style="font-size:0.65rem;"></i> Email</label>
-                <input type="email" name="email" class="register-input" required placeholder="player@XSoneBMP.com">
+                <label><i class="fa-solid fa-user"></i> Имя пользователя</label>
+                <input 
+                    type="text" 
+                    name="username" 
+                    class="register-input" 
+                    id="username" 
+                    required 
+                    placeholder="xsone?" 
+                    maxlength="30" 
+                    minlength="3"
+                    autocomplete="off"
+                >
             </div>
+
             <div class="register-form-group">
-                <label><i class="fa-solid fa-lock" style="font-size:0.65rem;"></i> Пароль</label>
-                <input type="password" name="password" class="register-input" required placeholder="Минимум 8 символов, буквы и цифры" minlength="8">
+                <label><i class="fa-solid fa-envelope"></i> Email</label>
+                <input 
+                    type="email" 
+                    name="email" 
+                    class="register-input" 
+                    id="email" 
+                    required 
+                    placeholder="player@XSoneBMP.com"
+                    autocomplete="off"
+                >
             </div>
-            <button type="submit" class="register-btn">
+
+            <div class="register-form-group">
+                <label><i class="fa-solid fa-lock"></i> Пароль</label>
+                <input 
+                    type="password" 
+                    name="password" 
+                    class="register-input" 
+                    id="password" 
+                    required 
+                    placeholder="Минимум 8 символов, буквы и цифры" 
+                    minlength="8"
+                    autocomplete="new-password"
+                    oninput="checkPasswordStrength()"
+                >
+                <div class="password-strength" id="strengthBars">
+                    <div class="password-strength-bar"></div>
+                    <div class="password-strength-bar"></div>
+                    <div class="password-strength-bar"></div>
+                    <div class="password-strength-bar"></div>
+                </div>
+                <div class="password-strength-text" id="strengthText"></div>
+            </div>
+
+            <button type="submit" class="register-btn" id="submitBtn">
                 <i class="fa-solid fa-rocket"></i> Создать аккаунт
             </button>
         </form>
-        
+
         <p class="register-link">
             Уже есть аккаунт? <a href="/login">Войдите <i class="fa-solid fa-arrow-right"></i></a>
         </p>
     </div>
 </section>
+
 {{end}}
