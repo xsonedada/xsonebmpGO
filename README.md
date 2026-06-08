@@ -121,7 +121,7 @@
 
 ```bash
 # Клонируйте репозиторий
-git clone https://github.com/xsonedada/xsonebmp.git
+git clone https://github.com/xsonedada/xsonebmpgo.git
 cd xsonebmp
 
 # Настройте базу данных (создайте БД xsonebmp)
